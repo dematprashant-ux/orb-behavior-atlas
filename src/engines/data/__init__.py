@@ -6,6 +6,13 @@ from src.engines.data.interfaces import (
     DataSource,
 )
 from src.engines.data.providers import BaseProviderAdapter, ProviderAdapter, ProviderConfig
+from src.engines.data.orchestration import (
+    DataEngineExecutionRequest,
+    DataEngineExecutionResult,
+    DataEngineOrchestrator,
+    ExecutionStage,
+    ExecutionStatus,
+)
 from src.engines.data.quality import (
     DataQualityReport,
     QualityCode,
@@ -54,6 +61,9 @@ __all__ = [
     "DataAccess",
     "DataAccessError",
     "DataEngine",
+    "DataEngineExecutionRequest",
+    "DataEngineExecutionResult",
+    "DataEngineOrchestrator",
     "DataEngineError",
     "DataNormalizationError",
     "DataSource",
@@ -68,6 +78,8 @@ __all__ = [
     "CandleValidationResult",
     "BaseProviderAdapter",
     "Instrument",
+    "ExecutionStage",
+    "ExecutionStatus",
     "LoadCandlesRequest",
     "LoadCandlesResult",
     "LoadSessionRequest",

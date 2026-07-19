@@ -412,6 +412,35 @@ mutation; unexpected timestamp spacing is reported as self-contained,
 deterministically ordered observations; and unsupported timeframe durations
 fail as deterministic programming or configuration errors.
 
+## M3.1 — Data Engine Orchestration
+
+### Objective
+
+Compose completed Data Engine capabilities into one deterministic application
+workflow without duplicating provider, validation, construction, quality, or
+storage behavior.
+
+### Scope
+
+- Immutable execution request, result, status, and failure-stage models
+- One `DataEngineOrchestrator` application service
+- Fetch, validate, reject, construct, assess, and optional store coordination
+- Contract tests and directly affected Data Engine documentation
+
+### Explicit Exclusions
+
+- Provider registries, dependency-injection containers, retrieval APIs, storage
+  backends, retries, rollback, transactions, and concrete persistence behavior
+- Normalization changes, validation-rule changes, repair, reconstruction,
+  analytics, ORB logic, strategy logic, and live execution
+
+### Acceptance Criteria
+
+M3.1 is complete when every execution follows the same deterministic sequence:
+canonical fetch, semantic validation, rejection of any invalid candle,
+session construction, quality assessment, optional storage, and immutable
+terminal result reporting as `COMPLETED`, `REJECTED`, or `FAILED`.
+
 Implement:
 
 - Data Engine

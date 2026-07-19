@@ -1,8 +1,9 @@
 """Typed public contracts and provider boundary for the Data Engine.
 
 Provider adapters use Data Engine-owned normalization components internally and
-return canonical candles from the ``DataSource`` boundary. Validation, storage,
-session construction, and quality reporting remain separate milestones.
+return canonical candles from the ``DataSource`` boundary. Validation, session
+construction, quality assessment, storage, and orchestration use separate
+public boundaries.
 """
 
 from __future__ import annotations

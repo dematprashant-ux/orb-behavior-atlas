@@ -340,8 +340,23 @@ candles across an inclusive range of session dates. Both range boundaries are
 required `date` values. A dedicated `DateRange` value object may be introduced
 in a future milestone to encapsulate these semantics.
 
-Validation and quality-reporting operations remain deferred until their result
-models are defined.
+## Orchestration Workflow
+
+`DataEngineOrchestrator` coordinates existing public boundaries in a fixed
+order: fetch canonical candles from `DataSource`, validate them, reject the
+execution if any candle is invalid, construct sessions, assess quality, and
+store each constructed session when a `DataStore` is configured.
+
+The orchestrator does not normalize provider data directly, reimplement
+validation or quality rules, construct retrieval APIs, repair data, or infer
+calendar metadata. It returns immutable terminal results with `COMPLETED`,
+`REJECTED`, or `FAILED` status. Failed results identify the stage but do not
+expose underlying provider or storage exception details.
+
+Persistence is determined solely by whether the orchestrator has a `DataStore`.
+Storage occurs after quality assessment in deterministic session order. Because
+the storage boundary exposes only single-session writes, multi-session runs do
+not provide rollback or transaction guarantees.
 
 ---
 
