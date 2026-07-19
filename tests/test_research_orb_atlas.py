@@ -11,6 +11,7 @@ from src.engines.research import (
     OpeningRange,
     ORBBehavior,
     ORBBehaviorAtlas,
+    ORBBehaviorAtlasGroups,
     ORBBehaviorKind,
     ORBBehaviorStatistics,
     ORBEscapeDirection,
@@ -21,6 +22,9 @@ from src.engines.research import (
     build_behavior_atlas,
     build_behavior_record,
     compute_behavior_statistics,
+    group_by_behavior,
+    group_by_escape_direction,
+    group_by_return_to_range,
 )
 
 
@@ -319,6 +323,126 @@ class ORBBehaviorAtlasTests(TestCase):
             atlas.filter(escape_direction="UPWARD")
         with self.assertRaises(TypeError):
             atlas.filter(returned_to_range=1)
+
+    def test_grouping_an_empty_atlas_omits_every_group(self) -> None:
+        """Represent no records with immutable empty group mappings."""
+        atlas = build_behavior_atlas(())
+
+        for groups in (
+            group_by_behavior(atlas),
+            group_by_escape_direction(atlas),
+            group_by_return_to_range(atlas),
+        ):
+            self.assertIsInstance(groups, ORBBehaviorAtlasGroups)
+            self.assertEqual(dict(groups.groups), {})
+
+    def test_group_by_behavior_preserves_single_group_order_and_references(
+        self,
+    ) -> None:
+        """Retain existing no-escape records in their supplied canonical order."""
+        first = _record(high=106.0)
+        second = _record(high=108.0)
+
+        groups = group_by_behavior(build_behavior_atlas((second, first)))
+
+        self.assertEqual(tuple(groups.groups), (ORBBehaviorKind.NO_ESCAPE,))
+        no_escape = groups.groups[ORBBehaviorKind.NO_ESCAPE]
+        self.assertEqual(tuple(no_escape), (second, first))
+        self.assertIs(no_escape[1], first)
+
+    def test_grouping_multiple_existing_facts_preserves_each_group_order(self) -> None:
+        """Group only existing facts without sorting, copying, or calculating data."""
+        no_escape = _record(high=106.0)
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        downward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.DOWNWARD,
+            returned=False,
+        )
+        upward_no_return = _escape_record(
+            high=112.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=False,
+        )
+        atlas = build_behavior_atlas(
+            (upward_return, no_escape, downward_no_return, upward_no_return)
+        )
+
+        behavior_groups = group_by_behavior(atlas)
+        direction_groups = group_by_escape_direction(atlas)
+        return_groups = group_by_return_to_range(atlas)
+
+        self.assertEqual(
+            tuple(behavior_groups.groups[ORBBehaviorKind.ESCAPE_WITHOUT_RETURN]),
+            (downward_no_return, upward_no_return),
+        )
+        self.assertEqual(
+            tuple(direction_groups.groups[ORBEscapeDirection.UPWARD]),
+            (upward_return, upward_no_return),
+        )
+        self.assertEqual(
+            tuple(return_groups.groups[False]),
+            (downward_no_return, upward_no_return),
+        )
+        self.assertEqual(tuple(return_groups.groups[True]), (upward_return,))
+        self.assertNotIn(ORBBehaviorKind.NO_ESCAPE, direction_groups.groups)
+        self.assertNotIn(ORBBehaviorKind.NO_ESCAPE, return_groups.groups)
+
+    def test_grouping_is_deterministic_and_immutable(self) -> None:
+        """Return equal read-only grouping values without mutable group state."""
+        atlas = build_behavior_atlas(
+            (
+                _escape_record(
+                    high=108.0,
+                    direction=ORBEscapeDirection.UPWARD,
+                    returned=True,
+                ),
+                _escape_record(
+                    high=110.0,
+                    direction=ORBEscapeDirection.DOWNWARD,
+                    returned=False,
+                ),
+            )
+        )
+
+        first = group_by_escape_direction(atlas)
+        second = group_by_escape_direction(atlas)
+
+        self.assertEqual(dict(first.groups), dict(second.groups))
+        self.assertTrue(is_dataclass(first))
+        self.assertFalse(hasattr(first, "__dict__"))
+        with self.assertRaises(FrozenInstanceError):
+            first.groups = {}
+        with self.assertRaises(TypeError):
+            first.groups[ORBEscapeDirection.UPWARD] = build_behavior_atlas(())
+
+    def test_grouping_rejects_non_atlas_input(self) -> None:
+        """Require the immutable atlas boundary for every grouping operation."""
+        with self.assertRaises(TypeError):
+            group_by_behavior(())
+        with self.assertRaises(TypeError):
+            group_by_escape_direction(())
+        with self.assertRaises(TypeError):
+            group_by_return_to_range(())
+
+    def test_grouping_has_only_atlas_model_dependencies(self) -> None:
+        """Keep grouping independent from candles and infrastructure concerns."""
+        with open(
+            "src/engines/research/orb/grouping.py",
+            encoding="utf-8",
+        ) as source_file:
+            tree = ast.parse(source_file.read())
+
+        imported_modules = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module is not None
+        }
+        self.assertEqual(imported_modules, {"src.engines.research.orb.models"})
 
     def test_statistics_for_an_empty_atlas_are_zero(self) -> None:
         """Summarize no completed records with deterministic zero counts."""

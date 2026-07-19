@@ -1,9 +1,10 @@
 """Immutable observed-fact models for BANKNIFTY ORB research sessions."""
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from types import MappingProxyType
 
 from src.engines.data.models import Candle, Session
 
@@ -11,6 +12,7 @@ __all__ = [
     "OpeningRange",
     "ORBBehavior",
     "ORBBehaviorAtlas",
+    "ORBBehaviorAtlasGroups",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
     "ORBBehaviorKind",
@@ -365,6 +367,34 @@ class ORBBehaviorAtlas:
                 )
             )
         )
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorAtlasGroups:
+    """Represents immutable key-to-atlas groups of existing behavior records."""
+
+    groups: Mapping[
+        ORBBehaviorKind | ORBEscapeDirection | bool,
+        ORBBehaviorAtlas,
+    ]
+
+    def __post_init__(self) -> None:
+        """Defensively retain a read-only mapping of supported group values."""
+        if not isinstance(self.groups, Mapping):
+            raise TypeError("groups must be a mapping of supported keys to atlases.")
+
+        immutable_groups: dict[
+            ORBBehaviorKind | ORBEscapeDirection | bool,
+            ORBBehaviorAtlas,
+        ] = {}
+        for key, atlas in self.groups.items():
+            if not isinstance(key, (ORBBehaviorKind, ORBEscapeDirection, bool)):
+                raise TypeError("groups must use supported behavior atlas keys.")
+            if not isinstance(atlas, ORBBehaviorAtlas):
+                raise TypeError("groups must contain only ORBBehaviorAtlas values.")
+            immutable_groups[key] = atlas
+
+        object.__setattr__(self, "groups", MappingProxyType(immutable_groups))
 
 
 @dataclass(frozen=True, slots=True)

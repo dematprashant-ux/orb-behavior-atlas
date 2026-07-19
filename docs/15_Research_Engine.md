@@ -148,6 +148,14 @@ AND; omitted criteria are ignored. Each filtered result is a new immutable
 atlas retaining matching record references in their original order. The method
 does not compute market facts, statistics, or new research values.
 
+## 1.12 Behavior Atlas Grouping
+
+M7.5 adds `group_by_behavior()`, `group_by_escape_direction()`, and
+`group_by_return_to_range()`. They return immutable `ORBBehaviorAtlasGroups`
+mapping non-empty existing-fact keys to immutable atlases. Records retain their
+original order and references within each group; records without an escape or
+post-escape observation are omitted from the corresponding grouping.
+
 ---
 
 # 2. Responsibilities

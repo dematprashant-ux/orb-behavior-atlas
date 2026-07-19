@@ -4,6 +4,7 @@ from src.engines.research.orb import (
     OpeningRange,
     ORBBehavior,
     ORBBehaviorAtlas,
+    ORBBehaviorAtlasGroups,
     ORBBehaviorKind,
     ORBBehaviorRecord,
     ORBBehaviorStatistics,
@@ -20,6 +21,9 @@ from src.engines.research.orb import (
     extract_opening_range,
     find_first_escape_event,
     generate_orb_features,
+    group_by_behavior,
+    group_by_escape_direction,
+    group_by_return_to_range,
     observe_post_escape,
 )
 
@@ -27,6 +31,7 @@ __all__ = [
     "OpeningRange",
     "ORBBehavior",
     "ORBBehaviorAtlas",
+    "ORBBehaviorAtlasGroups",
     "ORBBehaviorKind",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
@@ -43,5 +48,8 @@ __all__ = [
     "extract_opening_range",
     "find_first_escape_event",
     "generate_orb_features",
+    "group_by_behavior",
+    "group_by_escape_direction",
+    "group_by_return_to_range",
     "observe_post_escape",
 ]

@@ -760,6 +760,34 @@ M7.4 is complete when callers can combine any supported supplied criteria into
 one immutable filtered atlas without changing, copying, or reinterpreting the
 existing behavior records.
 
+## M7.5 — Behavior Atlas Grouping
+
+### Objective
+
+Provide immutable grouping of existing completed behavior records without
+recalculating, analyzing, or modifying their research facts.
+
+### Scope
+
+- Immutable key-to-atlas `ORBBehaviorAtlasGroups` model
+- Pure grouping by existing behavior, escape-direction, and return-to-range
+  facts
+- Canonical per-group order and record-reference preservation
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, behavior classification, feature generation, observation
+  recalculation, statistics, record mutation, I/O, persistence, and caching
+- Empty groups, additional grouping criteria, aggregation, reporting,
+  visualization, analytics, and strategy behavior
+
+### Acceptance Criteria
+
+M7.5 is complete when callers can group an immutable atlas into non-empty,
+immutable key-to-atlas collections while retaining original record order and
+references inside every group.
+
 Implement:
 
 - Data Engine
