@@ -18,6 +18,17 @@ The Live Execution Engine executes trades.
 
 It never creates strategies, performs research, or validates edges.
 
+## 1.1 Execution Domain Foundation
+
+M9.1 establishes only the technology-neutral execution contract: immutable
+`ExecutionRequest`, `ExecutionResult`, and `ExecutionStatus` models, pure
+builders, and the `ExecutionEngine` protocol. Requests retain existing
+`StrategyDecision` references and results retain request references.
+
+This foundation does not execute or simulate trades, calculate fills, slippage,
+commissions, or PnL, manage positions, analyze candles, backtest, communicate
+with brokers, or perform I/O.
+
 ---
 
 # 2. Responsibilities

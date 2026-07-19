@@ -872,6 +872,35 @@ deterministically produce `NO_ACTION`, while existing `ESCAPE_WITHOUT_RETURN`
 behaviors map their already-recorded direction to `LONG_SETUP` or `SHORT_SETUP`
 without inspecting or changing research data.
 
+## M9.1 — Execution Domain Foundation
+
+### Objective
+
+Establish immutable Execution Domain request, result, status, and protocol
+contracts without introducing execution behavior.
+
+### Scope
+
+- Immutable `ExecutionRequest`, `ExecutionResult`, and `ExecutionStatus`
+  models
+- Pure request and result builders retaining existing child references
+- Abstract `ExecutionEngine.execute(request) -> ExecutionResult` protocol
+- Contract tests and directly affected Live Execution Engine documentation
+
+### Explicit Exclusions
+
+- Fill simulation, slippage, commissions, PnL, backtesting, position
+  management, candle analysis, broker communication, and I/O
+- Concrete execution engines, orders, risk controls, retries, persistence,
+  caching, analytics, reporting, and live-trading integration
+
+### Acceptance Criteria
+
+M9.1 is complete when callers can construct immutable execution requests from
+existing strategy decisions and immutable results from existing requests, while
+future execution engines have a stable pure protocol boundary without any
+execution implementation.
+
 Implement:
 
 - Data Engine
