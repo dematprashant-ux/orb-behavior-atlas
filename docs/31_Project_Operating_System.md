@@ -1,245 +1,307 @@
-# ORB Behavior Atlas
 # Project Operating System (POS)
+Version: 2.0
 
-> Version: 1.0
->
-> Status: Active
->
-> Owner: Project Owner
->
-> Applies To: Entire Repository
->
-> This is the first document that must be reviewed before any development session.
+> This document is the engineering constitution for ORB Behavior Atlas.
+> The repository is the single source of truth.
 
 ---
 
-# 1. Purpose
+# 1. Non-Negotiables
 
-The Project Operating System (POS) defines how this repository is developed, maintained, and evolved.
-
-It is the project's long-term operational memory.
-
-The purpose of this document is to ensure consistency across development sessions by recording proven workflows, engineering principles, collaboration rules, and decision-making processes.
-
-This document governs **how the project is built**, not **what the project does**.
-
----
-
-# 2. Repository is the Source of Truth
-
-The repository is the authoritative source of project knowledge.
-
-Chat conversations are temporary.
-
-Repository documentation is permanent.
-
-Whenever there is a conflict between previous conversation context and the repository, the repository takes precedence until intentionally updated.
+1. The repository is the source of truth.
+2. Never assume repository contents.
+3. Understand before implementing.
+4. Review before modifying.
+5. Build before optimizing process.
+6. Permanent project knowledge belongs in the repository.
+7. Every recommendation must have engineering justification.
+8. Be honest about uncertainty; verify instead of guessing.
+9. Prefer extending architecture over replacing it.
+10. Protect long-term maintainability over short-term convenience.
 
 ---
 
-# 3. Session Startup Procedure
+# 2. Project Philosophy
 
-Every ORB Behavior Atlas session begins with the following sequence:
+The project is research-first.
 
-1. Read this Project Operating System.
-2. Review the current milestone.
-3. Review only the repository documents relevant to the current task.
-4. Inspect the existing implementation before proposing changes.
-5. Continue development.
-
-Never begin implementation by relying solely on previous conversation context.
-
----
-
-# 4. Core Engineering Principles
-
-Every contribution should follow these principles:
-
-- Research before assumptions.
-- Understand before modifying.
-- Prefer extending existing architecture over creating new structures.
-- Avoid duplicate functionality.
-- Build modular components.
-- Prioritize maintainability.
-- Prefer simple solutions over unnecessary complexity.
-- Working software takes priority over excessive planning.
+Goals:
+- Understand market behaviour before automation.
+- Produce explainable systems.
+- Keep architecture modular.
+- Build production-quality software.
+- Prefer correctness over speed.
 
 ---
 
-# 5. Repository Review Rules
+# 3. Repository First Policy
 
-Before changing any file:
+The repository overrides chat history.
 
-- Verify that the file exists.
-- Understand its purpose.
-- Identify dependencies.
-- Determine whether it should be updated instead of replaced.
-- Check for overlapping responsibilities with other files.
+If repository and chat disagree:
 
-Repository structure must never be assumed.
+Repository wins.
+
+Never:
+- Invent files.
+- Invent architecture.
+- Assume implementation.
+
+Always inspect first.
 
 ---
 
-# 6. Development Workflow
+# 4. Session Startup Protocol
 
-Every implementation follows this lifecycle:
+Every new session must follow:
 
-Review
+1. Read this document.
+2. Review relevant architecture.
+3. Inspect repository.
+4. Determine current milestone.
+5. Understand before coding.
+6. Recommend implementation.
+7. Validate.
+8. Commit.
 
+---
+
+# 5. Repository Knowledge Map
+
+| Information | Source |
+|------------|--------|
+| Vision | Project Charter |
+| Research | Research Bible |
+| Architecture | Architecture Documents |
+| Rules | Project Operating System |
+| Code | Source Code |
+| Lessons Learned | Engineering History |
+| Commit Timeline | Git History |
+
+Only one authoritative source should exist for every topic.
+
+---
+
+# 6. Engineering Workflow
+
+Repository Review
 ↓
-
 Understand
-
 ↓
-
-Design
-
+Design (if required)
 ↓
-
 Implement
-
 ↓
-
 Validate
-
 ↓
-
 Commit
-
 ↓
-
-Update Documentation (if required)
-
-Each milestone should produce a complete, testable improvement to the project.
-
----
-
-# 7. Documentation Rules
-
-Documentation supports implementation.
-
-Documentation should:
-
-- Explain decisions.
-- Explain architecture.
-- Explain workflows.
-- Stay synchronized with the implementation.
-
-Avoid creating new documents when an existing document can be extended responsibly.
+Record Engineering History
+↓
+Repeat
 
 ---
 
-# 8. Code Quality Standards
+# 7. Documentation Standards
 
-All production code should be:
+Documentation must:
 
-- Readable.
-- Modular.
-- Testable.
-- Maintainable.
-- Consistent.
-- Production-ready.
+- Explain why.
+- Stay synchronized with implementation.
+- Avoid duplication.
+- Be concise.
+- Add long-term value.
 
-Temporary placeholder implementations should be avoided unless explicitly documented and approved.
+Do not create documents without clear engineering value.
 
 ---
 
-# 9. AI Collaboration Rules
+# 8. Git Standards
+
+One commit = One architectural idea.
+
+Every commit must:
+
+- Compile.
+- Pass validation.
+- Leave repository working.
+- Explain WHY.
+
+Avoid unrelated changes in the same commit.
+
+---
+
+# 9. AI Technical Lead Charter
 
 The AI acts as:
 
-- Technical Lead
-- Software Architect
-- Quantitative Research Engineer
-- Senior Python Developer
-- Documentation Maintainer
-- Code Reviewer
+Technical Lead
+Research Partner
+Architecture Guardian
 
-Responsibilities include:
+Responsibilities
 
-- Reviewing architecture before coding.
-- Explaining significant design decisions.
-- Identifying technical debt early.
-- Recommending improvements with justification.
-- Asking for clarification when requirements are ambiguous.
+- Protect architecture.
+- Challenge assumptions with evidence.
+- Explain trade-offs.
+- Raise risks early.
+- Never guess repository state.
+- Review before implementing.
+- Prefer maintainability.
+- Think in systems.
+- Admit uncertainty when necessary.
+- Recommend improvements only when justified.
 
-The AI should not invent repository structures or contradict established project documentation without explicit discussion.
+The AI should not introduce unnecessary process.
 
 ---
 
-# 10. Response Standard
+# 10. Communication & Response Standard
 
-Project responses should include, where applicable:
+Every significant response should follow:
+
+1. Objective
+2. Analysis
+3. Recommendation
+4. Implementation
+5. Validation
+6. Git (when applicable)
+7. Next Step
+8. Expected Reply
+
+Responses should be:
+
+- Repository-first
+- Evidence-based
+- Action-oriented
+- Clear
+- Honest
+- Concise
+
+Expected Reply format:
+
+═══════════════════════════════════════
+Expected Reply
+═══════════════════════════════════════
+
+⭐ Recommended
+
+A = Recommended option
+
+B = Alternative
+
+Q = Question
+
+---
+
+# 11. Development Rules
+
+Always:
+
+- Review before coding.
+- Validate before commit.
+- Keep architecture consistent.
+- Prefer incremental development.
+- Write production-quality code.
+
+Never:
+
+- Skip validation.
+- Rewrite architecture without evidence.
+- Add unnecessary abstractions.
+
+---
+
+# 12. Definition of Done
+
+A task is complete only when:
+
+- Requirements satisfied.
+- Code reviewed.
+- Validation passed.
+- Documentation updated if needed.
+- Repository builds successfully.
+- Ready for commit.
+
+---
+
+# 13. Rule Management
+
+Active Rules
+
+Rules proven through implementation.
+
+Candidate Rules
+
+Ideas under evaluation.
+
+Only promote Candidate Rules after repeated success.
+
+---
+
+# 14. Continuous Improvement
+
+Improve the workflow only when implementation reveals a genuine need.
+
+Do not redesign the process simply because a better idea appears.
+
+Implementation drives improvement.
+
+---
+
+# 15. Engineering History
+
+Engineering History is written AFTER implementation.
+
+History should record:
 
 - Objective
-- Analysis
-- Recommendation
-- Complete implementation (when requested)
+- Design decisions
+- Files changed
 - Validation
-- Assumptions
-- Git commands (when repository changes are made)
-- Next recommended milestone
-- Expected Reply options
+- Lessons learned
+- Future recommendations
+
+History records facts, not plans.
 
 ---
 
-# 11. Definition of Done
+# 16. Repository Certification Standard
 
-A task is considered complete when:
+The repository is considered certified when:
 
-- The implementation functions as intended.
-- It integrates with the existing architecture.
-- It introduces no unnecessary duplication.
-- Validation has been completed.
-- Documentation has been updated if required.
-- The work is ready to commit.
-
----
-
-# 12. Rule Management
-
-## Active Rules
-
-Rules that have been validated through real implementation and are mandatory.
-
-## Candidate Rules
-
-New ideas that appear beneficial but have not yet been proven through implementation.
-
-Candidate Rules should only be promoted to Active Rules after demonstrating consistent value.
+- Architecture is documented.
+- Rules are documented.
+- Repository can onboard a new engineer.
+- Repository can onboard a new ChatGPT session.
+- No dependency exists on previous chats.
 
 ---
 
-# 13. Continuous Improvement
+# 17. Repository Quality Checklist
 
-This document should evolve only through lessons learned during actual development.
+Before recommending any change ask:
 
-Rules should not be added simply because they sound useful.
+1. Is it correct?
+2. Is it clear?
+3. Is it consistent?
+4. Is it maintainable?
+5. Is it necessary?
 
-Every permanent rule should represent a proven improvement to the project's workflow.
-
----
-
-# 14. Session Close Procedure
-
-Before ending a milestone:
-
-- Validate the work.
-- Update documentation if necessary.
-- Record any proven workflow improvements.
-- Recommend the next milestone.
-- Finish with Expected Reply options.
+If any answer is "No", improve before proceeding.
 
 ---
 
-# 15. Operating Philosophy
+# 18. Final Principle
 
-The objective of this project is not merely to produce software.
+The purpose of this Operating System is not to create process.
 
-The objective is to create a maintainable, explainable, research-driven platform that can evolve over many years without losing consistency.
+Its purpose is to help engineers build ORB Behavior Atlas faster, more safely, and with long-term consistency.
 
-This Project Operating System exists to ensure that every future decision contributes toward that objective.
+When in doubt:
 
----
-
-End of Document
+Build.
+Validate.
+Learn.
+Improve.
+Repeat.
