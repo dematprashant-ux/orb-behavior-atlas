@@ -286,6 +286,39 @@ M2.5 is complete when all documented candle-level semantic rules are reported
 deterministically as structured results, while acquisition and normalization
 failures remain exception-based concerns at their existing boundaries.
 
+## M2.6 — Provider Adapter Framework
+
+### Objective
+
+Establish the transport-neutral framework through which future external market
+data providers implement the existing `DataSource` contract.
+
+### Scope
+
+- Immutable declarative `ProviderConfig` and canonical request mappings
+- `ProviderAdapter` protocol and reusable `BaseProviderAdapter`
+- Provider payload acquisition and parsing extension points
+- M2.4 canonical normalization integration
+- Contract tests and directly affected Data Engine documentation
+
+Provider adapters stop after canonical normalization and return `Candle`
+objects through `DataSource.fetch()`. M2.5 validation remains outside this
+framework and is not executed by adapters.
+
+### Explicit Exclusions
+
+- Concrete providers, HTTP, REST, WebSockets, authentication, retries, and
+  caching
+- Validation execution, sessions, storage, retrieval, and quality reporting
+- Provider runtime state, transport objects, credentials, or mutable config
+- Changes to the M2.3 `DataSource` public retrieval interface
+
+### Acceptance Criteria
+
+M2.6 is complete when a future provider can map requests, acquire and parse
+payloads through protected extension points, normalize canonical candles, and
+return them through the unchanged provider-neutral source contract.
+
 Implement:
 
 - Data Engine

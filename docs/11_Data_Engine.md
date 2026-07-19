@@ -121,6 +121,18 @@ Provider-specific parsing occurs inside each provider adapter. Adapters use
 reusable Data Engine normalization components before returning canonical candles
 through the provider-neutral data-source boundary.
 
+## Provider Adapter Framework
+
+Provider adapters implement the provider-neutral `DataSource` boundary. Each
+adapter owns canonical request mapping, provider payload acquisition, provider
+payload parsing, source timezone declaration, and M2.4 normalization. Adapters
+return canonical candles only; they do not execute M2.5 validation.
+
+Provider configuration is immutable and declarative. It contains only the
+provider name, source timezone, and canonical instrument/timeframe mappings.
+It must not contain credentials, transport objects, runtime state, caches, or
+retry behavior.
+
 ## Canonical Normalization Boundary
 
 Normalization accepts provider-independent values with canonical candle keys:

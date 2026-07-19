@@ -5,6 +5,7 @@ from src.engines.data.interfaces import (
     DataEngine,
     DataSource,
 )
+from src.engines.data.providers import BaseProviderAdapter, ProviderAdapter, ProviderConfig
 from src.engines.data.validation import (
     CandleValidationResult,
     ValidationCode,
@@ -33,7 +34,10 @@ __all__ = [
     "DataSourceError",
     "Candle",
     "CandleValidationResult",
+    "BaseProviderAdapter",
     "Instrument",
+    "ProviderAdapter",
+    "ProviderConfig",
     "Session",
     "Timeframe",
     "UnsupportedInstrumentError",
