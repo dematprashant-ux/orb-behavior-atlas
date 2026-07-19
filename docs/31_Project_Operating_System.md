@@ -1,5 +1,5 @@
 # Project Operating System (POS)
-Version: 2.0
+Version: 2.1
 
 > This document is the engineering constitution for ORB Behavior Atlas.
 > The repository is the single source of truth.
@@ -49,20 +49,86 @@ Never:
 
 Always inspect first.
 
+## Authority Order
+
+Resolve project information in the following order:
+
+1. Explicit user instruction
+2. Approved Architecture Decision Record (ADR)
+3. Current source code
+4. Implementation Plan
+5. System Architecture
+6. Project Operating System
+7. Other documentation
+8. Project Dashboard
+
+If sources materially conflict, do not guess. Report the conflict and wait for
+approval when it affects implementation.
+
+## Repository Truth Principle
+
+If documentation, implementation, Git history, or repository state disagree:
+
+1. Investigate the discrepancy.
+2. Explain the conflict.
+3. Do not silently choose one source.
+4. Request clarification when the conflict affects implementation.
+
 ---
 
 # 4. Session Startup Protocol
 
-Every new session must follow:
+Every new AI coding session must follow this order:
 
-1. Read this document.
-2. Review relevant architecture.
-3. Inspect repository.
-4. Determine current milestone.
-5. Understand before coding.
-6. Recommend implementation.
-7. Validate.
-8. Commit.
+```
+Wake Up
+↓
+Repository Inspection
+↓
+Read Authoritative Documents
+↓
+Verify Authority
+↓
+Wake Up Summary
+↓
+Wait for Approval
+```
+
+Repository Inspection must include:
+
+- Repository structure
+- Git status
+- Current branch
+- Recent commits
+- Existing implementation
+- Public APIs
+- Relevant tests
+
+Read the Project Charter, Implementation Plan, System Architecture, and all
+task-relevant specifications and standards. Apply the Authority Order before
+making a recommendation.
+
+Before implementation, present this concise, factual summary:
+
+```
+Wake Up Summary
+
+Scope: <requested task or milestone>
+Current milestone: <identifier and name>
+Completed milestones: <relevant committed milestones>
+Next milestone: <next planned item>
+Architecture boundary: <owning engine and allowed dependencies>
+Relevant sources: <documents and code reviewed>
+Public API: <affected interface, model, or none>
+Out of scope: <explicit exclusions>
+Repository state: <branch, clean/dirty, unrelated changes>
+Open decisions or conflicts: <items or none identified>
+Blockers: <items or none identified>
+Status: Awaiting explicit approval before implementation.
+```
+
+Do not create, edit, stage, commit, or push files until the user gives explicit
+approval for the applicable review gate.
 
 ---
 
@@ -129,9 +195,53 @@ Every commit must:
 
 Avoid unrelated changes in the same commit.
 
+## Milestone Integrity
+
+One milestone equals one architectural idea. Do not mix unrelated features,
+governance changes, or implementation work in the same milestone. If additional
+work is discovered, recommend a new milestone rather than expanding the current
+one.
+
+## Required Review Gates
+
+Every milestone must pass these gates in order:
+
+1. Design Review
+2. Implementation Review
+3. Commit Approval
+4. Push Approval
+
+Explicit user approval is required before progressing through each gate.
+
 ---
 
-# 9. AI Technical Lead Charter
+# 9. AI Role Separation
+
+ChatGPT responsibilities:
+
+- Architecture
+- Research
+- Design
+- Reviews
+- Planning
+- Prioritization
+- Technical decisions
+
+Codex responsibilities:
+
+- Repository inspection
+- Implementation
+- Validation
+- Documentation updates
+- Git operations
+- Commit
+- Push
+
+Neither role should assume the other's responsibilities.
+
+---
+
+# 10. AI Technical Lead Charter
 
 The AI acts as:
 
@@ -156,7 +266,7 @@ The AI should not introduce unnecessary process.
 
 ---
 
-# 10. Communication & Response Standard
+# 11. Communication & Response Standard
 
 Every significant response should follow:
 
@@ -194,7 +304,7 @@ Q = Question
 
 ---
 
-# 11. Development Rules
+# 12. Development Rules
 
 Always:
 
@@ -212,7 +322,7 @@ Never:
 
 ---
 
-# 12. Definition of Done
+# 13. Definition of Done
 
 A task is complete only when:
 
@@ -225,7 +335,7 @@ A task is complete only when:
 
 ---
 
-# 13. Rule Management
+# 14. Rule Management
 
 Active Rules
 
@@ -239,7 +349,7 @@ Only promote Candidate Rules after repeated success.
 
 ---
 
-# 14. Continuous Improvement
+# 15. Continuous Improvement
 
 Improve the workflow only when implementation reveals a genuine need.
 
@@ -249,7 +359,7 @@ Implementation drives improvement.
 
 ---
 
-# 15. Engineering History
+# 16. Engineering History
 
 Engineering History is written AFTER implementation.
 
@@ -266,7 +376,7 @@ History records facts, not plans.
 
 ---
 
-# 16. Repository Certification Standard
+# 17. Repository Certification Standard
 
 The repository is considered certified when:
 
@@ -278,7 +388,7 @@ The repository is considered certified when:
 
 ---
 
-# 17. Repository Quality Checklist
+# 18. Repository Quality Checklist
 
 Before recommending any change ask:
 
@@ -292,7 +402,7 @@ If any answer is "No", improve before proceeding.
 
 ---
 
-# 18. Final Principle
+# 19. Final Principle
 
 The purpose of this Operating System is not to create process.
 

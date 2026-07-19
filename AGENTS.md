@@ -1,65 +1,31 @@
 # ORB Behavior Atlas - Engineering Instructions
 
-## Repository First
+## Mandatory Wake Up Procedure
 
-Always inspect the repository before making changes.
+Before implementation, complete the Wake Up procedure in the
+[Project Operating System](docs/31_Project_Operating_System.md).
 
-Read relevant documentation before implementing.
+It requires repository inspection, authoritative-document review, authority
+verification, and a Wake Up Summary.
 
-Never assume architecture.
-
----
-
-## Development Principles
-
-- Production-quality code only.
-- Strong type hints.
-- Comprehensive docstrings.
-- Small focused modules.
-- One architectural idea per commit.
-- Keep the repository buildable after every change.
+Wait for explicit approval before implementation.
 
 ---
 
-## Workflow
+## Milestone Boundaries
 
-For every task:
-
-1. Review documentation.
-2. Review existing implementation.
-3. Explain the plan.
-4. Implement.
-5. Validate.
-6. Summarize changes.
+- Follow the approved milestone scope and exclusions.
+- One milestone equals one architectural idea.
+- Do not mix unrelated governance, implementation, or feature work.
+- Recommend a new milestone when additional work is discovered.
 
 ---
 
-## Architecture
+## Execution and Approval
 
-Follow the repository architecture.
+- Implement and validate only after the applicable approval gate.
+- Present the summary, files changed, validation, and Git diff for review.
+- Commit and push only after explicit approval.
 
-Do not introduce new patterns without justification.
-
-Current engine layout:
-
-src/
-    engines/
-        data/
-        orb/
-        event/
-        behavior/
-        research/
-        validation/
-        strategy/
-        execution/
-
----
-
-## Validation
-
-Before finishing:
-
-- imports pass
-- typing is correct
-- formatting is consistent
-- no circular imports
+For detailed workflow, architecture, coding, testing, and release rules, defer
+to the Project Operating System and its authoritative referenced documents.
