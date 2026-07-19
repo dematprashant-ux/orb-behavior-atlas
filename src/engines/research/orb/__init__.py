@@ -8,6 +8,7 @@ from src.engines.research.orb.models import (
     OpeningRange,
     ORBBehavior,
     ORBBehaviorKind,
+    ORBBehaviorRecord,
     ORBEscapeDirection,
     ORBEscapeEvent,
     ORBFeatures,
@@ -16,20 +17,23 @@ from src.engines.research.orb.models import (
     ORBWindow,
 )
 from src.engines.research.orb.observation import observe_post_escape
+from src.engines.research.orb.record import build_behavior_record
 
 __all__ = [
     "OpeningRange",
     "ORBBehavior",
     "ORBBehaviorKind",
+    "ORBBehaviorRecord",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
     "ORBFeatures",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
-    "extract_opening_range",
+    "build_behavior_record",
     "classify_orb_behavior",
-    "generate_orb_features",
+    "extract_opening_range",
     "find_first_escape_event",
+    "generate_orb_features",
     "observe_post_escape",
 ]

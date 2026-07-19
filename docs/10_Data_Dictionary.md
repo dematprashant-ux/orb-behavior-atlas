@@ -166,6 +166,19 @@ recalculated market values or outcome inference.
 `ORBFeatures` is a deterministic projection of existing research outputs. It
 does not scan candles or add statistics.
 
+## ORBBehaviorRecord Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| opening_range | OpeningRange | Existing immutable opening-range output |
+| escape_event | ORBEscapeEvent or None | Existing first escape event, if present |
+| post_escape_observation | ORBPostEscapeObservation or None | Existing post-escape observation, if applicable |
+| behavior | ORBBehavior | Existing objective behavior classification |
+| features | ORBFeatures | Existing standardized feature record |
+
+`ORBBehaviorRecord` stores references to child objects and does not duplicate
+their values or perform analysis.
+
 ---
 
 # 6. ORB Levels

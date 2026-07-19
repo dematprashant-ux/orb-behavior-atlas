@@ -628,6 +628,30 @@ M5.2 is complete when callers can deterministically generate behavior,
 escape-presence and direction, return, MFE, MAE, and range-size features from
 existing immutable inputs only.
 
+## M6.1 — ORB Behavior Record
+
+### Objective
+
+Aggregate existing immutable ORB research outputs into one canonical analyzed
+session record without duplicating child values.
+
+### Scope
+
+- Immutable `ORBBehaviorRecord` references to current range, optional event,
+  optional observation, behavior, and features
+- Pure construction with intrinsic child-object consistency checks
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, observation recomputation, classification, feature
+  generation, candle scanning, I/O, providers, storage, and persistence
+
+### Acceptance Criteria
+
+M6.1 is complete when callers can assemble consistent existing outputs into one
+immutable record that retains the exact supplied child objects.
+
 Implement:
 
 - Data Engine

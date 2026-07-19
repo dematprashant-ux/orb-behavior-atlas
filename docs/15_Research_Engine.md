@@ -101,6 +101,18 @@ classification.
 
 ---
 
+# 1.7 ORB Behavior Record
+
+M6.1 adds `build_behavior_record(opening_range, escape_event,
+post_escape_observation, behavior, features)`. It aggregates references to
+existing immutable outputs into one canonical session record and checks that
+their already-derived facts agree.
+
+The factory does not inspect candles, recompute observations, classify behavior,
+or generate features.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

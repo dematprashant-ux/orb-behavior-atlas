@@ -9,6 +9,7 @@ from src.engines.data.models import Candle, Session
 __all__ = [
     "OpeningRange",
     "ORBBehavior",
+    "ORBBehaviorRecord",
     "ORBBehaviorKind",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
@@ -185,6 +186,17 @@ class ORBPostEscapeObservation:
                 self.first_return_inside_timestamp,
                 "first_return_inside_timestamp",
             )
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorRecord:
+    """Aggregates existing immutable ORB research outputs for one session."""
+
+    opening_range: OpeningRange
+    escape_event: ORBEscapeEvent | None
+    post_escape_observation: ORBPostEscapeObservation | None
+    behavior: ORBBehavior
+    features: ORBFeatures
 
 
 @dataclass(frozen=True, slots=True)
