@@ -523,6 +523,33 @@ M4.2 is complete when a caller can extract an immutable opening range from the
 first canonical candles of a session for a positive whole-timeframe duration,
 without mutating or reordering the source session.
 
+## M4.3 — First ORB Escape Event
+
+### Objective
+
+Record the first observed canonical candle after an opening range that exits
+its upper or lower boundary.
+
+### Scope
+
+- Immutable `ORBEscapeEvent` and stable escape-direction enum
+- Pure first-escape detection from one canonical `OpeningRange` and `Session`
+- Intrinsic range/session aggregate consistency checks
+- Contract tests and directly affected Research and Event documentation
+
+### Explicit Exclusions
+
+- Breakout confirmation, retests, fake-breakout classification, momentum,
+  success, failure, probability, trend, and trading decisions
+- Providers, storage, persistence, analytics, reports, visualization,
+  backtesting, and strategy logic
+
+### Acceptance Criteria
+
+M4.3 is complete when the first post-range candle with a high strictly above
+the range high or low strictly below the range low is recorded immutably, or
+`None` is returned when no such candle exists.
+
 Implement:
 
 - Data Engine

@@ -115,6 +115,19 @@ irregular interval or modify canonical data.
 `OpeningRange` is an immutable observed-fact record. Derived ORB values and
 levels are not part of M4.2.
 
+## ORBEscapeEvent Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| timestamp | Datetime | Canonical timestamp of the escape candle |
+| direction | ORBEscapeDirection | `UPWARD` or `DOWNWARD` crossed boundary |
+| candle | Candle | Canonical candle containing the observed escape |
+| boundary_crossed | Float | Opening-range high or low crossed by the candle |
+| crossing_price | Float | Candle high for upward, or low for downward, escape |
+
+An `ORBEscapeEvent` records only the first post-range boundary exit. It does
+not confirm a breakout or classify the market response.
+
 ---
 
 # 6. ORB Levels

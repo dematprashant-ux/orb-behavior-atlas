@@ -48,6 +48,20 @@ canonical candle. It does not detect breakouts or infer any market behavior.
 
 ---
 
+# 1.3 First ORB Escape Event
+
+M4.3 adds `find_first_escape_event(opening_range, session)`. It observes only
+canonical candles at or after the opening window's exclusive end. An upward
+escape is a candle high strictly above the range high; a downward escape is a
+candle low strictly below the range low. Boundary contact alone is not an
+escape.
+
+The function returns the first immutable `ORBEscapeEvent`, or `None` when no
+escape occurs. It does not confirm a breakout, infer outcome, or assign a
+trading meaning to the event.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

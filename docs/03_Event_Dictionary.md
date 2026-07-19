@@ -124,6 +124,14 @@ Bearish Break
 Close < Level
 ```
 
+## ORB Escape Observation
+
+`ORBEscapeEvent` is an earlier, observational Research Engine record rather
+than an `EVT-004` Break. It identifies the first post-opening-range candle whose
+high is strictly above the ORB high or whose low is strictly below the ORB low.
+It does not require a close beyond the boundary and makes no confirmation,
+success, or failure determination.
+
 ---
 
 ## EVT-005 — Rejection

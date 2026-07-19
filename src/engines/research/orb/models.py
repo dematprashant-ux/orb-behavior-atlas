@@ -2,10 +2,17 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 
 from src.engines.data.models import Candle, Session
 
-__all__ = ["OpeningRange", "ORBSession", "ORBWindow"]
+__all__ = [
+    "OpeningRange",
+    "ORBEscapeDirection",
+    "ORBEscapeEvent",
+    "ORBSession",
+    "ORBWindow",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,6 +45,35 @@ class OpeningRange:
         """Require the observed high to be at least the observed low."""
         if self.high < self.low:
             raise ValueError("high must not be below low")
+
+
+class ORBEscapeDirection(str, Enum):
+    """Identifies the ORB boundary crossed by an observed escape candle."""
+
+    UPWARD = "UPWARD"
+    DOWNWARD = "DOWNWARD"
+
+
+@dataclass(frozen=True, slots=True)
+class ORBEscapeEvent:
+    """Records one observed canonical candle exiting an opening range boundary."""
+
+    timestamp: datetime
+    direction: ORBEscapeDirection
+    candle: Candle
+    boundary_crossed: float
+    crossing_price: float
+
+    def __post_init__(self) -> None:
+        """Require a timestamp and crossing price consistent with the event facts."""
+        _require_timezone_aware(self.timestamp, "timestamp")
+        if self.timestamp != self.candle.timestamp:
+            raise ValueError("timestamp must match the escape candle timestamp")
+        if self.direction is ORBEscapeDirection.UPWARD:
+            if self.crossing_price <= self.boundary_crossed:
+                raise ValueError("upward crossing_price must exceed boundary_crossed")
+        elif self.crossing_price >= self.boundary_crossed:
+            raise ValueError("downward crossing_price must be below boundary_crossed")
 
 
 @dataclass(frozen=True, slots=True)
