@@ -23,6 +23,7 @@ from src.engines.data.quality import (
     assess_session,
     assess_sessions,
 )
+from src.engines.data.runtime import DataEngineRuntime, compose_data_engine_runtime
 from src.engines.data.sessions import SessionMetadata, build_session, build_sessions
 from src.engines.data.storage import (
     CandleIdentity,
@@ -64,6 +65,7 @@ __all__ = [
     "DataEngineExecutionRequest",
     "DataEngineExecutionResult",
     "DataEngineOrchestrator",
+    "DataEngineRuntime",
     "DataEngineError",
     "DataNormalizationError",
     "DataSource",
@@ -108,6 +110,7 @@ __all__ = [
     "validate_candles",
     "build_session",
     "build_sessions",
+    "compose_data_engine_runtime",
     "assess_session",
     "assess_sessions",
 ]

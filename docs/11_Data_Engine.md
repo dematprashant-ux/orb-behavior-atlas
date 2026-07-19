@@ -358,6 +358,19 @@ Storage occurs after quality assessment in deterministic session order. Because
 the storage boundary exposes only single-session writes, multi-session runs do
 not provide rollback or transaction guarantees.
 
+## Runtime Composition
+
+`compose_data_engine_runtime()` is the sole Data Engine runtime-composition
+boundary. It accepts a required injected `DataSource` and optional injected
+`DataStore`, constructs a `DataEngineOrchestrator`, and returns a passive
+identity-based `DataEngineRuntime` bundle containing the source and
+orchestrator.
+
+Composition performs no execution, I/O, provider or storage construction,
+configuration loading, discovery, or lifecycle management. Provider adapters,
+their `ProviderConfig`, concrete storage backends, and environment settings are
+constructed outside the Data Engine and passed into this boundary as objects.
+
 ---
 
 # 15. Error Handling

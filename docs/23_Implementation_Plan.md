@@ -441,6 +441,35 @@ canonical fetch, semantic validation, rejection of any invalid candle,
 session construction, quality assessment, optional storage, and immutable
 terminal result reporting as `COMPLETED`, `REJECTED`, or `FAILED`.
 
+## M3.2 — Runtime Composition & Dependency Wiring
+
+### Objective
+
+Provide one small, explicit composition boundary that assembles the injected
+Data Engine source, optional storage boundary, and orchestrator without
+executing the pipeline.
+
+### Scope
+
+- Identity-based immutable `DataEngineRuntime` bundle
+- `compose_data_engine_runtime()` factory
+- Explicit wiring of `DataSource`, optional `DataStore`, and
+  `DataEngineOrchestrator`
+- Contract tests and directly affected Data Engine documentation
+
+### Explicit Exclusions
+
+- Runtime execution methods, provider or storage construction, environment
+  loading, configuration parsing, registries, plugins, DI containers, service
+  locators, lifecycle management, health checks, and retrieval
+- Analytics, ORB logic, strategy logic, and downstream engine work
+
+### Acceptance Criteria
+
+M3.2 is complete when callers can inject a non-null `DataSource` and optional
+`DataStore` into a passive immutable runtime bundle; composition performs no
+I/O, discovery, configuration loading, or pipeline execution.
+
 Implement:
 
 - Data Engine
