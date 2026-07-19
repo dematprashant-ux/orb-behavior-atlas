@@ -12,6 +12,7 @@ __all__ = [
     "ORBBehavior",
     "ORBBehaviorAtlas",
     "ORBBehaviorRecord",
+    "ORBBehaviorStatistics",
     "ORBBehaviorKind",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
@@ -199,6 +200,19 @@ class ORBBehaviorRecord:
     post_escape_observation: ORBPostEscapeObservation | None
     behavior: ORBBehavior
     features: ORBFeatures
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorStatistics:
+    """Records immutable aggregate counts over completed ORB behavior records."""
+
+    total_records: int
+    no_escape_count: int
+    escape_with_return_count: int
+    escape_without_return_count: int
+    upward_escape_count: int
+    downward_escape_count: int
+    returned_to_range_count: int
 
 
 @dataclass(frozen=True, slots=True)

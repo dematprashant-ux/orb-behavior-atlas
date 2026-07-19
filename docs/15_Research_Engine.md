@@ -132,6 +132,14 @@ in its completed records and returns a new atlas that retains matching record
 references in their original order. No query scans candles, recalculates
 observations, or creates research facts.
 
+## 1.10 Behavior Atlas Statistics
+
+M7.3 adds `compute_behavior_statistics(atlas)`, which creates an immutable
+`ORBBehaviorStatistics` summary from completed atlas records only. It reports
+the total, behavior-kind, escape-direction, and return-to-range counts directly
+present in those records. It does not calculate percentages or any other
+derived metric, inspect candles, modify records, cache results, or access I/O.
+
 ---
 
 # 2. Responsibilities

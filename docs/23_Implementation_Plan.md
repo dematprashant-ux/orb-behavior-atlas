@@ -706,6 +706,33 @@ M7.2 is complete when supported queries return new immutable atlases with only
 matching existing records, preserving canonical order and object references
 without creating or changing research facts.
 
+## M7.3 — Behavior Atlas Statistics
+
+### Objective
+
+Provide immutable count-only statistical summaries over completed ORB behavior
+records held by an `ORBBehaviorAtlas`.
+
+### Scope
+
+- Immutable `ORBBehaviorStatistics` aggregate-count model
+- Pure `compute_behavior_statistics(atlas)` construction from existing records
+- Total, behavior-kind, escape-direction, and return-to-range counts only
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Candle analysis, behavior classification, feature generation, record
+  mutation, I/O, persistence, caching, percentages, and other derived metrics
+- Probability, distribution, aggregation beyond supported counts, reporting,
+  visualization, strategy behavior, and analytics beyond the requested counts
+
+### Acceptance Criteria
+
+M7.3 is complete when an immutable atlas deterministically produces an
+immutable summary of its supported existing record counts without modifying or
+reinterpreting any research fact.
+
 Implement:
 
 - Data Engine

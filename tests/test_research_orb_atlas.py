@@ -12,6 +12,7 @@ from src.engines.research import (
     ORBBehavior,
     ORBBehaviorAtlas,
     ORBBehaviorKind,
+    ORBBehaviorStatistics,
     ORBEscapeDirection,
     ORBEscapeEvent,
     ORBFeatures,
@@ -19,6 +20,7 @@ from src.engines.research import (
     ORBWindow,
     build_behavior_atlas,
     build_behavior_record,
+    compute_behavior_statistics,
 )
 
 
@@ -186,6 +188,110 @@ class ORBBehaviorAtlasTests(TestCase):
             atlas.by_escape_direction("UPWARD")
         with self.assertRaises(TypeError):
             atlas.by_return_to_range(1)
+
+    def test_statistics_for_an_empty_atlas_are_zero(self) -> None:
+        """Summarize no completed records with deterministic zero counts."""
+        statistics = compute_behavior_statistics(build_behavior_atlas(()))
+
+        self.assertEqual(
+            statistics,
+            ORBBehaviorStatistics(
+                total_records=0,
+                no_escape_count=0,
+                escape_with_return_count=0,
+                escape_without_return_count=0,
+                upward_escape_count=0,
+                downward_escape_count=0,
+                returned_to_range_count=0,
+            ),
+        )
+
+    def test_statistics_summarize_a_single_completed_record(self) -> None:
+        """Count a single no-escape record without deriving additional metrics."""
+        statistics = compute_behavior_statistics(
+            build_behavior_atlas((_record(high=106.0),))
+        )
+
+        self.assertEqual(statistics.total_records, 1)
+        self.assertEqual(statistics.no_escape_count, 1)
+        self.assertEqual(statistics.escape_with_return_count, 0)
+        self.assertEqual(statistics.escape_without_return_count, 0)
+        self.assertEqual(statistics.upward_escape_count, 0)
+        self.assertEqual(statistics.downward_escape_count, 0)
+        self.assertEqual(statistics.returned_to_range_count, 0)
+
+    def test_statistics_summarize_existing_mixed_record_facts(self) -> None:
+        """Count behaviors, directions, and returns already present in records."""
+        no_escape = _record(high=106.0)
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        downward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.DOWNWARD,
+            returned=False,
+        )
+
+        statistics = compute_behavior_statistics(
+            build_behavior_atlas((no_escape, upward_return, downward_no_return))
+        )
+
+        self.assertEqual(
+            statistics,
+            ORBBehaviorStatistics(
+                total_records=3,
+                no_escape_count=1,
+                escape_with_return_count=1,
+                escape_without_return_count=1,
+                upward_escape_count=1,
+                downward_escape_count=1,
+                returned_to_range_count=1,
+            ),
+        )
+
+    def test_statistics_are_deterministic_and_immutable(self) -> None:
+        """Return equal frozen count summaries without retaining mutable state."""
+        atlas = build_behavior_atlas(
+            (
+                _record(high=106.0),
+                _escape_record(
+                    high=108.0,
+                    direction=ORBEscapeDirection.UPWARD,
+                    returned=True,
+                ),
+            )
+        )
+
+        first = compute_behavior_statistics(atlas)
+        second = compute_behavior_statistics(atlas)
+
+        self.assertEqual(first, second)
+        self.assertTrue(is_dataclass(first))
+        self.assertFalse(hasattr(first, "__dict__"))
+        with self.assertRaises(FrozenInstanceError):
+            first.total_records = 0
+
+    def test_statistics_reject_non_atlas_input(self) -> None:
+        """Require the existing immutable atlas boundary as the sole input."""
+        with self.assertRaises(TypeError):
+            compute_behavior_statistics(())
+
+    def test_statistics_have_only_atlas_model_dependencies(self) -> None:
+        """Keep aggregate counts independent from candles and infrastructure."""
+        with open(
+            "src/engines/research/orb/statistics.py",
+            encoding="utf-8",
+        ) as source_file:
+            tree = ast.parse(source_file.read())
+
+        imported_modules = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module is not None
+        }
+        self.assertEqual(imported_modules, {"src.engines.research.orb.models"})
 
 
 def _record(*, high: float):
