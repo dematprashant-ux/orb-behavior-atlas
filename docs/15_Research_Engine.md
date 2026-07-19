@@ -20,6 +20,20 @@ It does not make trading decisions.
 
 ---
 
+# 1.1 ORB Session Domain Model
+
+M4.1 establishes immutable, technology-neutral observed-fact records for
+BANKNIFTY opening-range research. `ORBWindow` records the timezone-aware
+canonical timestamps of an observed window, `OpeningRange` records its observed
+high and low, and `ORBSession` associates those facts with the canonical Data
+Engine `Session`.
+
+These records do not extract windows, calculate derived values, classify market
+behavior, or infer session completeness. Those responsibilities remain with
+later, dedicated milestones.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

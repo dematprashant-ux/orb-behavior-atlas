@@ -470,6 +470,33 @@ M3.2 is complete when callers can inject a non-null `DataSource` and optional
 `DataStore` into a passive immutable runtime bundle; composition performs no
 I/O, discovery, configuration loading, or pipeline execution.
 
+## M4.1 — ORB Session Domain Model
+
+### Objective
+
+Establish the first Research Engine domain layer for BANKNIFTY opening-range
+research through immutable, observed-fact models.
+
+### Scope
+
+- Timezone-aware ORB window timestamps
+- Observed opening-range high and low values
+- An ORB session record that reuses the canonical Data Engine `Session`
+- Public exports, contract tests, and directly affected Research Engine
+  documentation
+
+### Explicit Exclusions
+
+- ORB-window extraction, calculations, classification, and breakout detection
+- Calendar or candle-completeness checks, persistence, analytics, reporting,
+  backtesting, strategy logic, and execution
+
+### Acceptance Criteria
+
+M4.1 is complete when callers can construct immutable ORB window,
+opening-range, and session records from canonical data without performing any
+market inference or derived calculation.
+
 Implement:
 
 - Data Engine
