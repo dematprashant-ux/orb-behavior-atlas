@@ -15,6 +15,18 @@ class DataAccessError(DataEngineError):
     """Raised when Data Engine data cannot be accessed."""
 
 
+class DataStorageError(DataAccessError):
+    """Raised when canonical data cannot be persisted or retrieved safely."""
+
+
+class DataStorageConflictError(DataStorageError):
+    """Raised when a canonical storage identity already exists."""
+
+
+class DataStorageCorruptionError(DataStorageError):
+    """Raised when persisted canonical data cannot be reconstructed safely."""
+
+
 class DataNormalizationError(DataEngineError):
     """Raised when provider-independent values cannot form a canonical candle."""
 
@@ -36,6 +48,9 @@ __all__ = [
     "DataEngineError",
     "DataNormalizationError",
     "DataSourceError",
+    "DataStorageConflictError",
+    "DataStorageCorruptionError",
+    "DataStorageError",
     "SessionConstructionError",
     "UnsupportedInstrumentError",
     "UnsupportedTimeframeError",

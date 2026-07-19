@@ -350,6 +350,39 @@ canonical candles while preserving each group's input order, representing
 unknown session metadata as `None`, and receiving deterministic failures for
 duplicate or descending timestamps and unmatched metadata keys.
 
+## M2.8 — Data Storage Boundary
+
+### Objective
+
+Define a technology-neutral persistence boundary for canonical sessions and
+candles without selecting or implementing a storage backend.
+
+### Scope
+
+- Immutable canonical storage identities, requests, and results
+- A single `DataStore` protocol
+- Session-only write aggregation and canonical candle retrieval
+- Storage aggregate-consistency checks and a storage exception hierarchy
+- Contract tests and directly affected Data Engine documentation
+
+### Explicit Exclusions
+
+- Databases, files, serialization, migrations, indexes, caching, cloud
+  storage, authentication, and scheduling
+- Independent candle writes, overwrite, upsert, deletion, replacement, and
+  batch-write behavior
+- Changes to `DataSource`, `DataAccess`, or `DataEngine`
+- Validation execution, normalization, session reconstruction, quality
+  reporting, analytics, ORB logic, and strategy behavior
+
+### Acceptance Criteria
+
+M2.8 is complete when storage implementations can depend on a single public,
+technology-neutral protocol with immutable canonical values; candle loads have
+inclusive session-date ranges and deterministic timestamp ordering; and
+malformed session aggregates and existing storage identities have defined,
+separate failure semantics.
+
 Implement:
 
 - Data Engine

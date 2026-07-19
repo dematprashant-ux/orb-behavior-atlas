@@ -75,6 +75,16 @@ canonical representation of an undetermined metadata fact.
 For canonical candles, `session_date` is derived from the candle timestamp
 after it has been normalized to the `Asia/Kolkata` trading-session timezone.
 
+## Storage Identity
+
+| Object | Identity Fields | Description |
+|---------|-----------------|-------------|
+| Candle | instrument, timeframe, timestamp | Canonical candle storage identity |
+| Session | session_date, instrument, timeframe | Canonical session storage identity |
+
+Storage identity never includes provider-native identifiers. Candle
+`session_date` is derived metadata and is not part of candle identity.
+
 ---
 
 # 5. ORB Object

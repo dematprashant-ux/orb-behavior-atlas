@@ -285,25 +285,32 @@ These metrics should be available to downstream engines.
 
 # 13. Storage Model
 
-Recommended structure:
+The storage boundary persists canonical `Session` aggregates. A session is the
+only write aggregate: its immutable metadata and canonical candle collection
+are stored together. Independent candle writes are not part of the Data Engine
+storage contract.
+
+Canonical storage identities are:
 
 ```
-Instrument
-
-↓
-
-Timeframe
-
-↓
-
-Trading Session
-
-↓
-
-Candles
+Candle:  instrument + timeframe + timestamp
+Session: session_date + instrument + timeframe
 ```
 
-Storage format should remain independent of research logic.
+Session writes must preserve aggregate consistency: every candle must match the
+session instrument, timeframe, and session date; candle identities must be
+unique; and candle timestamps must be strictly increasing. Storage does not
+repeat M2.5 OHLC validation or reconstruct sessions.
+
+The provider-neutral `DataStore` boundary returns a requested stored session
+without changing its candle order. Candle-range retrieval uses inclusive
+`start_session_date` and `end_session_date` values and always returns candles
+in ascending canonical timestamp order. Backend-native ordering must not cross
+this boundary.
+
+Storage format and technology remain independent of research logic. SQLite,
+DuckDB, PostgreSQL, files, memory, and cloud implementations must satisfy the
+same contract without changing Data Engine APIs.
 
 ---
 
