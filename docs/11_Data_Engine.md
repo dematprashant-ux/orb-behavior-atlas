@@ -212,6 +212,18 @@ Each candle must satisfy:
 
 Invalid records should be flagged.
 
+## Canonical Candle Validation Boundary
+
+Canonical validation evaluates immutable `Candle` objects after M2.4
+normalization. Normalization failures raise `DataNormalizationError`; semantic
+candle violations are returned as structured validation issues. Source
+acquisition failures remain `DataSourceError` concerns.
+
+M2.5 emits only error-severity issues. Warnings, quality aggregation, missing
+session detection, incomplete-session detection, and gap analysis remain later
+responsibilities. Duplicate and ordering checks inspect only canonical
+`Candle.timestamp` values, never provider-native timestamps.
+
 ---
 
 # 11. Missing Data Detection
@@ -219,12 +231,14 @@ Invalid records should be flagged.
 The engine should detect:
 
 - Missing candles
-- Duplicate candles
 - Missing sessions
 - Incomplete sessions
 - Timestamp gaps
 
 Quality reports should summarize all issues.
+
+Duplicate timestamps are detected by canonical candle validation. Missing-data
+detection and quality-report aggregation remain separate milestones.
 
 ---
 

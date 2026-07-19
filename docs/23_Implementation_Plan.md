@@ -255,6 +255,37 @@ M2.4 is complete when adapters have a reusable internal component that creates
 canonical candles with deterministic, non-sensitive normalization errors,
 without introducing provider behavior or downstream Data Engine concerns.
 
+## M2.5 — Canonical Candle Validation
+
+### Objective
+
+Report semantic validity of canonical immutable candles through structured,
+immutable validation results without transforming or rejecting input data.
+
+### Scope
+
+- Immutable validation result models and stable validation codes
+- Single-candle semantic validation
+- Batch duplicate and timestamp-order checks on canonical timestamps
+- Contract tests and directly affected Data Engine documentation
+
+M2.5 emits only `ERROR` severity. `WARNING` is reserved for later milestones.
+Provider-native timestamps are outside this boundary: duplicate and ordering
+checks operate only on canonical `Candle.timestamp` values produced by M2.4.
+
+### Explicit Exclusions
+
+- Providers, source I/O, and normalization changes
+- Session construction, storage, retrieval, and missing-data detection
+- Gap analysis, quality aggregation, dashboards, and strategy logic
+- Changes to M2.3 public protocols
+
+### Acceptance Criteria
+
+M2.5 is complete when all documented candle-level semantic rules are reported
+deterministically as structured results, while acquisition and normalization
+failures remain exception-based concerns at their existing boundaries.
+
 Implement:
 
 - Data Engine

@@ -184,6 +184,11 @@ Every dataset must satisfy the following:
 
 Any violation must be flagged before research begins.
 
+Canonical candle validation returns ordered, immutable issue records for these
+semantic violations. M2.5 emits only error-severity issues; warning and quality
+aggregation semantics are reserved for later milestones. Duplicate and ordering
+checks use canonical `Candle.timestamp` values after normalization.
+
 ---
 
 # 13. Version Control
