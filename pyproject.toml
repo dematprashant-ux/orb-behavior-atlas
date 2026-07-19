@@ -1,1 +1,49 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
 
+[project]
+name = "banknifty-orb-behavior-atlas"
+version = "0.1.0"
+description = "Research-first platform for BANKNIFTY ORB behavior analysis, probability modeling, and automated trading."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Project Owner" }
+]
+
+keywords = [
+    "banknifty",
+    "orb",
+    "quantitative-trading",
+    "algorithmic-trading",
+    "research",
+    "python"
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+
+dev = [
+    "pytest>=8.0",
+    "black>=24.0",
+    "ruff>=0.5",
+    "mypy>=1.10"
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+include-package-data = true
