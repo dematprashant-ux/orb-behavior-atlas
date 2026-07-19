@@ -1,11 +1,14 @@
 """Pure construction of immutable Backtesting Engine contexts and runs."""
 
+from collections.abc import Sequence
+
 from src.engines.backtesting.models import (
     BacktestContext,
     BacktestRun,
     BacktestStatus,
 )
 from src.engines.execution.interfaces import ExecutionEngine
+from src.engines.execution.models import ExecutionResult
 from src.engines.research.orb.models import ORBBehaviorAtlas
 from src.engines.strategy.interfaces import Strategy
 
@@ -50,21 +53,36 @@ def build_backtest_context(
 def build_backtest_run(
     context: BacktestContext,
     status: BacktestStatus,
+    execution_results: Sequence[ExecutionResult] = (),
 ) -> BacktestRun:
-    """Build a run that retains an existing context reference.
+    """Build a run that retains a context and immutable execution-result references.
 
     Args:
         context: Existing immutable backtest context.
         status: Structural lifecycle status for the run.
+        execution_results: Existing delegated execution results in canonical order.
 
     Returns:
-        An immutable run referencing ``context``.
+        An immutable run referencing ``context`` and result objects.
 
     Raises:
-        TypeError: If either input has an unsupported model type.
+        TypeError: If an input has an unsupported model type.
     """
     if not isinstance(context, BacktestContext):
         raise TypeError("context must be a BacktestContext.")
     if not isinstance(status, BacktestStatus):
         raise TypeError("status must be a BacktestStatus.")
-    return BacktestRun(context=context, status=status)
+    if not isinstance(execution_results, Sequence):
+        raise TypeError(
+            "execution_results must be a sequence of ExecutionResult values."
+        )
+    if any(
+        not isinstance(execution_result, ExecutionResult)
+        for execution_result in execution_results
+    ):
+        raise TypeError("execution_results must contain only ExecutionResult values.")
+    return BacktestRun(
+        context=context,
+        status=status,
+        execution_results=tuple(execution_results),
+    )

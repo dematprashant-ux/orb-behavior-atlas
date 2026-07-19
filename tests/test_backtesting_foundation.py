@@ -117,8 +117,10 @@ class BacktestingFoundationTests(TestCase):
         """Keep the foundation independent from data, fills, and performance logic."""
         expected_imports = {
             "src/engines/backtesting/builders.py": {
+                "collections.abc",
                 "src.engines.backtesting.models",
                 "src.engines.execution.interfaces",
+                "src.engines.execution.models",
                 "src.engines.research.orb.models",
                 "src.engines.strategy.interfaces",
             },
@@ -130,6 +132,7 @@ class BacktestingFoundationTests(TestCase):
                 "dataclasses",
                 "enum",
                 "src.engines.execution.interfaces",
+                "src.engines.execution.models",
                 "src.engines.research.orb.models",
                 "src.engines.strategy.interfaces",
             },

@@ -30,6 +30,19 @@ This foundation does not replay historical data, invoke injected services,
 simulate fills, calculate PnL, returns, drawdown, Sharpe ratio, or win rate,
 build equity curves, duplicate upstream engine logic, or perform I/O.
 
+## 1.2 Deterministic Backtest Orchestrator
+
+M10.2 adds `DeterministicBacktestEngine`, the first concrete
+`BacktestEngine`. For each record in the context's existing behavior atlas, it
+builds a `StrategyContext`, delegates evaluation to the injected `Strategy`,
+builds an `ExecutionRequest`, and delegates to the injected `ExecutionEngine`.
+The resulting immutable execution results are retained by a completed
+`BacktestRun` in atlas order.
+
+The orchestrator does not inspect candles, replay market data, simulate fills,
+calculate performance or costs, generate reports, perform I/O, or replace any
+upstream research, strategy, or execution responsibility.
+
 ---
 
 # 2. Responsibilities

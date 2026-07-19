@@ -929,6 +929,35 @@ existing historical research artifacts and injected strategy/execution
 dependencies, and immutable runs from those contexts, while the engine remains
 only a pure protocol boundary.
 
+## M10.2 — Deterministic Backtest Orchestrator
+
+### Objective
+
+Implement the first concrete `BacktestEngine` as deterministic delegation over
+existing research records, strategy decisions, and execution results.
+
+### Scope
+
+- `DeterministicBacktestEngine.run(context) -> BacktestRun`
+- Per-record construction of existing `StrategyContext` and `ExecutionRequest`
+- Delegation to injected `Strategy` and `ExecutionEngine` services
+- Immutable, atlas-ordered execution results retained by `BacktestRun`
+- Contract tests and directly affected Backtesting Framework documentation
+
+### Explicit Exclusions
+
+- Candle replay, fill simulation, PnL, returns, drawdown, Sharpe ratio,
+  commissions, slippage, reports, and equity curves
+- Research, strategy, or execution logic; persistence, caching, analytics,
+  transactions, and I/O
+
+### Acceptance Criteria
+
+M10.2 is complete when each existing behavior record is deterministically
+delegated in atlas order through the supplied strategy and execution contracts,
+and the resulting immutable execution results are returned in a completed run
+without market-data inspection or simulation.
+
 Implement:
 
 - Data Engine
