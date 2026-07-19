@@ -28,6 +28,17 @@ This foundation defines no decision rules. It does not generate signals,
 execute trades, size positions, calculate PnL, backtest, inspect candles, or
 perform I/O.
 
+## 1.2 Rule-Based ORB Strategy
+
+M8.2 adds `ORBRuleStrategy`, a deterministic non-executing implementation of
+the `Strategy` protocol. It maps only existing behavior facts: `NO_ESCAPE` and
+`ESCAPE_WITH_RETURN` map to `NO_ACTION`; `ESCAPE_WITHOUT_RETURN` maps its
+existing upward or downward escape direction to `LONG_SETUP` or `SHORT_SETUP`.
+
+It does not inspect candles, recalculate research facts, generate features,
+execute trades, manage positions, calculate PnL, or backtest. Its structural
+setup results do not authorize an executable trading strategy.
+
 ---
 
 # 2. Responsibilities
@@ -59,10 +70,10 @@ The Strategy Engine accepts:
 
 All inputs must originate from validated upstream components.
 
-M8.1 is a structural exception only: its context references completed research
-records and their atlas without authorizing a trading rule or executable
-strategy. Future concrete strategy implementations remain restricted to
-validated upstream evidence.
+M8.1 and M8.2 are non-executable structural exceptions: they reference
+completed research records and their atlas without authorizing an executable
+strategy. Future concrete production strategies remain restricted to validated
+upstream evidence.
 
 ---
 

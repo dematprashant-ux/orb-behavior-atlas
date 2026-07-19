@@ -845,6 +845,33 @@ structural decisions from existing research records and atlases, while future
 strategies have a stable pure protocol boundary without any implemented trading
 logic.
 
+## M8.2 — Rule-Based ORB Strategy
+
+### Objective
+
+Validate the Strategy Engine protocol through one deterministic, non-executing
+ORB behavior-to-setup mapping.
+
+### Scope
+
+- Concrete pure `ORBRuleStrategy` implementation of `Strategy`
+- Existing behavior and escape-direction mapping to structural decision types
+- Contract tests and directly affected Strategy Engine documentation
+
+### Explicit Exclusions
+
+- Trade execution, market orders, signals, position sizing, stops, targets,
+  PnL, backtesting, candle analysis, feature generation, and research logic
+- Additional strategy rules, persistence, I/O, caching, analytics, reporting,
+  validation integration, and execution integration
+
+### Acceptance Criteria
+
+M8.2 is complete when existing `NO_ESCAPE` and `ESCAPE_WITH_RETURN` behaviors
+deterministically produce `NO_ACTION`, while existing `ESCAPE_WITHOUT_RETURN`
+behaviors map their already-recorded direction to `LONG_SETUP` or `SHORT_SETUP`
+without inspecting or changing research data.
+
 Implement:
 
 - Data Engine
