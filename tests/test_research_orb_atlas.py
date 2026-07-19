@@ -189,6 +189,137 @@ class ORBBehaviorAtlasTests(TestCase):
         with self.assertRaises(TypeError):
             atlas.by_return_to_range(1)
 
+    def test_filter_supports_each_single_criterion(self) -> None:
+        """Filter existing records by one supplied fact without deriving values."""
+        no_escape = _record(high=106.0)
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        downward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.DOWNWARD,
+            returned=False,
+        )
+        atlas = build_behavior_atlas((no_escape, upward_return, downward_no_return))
+
+        self.assertEqual(
+            tuple(atlas.filter()),
+            (no_escape, upward_return, downward_no_return),
+        )
+        self.assertEqual(
+            tuple(atlas.filter(behavior=ORBBehaviorKind.NO_ESCAPE)),
+            (no_escape,),
+        )
+        self.assertEqual(
+            tuple(atlas.filter(escape_direction=ORBEscapeDirection.UPWARD)),
+            (upward_return,),
+        )
+        self.assertEqual(
+            tuple(atlas.filter(returned_to_range=False)),
+            (downward_no_return,),
+        )
+
+    def test_filter_combines_two_criteria_with_logical_and(self) -> None:
+        """Retain only records satisfying both supplied existing facts."""
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        upward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=False,
+        )
+        atlas = build_behavior_atlas((upward_no_return, upward_return))
+
+        result = atlas.filter(
+            escape_direction=ORBEscapeDirection.UPWARD,
+            returned_to_range=True,
+        )
+
+        self.assertEqual(tuple(result), (upward_return,))
+        self.assertIs(result[0], upward_return)
+
+    def test_filter_combines_three_criteria_in_original_order(self) -> None:
+        """Apply every criterion while retaining matching canonical order."""
+        first = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        second = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        nonmatching = _escape_record(
+            high=112.0,
+            direction=ORBEscapeDirection.DOWNWARD,
+            returned=True,
+        )
+        atlas = build_behavior_atlas((second, nonmatching, first))
+
+        result = atlas.filter(
+            behavior=ORBBehaviorKind.ESCAPE_WITH_RETURN,
+            escape_direction=ORBEscapeDirection.UPWARD,
+            returned_to_range=True,
+        )
+
+        self.assertEqual(tuple(result), (second, first))
+        self.assertIs(result[1], first)
+
+    def test_filter_returns_empty_atlas_for_empty_or_unmatched_inputs(self) -> None:
+        """Represent no matching existing records as a new immutable empty atlas."""
+        empty_result = build_behavior_atlas(()).filter(
+            behavior=ORBBehaviorKind.NO_ESCAPE,
+        )
+        unmatched_result = build_behavior_atlas((_record(high=106.0),)).filter(
+            escape_direction=ORBEscapeDirection.UPWARD,
+        )
+
+        self.assertEqual(tuple(empty_result), ())
+        self.assertEqual(tuple(unmatched_result), ())
+        self.assertIsInstance(unmatched_result, ORBBehaviorAtlas)
+
+    def test_filter_composes_with_existing_queries(self) -> None:
+        """Chain filtering APIs without mutation, duplication, or reordering."""
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        upward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=False,
+        )
+        atlas = build_behavior_atlas((upward_no_return, upward_return))
+
+        result = atlas.by_escape_direction(ORBEscapeDirection.UPWARD).filter(
+            behavior=ORBBehaviorKind.ESCAPE_WITH_RETURN,
+            returned_to_range=True,
+        )
+
+        self.assertEqual(tuple(result), (upward_return,))
+        self.assertIs(result[0], upward_return)
+        self.assertIsNot(result, atlas)
+        with self.assertRaises(FrozenInstanceError):
+            result.records = ()
+
+    def test_filter_rejects_invalid_supplied_criteria(self) -> None:
+        """Require enum and boolean criteria without coercing caller values."""
+        atlas = build_behavior_atlas(())
+
+        with self.assertRaises(TypeError):
+            atlas.filter(behavior="NO_ESCAPE")
+        with self.assertRaises(TypeError):
+            atlas.filter(escape_direction="UPWARD")
+        with self.assertRaises(TypeError):
+            atlas.filter(returned_to_range=1)
+
     def test_statistics_for_an_empty_atlas_are_zero(self) -> None:
         """Summarize no completed records with deterministic zero counts."""
         statistics = compute_behavior_statistics(build_behavior_atlas(()))

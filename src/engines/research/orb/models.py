@@ -308,6 +308,64 @@ class ORBBehaviorAtlas:
             )
         )
 
+    def filter(
+        self,
+        *,
+        behavior: ORBBehaviorKind | None = None,
+        escape_direction: ORBEscapeDirection | None = None,
+        returned_to_range: bool | None = None,
+    ) -> "ORBBehaviorAtlas":
+        """Return records matching every supplied existing query criterion.
+
+        Omitted criteria are ignored. The returned immutable atlas retains
+        matching records in their canonical order and by exact reference; it
+        neither derives nor modifies any research fact.
+
+        Args:
+            behavior: Existing behavior kind to retain, if supplied.
+            escape_direction: Existing escape direction to retain, if supplied.
+            returned_to_range: Existing return fact to retain, if supplied.
+
+        Raises:
+            TypeError: If a supplied criterion has an unsupported type.
+        """
+        if behavior is not None and not isinstance(behavior, ORBBehaviorKind):
+            raise TypeError("behavior must be an ORBBehaviorKind or None.")
+        if escape_direction is not None and not isinstance(
+            escape_direction,
+            ORBEscapeDirection,
+        ):
+            raise TypeError("escape_direction must be an ORBEscapeDirection or None.")
+        if returned_to_range is not None and not isinstance(returned_to_range, bool):
+            raise TypeError("returned_to_range must be a bool or None.")
+
+        return ORBBehaviorAtlas(
+            records=tuple(
+                record
+                for record in self.records
+                if (
+                    behavior is None or record.behavior.kind is behavior
+                )
+                and (
+                    escape_direction is None
+                    or (
+                        record.escape_event is not None
+                        and record.escape_event.direction is escape_direction
+                    )
+                )
+                and (
+                    returned_to_range is None
+                    or (
+                        record.post_escape_observation is not None
+                        and (
+                            record.post_escape_observation.returned_inside_range
+                            is returned_to_range
+                        )
+                    )
+                )
+            )
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class ORBSession:

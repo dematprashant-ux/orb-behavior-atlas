@@ -140,6 +140,14 @@ the total, behavior-kind, escape-direction, and return-to-range counts directly
 present in those records. It does not calculate percentages or any other
 derived metric, inspect candles, modify records, cache results, or access I/O.
 
+## 1.11 Multi-Criteria Atlas Query Layer
+
+M7.4 adds `ORBBehaviorAtlas.filter()`. Its optional `behavior`,
+`escape_direction`, and `returned_to_range` criteria are combined with logical
+AND; omitted criteria are ignored. Each filtered result is a new immutable
+atlas retaining matching record references in their original order. The method
+does not compute market facts, statistics, or new research values.
+
 ---
 
 # 2. Responsibilities

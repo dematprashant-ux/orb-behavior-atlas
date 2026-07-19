@@ -733,6 +733,33 @@ M7.3 is complete when an immutable atlas deterministically produces an
 immutable summary of its supported existing record counts without modifying or
 reinterpreting any research fact.
 
+## M7.4 — Multi-Criteria Query Layer
+
+### Objective
+
+Extend `ORBBehaviorAtlas` with one immutable, composable filter that combines
+existing behavior, escape-direction, and return-to-range facts.
+
+### Scope
+
+- Pure keyword-only `ORBBehaviorAtlas.filter()` API
+- Optional behavior, escape-direction, and return-to-range criteria
+- Logical-AND matching with canonical order and record-reference preservation
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, behavior classification, feature generation, statistics,
+  record mutation, I/O, persistence, caching, and new research facts
+- Additional query criteria, searching, aggregation, reporting, visualization,
+  analytics, and strategy behavior
+
+### Acceptance Criteria
+
+M7.4 is complete when callers can combine any supported supplied criteria into
+one immutable filtered atlas without changing, copying, or reinterpreting the
+existing behavior records.
+
 Implement:
 
 - Data Engine
