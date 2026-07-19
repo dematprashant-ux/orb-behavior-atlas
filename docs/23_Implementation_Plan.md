@@ -987,6 +987,33 @@ from existing backtest runs and immutable reports from those contexts, while
 future analytics engines have a stable pure protocol boundary without metrics
 or report generation.
 
+## M11.2 — Basic Performance Analyzer
+
+### Objective
+
+Implement the first concrete `PerformanceEngine` as deterministic counting over
+the existing execution results in a completed backtest run.
+
+### Scope
+
+- `BasicPerformanceEngine.analyze(context) -> PerformanceReport`
+- Immutable total, accepted, rejected, and skipped execution-result counts
+- Intrinsic completed-run requirement and contract tests
+- Directly affected documentation
+
+### Explicit Exclusions
+
+- PnL, returns, drawdown, Sharpe ratio, Sortino ratio, expectancy, win rate,
+  profit factor, percentages, charts, reports, and optimization
+- Candle inspection, execution, strategy evaluation, persistence, caching,
+  visualization, and I/O
+
+### Acceptance Criteria
+
+M11.2 is complete when a completed immutable backtest run deterministically
+produces an immutable analyzed report containing only total and per-status
+execution-result counts.
+
 Implement:
 
 - Data Engine

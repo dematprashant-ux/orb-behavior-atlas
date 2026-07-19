@@ -4,6 +4,7 @@ from src.engines.performance.builders import (
     build_performance_context,
     build_performance_report,
 )
+from src.engines.performance.analyzer import BasicPerformanceEngine
 from src.engines.performance.interfaces import PerformanceEngine
 from src.engines.performance.models import (
     PerformanceContext,
@@ -16,6 +17,7 @@ __all__ = [
     "PerformanceEngine",
     "PerformanceReport",
     "PerformanceStatus",
+    "BasicPerformanceEngine",
     "build_performance_context",
     "build_performance_report",
 ]
