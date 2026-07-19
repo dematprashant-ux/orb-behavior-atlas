@@ -179,6 +179,15 @@ does not scan candles or add statistics.
 `ORBBehaviorRecord` stores references to child objects and does not duplicate
 their values or perform analysis.
 
+## ORBBehaviorAtlas Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| records | Tuple[ORBBehaviorRecord, ...] | Ordered unique immutable behavior records |
+
+`ORBBehaviorAtlas` is an in-memory repository of completed records. It provides
+only iteration, length, and indexed access; it performs no analysis or storage.
+
 ---
 
 # 6. ORB Levels

@@ -652,6 +652,31 @@ session record without duplicating child values.
 M6.1 is complete when callers can assemble consistent existing outputs into one
 immutable record that retains the exact supplied child objects.
 
+## M7.1 — Behavior Atlas
+
+### Objective
+
+Provide the canonical in-memory, immutable repository of completed ORB behavior
+records.
+
+### Scope
+
+- Immutable ordered `ORBBehaviorAtlas` collection of behavior-record references
+- Pure atlas construction with value-equality duplicate rejection
+- Iteration, length, and indexed access only
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, classification, feature generation, record mutation, I/O,
+  persistence, filtering, searching, statistics, and research validation
+
+### Acceptance Criteria
+
+M7.1 is complete when callers can build an immutable atlas that preserves
+record order, rejects equal duplicate records, and exposes only minimal
+collection access.
+
 Implement:
 
 - Data Engine

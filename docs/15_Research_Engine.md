@@ -113,6 +113,18 @@ or generate features.
 
 ---
 
+# 1.8 Behavior Atlas
+
+M7.1 adds `build_behavior_atlas(records)`, the canonical in-memory repository
+of completed immutable `ORBBehaviorRecord` objects. It retains supplied record
+references and order, rejects equal duplicates, and provides only iteration,
+length, and indexed access.
+
+The atlas does not analyze, classify, generate features, filter, search,
+persist, or mutate records.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

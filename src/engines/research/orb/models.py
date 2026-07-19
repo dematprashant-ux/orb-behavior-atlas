@@ -1,5 +1,6 @@
 """Immutable observed-fact models for BANKNIFTY ORB research sessions."""
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -9,6 +10,7 @@ from src.engines.data.models import Candle, Session
 __all__ = [
     "OpeningRange",
     "ORBBehavior",
+    "ORBBehaviorAtlas",
     "ORBBehaviorRecord",
     "ORBBehaviorKind",
     "ORBEscapeDirection",
@@ -197,6 +199,25 @@ class ORBBehaviorRecord:
     post_escape_observation: ORBPostEscapeObservation | None
     behavior: ORBBehavior
     features: ORBFeatures
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorAtlas:
+    """Represents an ordered immutable in-memory collection of behavior records."""
+
+    records: tuple[ORBBehaviorRecord, ...]
+
+    def __iter__(self) -> Iterator[ORBBehaviorRecord]:
+        """Iterate over records in their supplied canonical order."""
+        return iter(self.records)
+
+    def __len__(self) -> int:
+        """Return the number of records held by this atlas."""
+        return len(self.records)
+
+    def __getitem__(self, index: int) -> ORBBehaviorRecord:
+        """Return one record by its zero-based canonical position."""
+        return self.records[index]
 
 
 @dataclass(frozen=True, slots=True)
