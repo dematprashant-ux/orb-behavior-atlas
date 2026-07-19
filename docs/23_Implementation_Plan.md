@@ -816,6 +816,35 @@ M7.6 is complete when an immutable atlas deterministically produces immutable
 frequency maps containing only observed existing categories and their raw
 integer counts.
 
+## M8.1 — Strategy Engine Foundation
+
+### Objective
+
+Establish the immutable Strategy Engine domain and pure evaluation contract
+without introducing strategy behavior or trading operations.
+
+### Scope
+
+- Immutable `StrategyContext`, `StrategyDecision`, and
+  `StrategyDecisionType` models
+- Pure context builder referencing one completed behavior record in its atlas
+- Abstract `Strategy.evaluate(context) -> StrategyDecision` protocol
+- Contract tests and directly affected Strategy Engine documentation
+
+### Explicit Exclusions
+
+- Trade execution, signals, position sizing, PnL, backtesting, candle
+  analysis, market research, and duplicated research logic
+- Strategy implementations, entry or exit rules, validation integration, I/O,
+  persistence, caching, analytics, reporting, and execution integration
+
+### Acceptance Criteria
+
+M8.1 is complete when callers can construct immutable strategy contexts and
+structural decisions from existing research records and atlases, while future
+strategies have a stable pure protocol boundary without any implemented trading
+logic.
+
 Implement:
 
 - Data Engine

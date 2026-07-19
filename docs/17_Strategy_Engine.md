@@ -16,6 +16,18 @@ It is the only component responsible for creating trading rules. Every strategy 
 
 The Strategy Engine never creates research or validates hypotheses.
 
+## 1.1 Strategy Engine Foundation
+
+M8.1 establishes the technology-neutral Strategy Engine boundary. It exposes
+immutable `StrategyContext` and `StrategyDecision` models, stable structural
+`StrategyDecisionType` values, and the pure `Strategy` protocol. A context
+references one completed `ORBBehaviorRecord` within its existing
+`ORBBehaviorAtlas`; it does not copy child research values.
+
+This foundation defines no decision rules. It does not generate signals,
+execute trades, size positions, calculate PnL, backtest, inspect candles, or
+perform I/O.
+
 ---
 
 # 2. Responsibilities
@@ -46,6 +58,11 @@ The Strategy Engine accepts:
 - Strategy Configuration
 
 All inputs must originate from validated upstream components.
+
+M8.1 is a structural exception only: its context references completed research
+records and their atlas without authorizing a trading rule or executable
+strategy. Future concrete strategy implementations remain restricted to
+validated upstream evidence.
 
 ---
 
