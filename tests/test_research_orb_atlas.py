@@ -12,6 +12,7 @@ from src.engines.research import (
     ORBBehavior,
     ORBBehaviorAtlas,
     ORBBehaviorAtlasGroups,
+    ORBBehaviorDistributions,
     ORBBehaviorKind,
     ORBBehaviorStatistics,
     ORBEscapeDirection,
@@ -22,6 +23,7 @@ from src.engines.research import (
     build_behavior_atlas,
     build_behavior_record,
     compute_behavior_statistics,
+    compute_behavior_distributions,
     group_by_behavior,
     group_by_escape_direction,
     group_by_return_to_range,
@@ -443,6 +445,126 @@ class ORBBehaviorAtlasTests(TestCase):
             if isinstance(node, ast.ImportFrom) and node.module is not None
         }
         self.assertEqual(imported_modules, {"src.engines.research.orb.models"})
+
+    def test_distributions_for_an_empty_atlas_are_empty(self) -> None:
+        """Represent no observed categories with immutable empty frequency maps."""
+        distributions = compute_behavior_distributions(build_behavior_atlas(()))
+
+        self.assertEqual(dict(distributions.behavior_distribution), {})
+        self.assertEqual(dict(distributions.escape_direction_distribution), {})
+        self.assertEqual(dict(distributions.return_to_range_distribution), {})
+
+    def test_distributions_preserve_one_observed_behavior_category(self) -> None:
+        """Count a single existing no-escape category without normalizing it."""
+        distributions = compute_behavior_distributions(
+            build_behavior_atlas((_record(high=106.0),))
+        )
+
+        self.assertEqual(
+            dict(distributions.behavior_distribution),
+            {ORBBehaviorKind.NO_ESCAPE: 1},
+        )
+        self.assertEqual(dict(distributions.escape_direction_distribution), {})
+        self.assertEqual(dict(distributions.return_to_range_distribution), {})
+
+    def test_distributions_count_multiple_observed_categories(self) -> None:
+        """Expose exact raw frequencies for existing behavior and escape facts."""
+        no_escape = _record(high=106.0)
+        upward_return = _escape_record(
+            high=108.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=True,
+        )
+        downward_no_return = _escape_record(
+            high=110.0,
+            direction=ORBEscapeDirection.DOWNWARD,
+            returned=False,
+        )
+        upward_no_return = _escape_record(
+            high=112.0,
+            direction=ORBEscapeDirection.UPWARD,
+            returned=False,
+        )
+
+        distributions = compute_behavior_distributions(
+            build_behavior_atlas(
+                (no_escape, upward_return, downward_no_return, upward_no_return)
+            )
+        )
+
+        self.assertEqual(
+            dict(distributions.behavior_distribution),
+            {
+                ORBBehaviorKind.NO_ESCAPE: 1,
+                ORBBehaviorKind.ESCAPE_WITH_RETURN: 1,
+                ORBBehaviorKind.ESCAPE_WITHOUT_RETURN: 2,
+            },
+        )
+        self.assertEqual(
+            dict(distributions.escape_direction_distribution),
+            {
+                ORBEscapeDirection.UPWARD: 2,
+                ORBEscapeDirection.DOWNWARD: 1,
+            },
+        )
+        self.assertEqual(
+            dict(distributions.return_to_range_distribution),
+            {True: 1, False: 2},
+        )
+
+    def test_distributions_are_deterministic_and_immutable(self) -> None:
+        """Return read-only observed-category maps without mutable state."""
+        atlas = build_behavior_atlas(
+            (
+                _record(high=106.0),
+                _escape_record(
+                    high=108.0,
+                    direction=ORBEscapeDirection.UPWARD,
+                    returned=True,
+                ),
+            )
+        )
+
+        first = compute_behavior_distributions(atlas)
+        second = compute_behavior_distributions(atlas)
+
+        self.assertIsInstance(first, ORBBehaviorDistributions)
+        self.assertEqual(
+            dict(first.behavior_distribution),
+            dict(second.behavior_distribution),
+        )
+        self.assertTrue(is_dataclass(first))
+        self.assertFalse(hasattr(first, "__dict__"))
+        with self.assertRaises(FrozenInstanceError):
+            first.behavior_distribution = {}
+        with self.assertRaises(TypeError):
+            first.behavior_distribution[ORBBehaviorKind.NO_ESCAPE] = 0
+
+    def test_distributions_reject_non_atlas_input(self) -> None:
+        """Require the immutable atlas as the sole distribution input boundary."""
+        with self.assertRaises(TypeError):
+            compute_behavior_distributions(())
+
+    def test_distributions_reuse_only_grouping_and_model_boundaries(self) -> None:
+        """Keep distribution construction independent from candles and I/O."""
+        with open(
+            "src/engines/research/orb/distributions.py",
+            encoding="utf-8",
+        ) as source_file:
+            tree = ast.parse(source_file.read())
+
+        imported_modules = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module is not None
+        }
+        self.assertEqual(
+            imported_modules,
+            {
+                "src.engines.research.orb.grouping",
+                "src.engines.research.orb.models",
+            },
+        )
 
     def test_statistics_for_an_empty_atlas_are_zero(self) -> None:
         """Summarize no completed records with deterministic zero counts."""

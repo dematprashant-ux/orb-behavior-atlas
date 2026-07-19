@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from types import MappingProxyType
+from typing import TypeVar
 
 from src.engines.data.models import Candle, Session
 
@@ -13,6 +14,7 @@ __all__ = [
     "ORBBehavior",
     "ORBBehaviorAtlas",
     "ORBBehaviorAtlasGroups",
+    "ORBBehaviorDistributions",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
     "ORBBehaviorKind",
@@ -23,6 +25,8 @@ __all__ = [
     "ORBSession",
     "ORBWindow",
 ]
+
+_DistributionCategory = TypeVar("_DistributionCategory")
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,6 +222,45 @@ class ORBBehaviorStatistics:
 
 
 @dataclass(frozen=True, slots=True)
+class ORBBehaviorDistributions:
+    """Records immutable frequency maps for existing ORB behavior categories."""
+
+    behavior_distribution: Mapping[ORBBehaviorKind, int]
+    escape_direction_distribution: Mapping[ORBEscapeDirection, int]
+    return_to_range_distribution: Mapping[bool, int]
+
+    def __post_init__(self) -> None:
+        """Defensively retain read-only observed-category frequency mappings."""
+        object.__setattr__(
+            self,
+            "behavior_distribution",
+            _freeze_distribution(
+                self.behavior_distribution,
+                ORBBehaviorKind,
+                "behavior_distribution",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "escape_direction_distribution",
+            _freeze_distribution(
+                self.escape_direction_distribution,
+                ORBEscapeDirection,
+                "escape_direction_distribution",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "return_to_range_distribution",
+            _freeze_distribution(
+                self.return_to_range_distribution,
+                bool,
+                "return_to_range_distribution",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class ORBBehaviorAtlas:
     """Represents an ordered immutable in-memory collection of behavior records."""
 
@@ -409,3 +452,23 @@ def _require_timezone_aware(timestamp: datetime, field_name: str) -> None:
     """Reject timestamps that cannot identify a canonical timezone instant."""
     if timestamp.tzinfo is None or timestamp.utcoffset() is None:
         raise ValueError(f"{field_name} must be timezone-aware")
+
+
+def _freeze_distribution(
+    distribution: Mapping[_DistributionCategory, int],
+    category_type: type[_DistributionCategory],
+    field_name: str,
+) -> Mapping[_DistributionCategory, int]:
+    """Return a read-only non-empty-count mapping of one supported category type."""
+    if not isinstance(distribution, Mapping):
+        raise TypeError(f"{field_name} must be a mapping.")
+
+    immutable_distribution: dict[_DistributionCategory, int] = {}
+    for category, count in distribution.items():
+        if not isinstance(category, category_type):
+            raise TypeError(f"{field_name} contains an unsupported category.")
+        if type(count) is not int or count <= 0:
+            raise ValueError(f"{field_name} counts must be positive integers.")
+        immutable_distribution[category] = count
+
+    return MappingProxyType(immutable_distribution)

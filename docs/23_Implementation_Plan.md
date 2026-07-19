@@ -788,6 +788,34 @@ M7.5 is complete when callers can group an immutable atlas into non-empty,
 immutable key-to-atlas collections while retaining original record order and
 references inside every group.
 
+## M7.6 — Behavior Atlas Distributions
+
+### Objective
+
+Provide immutable observed-category frequency maps over completed behavior
+records without performing analysis or normalizing their counts.
+
+### Scope
+
+- Immutable `ORBBehaviorDistributions` categorical frequency-map model
+- Pure `compute_behavior_distributions(atlas)` construction
+- Existing behavior, escape-direction, and return-to-range categories only
+- Reuse of the grouping boundary, contract tests, and directly affected
+  Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, behavior classification, feature generation, record
+  mutation, I/O, persistence, percentages, normalization, and caching
+- Additional categories, statistics beyond raw frequency maps, aggregation,
+  reporting, visualization, analytics, and strategy behavior
+
+### Acceptance Criteria
+
+M7.6 is complete when an immutable atlas deterministically produces immutable
+frequency maps containing only observed existing categories and their raw
+integer counts.
+
 Implement:
 
 - Data Engine

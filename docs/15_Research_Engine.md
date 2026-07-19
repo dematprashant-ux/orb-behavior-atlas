@@ -156,6 +156,13 @@ mapping non-empty existing-fact keys to immutable atlases. Records retain their
 original order and references within each group; records without an escape or
 post-escape observation are omitted from the corresponding grouping.
 
+## 1.13 Behavior Atlas Distributions
+
+M7.6 adds `compute_behavior_distributions(atlas)`, which reuses immutable
+atlas groups to produce read-only frequency maps for only observed behavior,
+escape-direction, and return-to-range categories. It does not calculate
+percentages, normalize values, inspect candles, or create new research facts.
+
 ---
 
 # 2. Responsibilities

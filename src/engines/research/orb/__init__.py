@@ -1,6 +1,7 @@
 """Immutable domain concepts and observed-fact operations for ORB sessions."""
 
 from src.engines.research.orb.classification import classify_orb_behavior
+from src.engines.research.orb.distributions import compute_behavior_distributions
 from src.engines.research.orb.atlas import build_behavior_atlas
 from src.engines.research.orb.escape import find_first_escape_event
 from src.engines.research.orb.extraction import extract_opening_range
@@ -15,6 +16,7 @@ from src.engines.research.orb.models import (
     ORBBehavior,
     ORBBehaviorAtlas,
     ORBBehaviorAtlasGroups,
+    ORBBehaviorDistributions,
     ORBBehaviorKind,
     ORBBehaviorRecord,
     ORBBehaviorStatistics,
@@ -34,6 +36,7 @@ __all__ = [
     "ORBBehavior",
     "ORBBehaviorAtlas",
     "ORBBehaviorAtlasGroups",
+    "ORBBehaviorDistributions",
     "ORBBehaviorKind",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
@@ -46,6 +49,7 @@ __all__ = [
     "build_behavior_record",
     "build_behavior_atlas",
     "classify_orb_behavior",
+    "compute_behavior_distributions",
     "compute_behavior_statistics",
     "extract_opening_range",
     "find_first_escape_event",
