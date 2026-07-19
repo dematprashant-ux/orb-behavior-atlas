@@ -10,6 +10,7 @@ from src.engines.data.interfaces import (
     SessionT,
     SourceRecordT,
 )
+from src.engines.data.models import Candle, Instrument, Session, Timeframe, Weekday
 from src.engines.data.exceptions import (
     DataAccessError,
     DataEngineError,
@@ -27,9 +28,14 @@ __all__ = [
     "DataSource",
     "DataSourceError",
     "EngineRecordT",
+    "Candle",
+    "Instrument",
     "QualityReportT",
+    "Session",
     "SessionT",
     "SourceRecordT",
+    "Timeframe",
     "UnsupportedInstrumentError",
     "UnsupportedTimeframeError",
+    "Weekday",
 ]

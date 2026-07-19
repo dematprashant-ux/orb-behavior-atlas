@@ -161,6 +161,34 @@ milestones: domain modeling, ingestion, normalization, validation, session
 construction, storage, retrieval behavior, missing-data detection, and quality
 reporting.
 
+## M2.2 — Data Engine Domain Models
+
+### Objective
+
+Define the immutable, provider-neutral market-data models required for the
+v1 BANKNIFTY five-minute research scope.
+
+### Scope
+
+- Typed `Instrument`, `Timeframe`, and `Weekday` enumerations
+- Immutable `Candle` and `Session` models
+- Stable package exports and structural model tests
+
+### Explicit Exclusions
+
+- Additional instruments or timeframes
+- Providers, persistence, identifiers, validation, normalization, and quality
+  reporting
+- Session construction, timezone conversion, derived fields, and business
+  logic
+- Models owned by downstream engines
+
+### Acceptance Criteria
+
+M2.2 is complete when the public package exports immutable, typed models for
+the documented BANKNIFTY five-minute candle and session structures, without
+introducing market-data behavior.
+
 Implement:
 
 - Data Engine

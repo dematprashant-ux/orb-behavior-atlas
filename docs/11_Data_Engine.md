@@ -125,14 +125,15 @@ Every candle must contain:
 
 | Field | Type |
 |--------|------|
+| Instrument | Instrument |
+| Timeframe | Timeframe |
 | Timestamp | Datetime |
+| Session Date | Date |
 | Open | Float |
 | High | Float |
 | Low | Float |
 | Close | Float |
 | Volume | Integer |
-| Session Date | Date |
-| Timeframe | String |
 
 ---
 

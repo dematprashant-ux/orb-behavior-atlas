@@ -45,9 +45,9 @@ event_type
 | Field | Type | Description |
 |---------|------|-------------|
 | trading_date | Date | Trading session date |
-| symbol | String | Instrument name |
-| timeframe | String | Candle timeframe |
-| weekday | String | Day of week |
+| instrument | Instrument | Instrument name |
+| timeframe | Timeframe | Candle timeframe |
+| weekday | Weekday | Day of week |
 | expiry_day | Boolean | Weekly expiry flag |
 | monthly_expiry | Boolean | Monthly expiry flag |
 | holiday_gap | Boolean | Previous day was holiday |
@@ -58,7 +58,10 @@ event_type
 
 | Field | Type | Description |
 |---------|------|-------------|
+| instrument | Instrument | Instrument name |
+| timeframe | Timeframe | Candle timeframe |
 | timestamp | Datetime | Candle timestamp |
+| session_date | Date | Trading session date |
 | open | Float | Opening price |
 | high | Float | Highest price |
 | low | Float | Lowest price |
