@@ -15,6 +15,10 @@ class DataAccessError(DataEngineError):
     """Raised when Data Engine data cannot be accessed."""
 
 
+class DataNormalizationError(DataEngineError):
+    """Raised when provider-independent values cannot form a canonical candle."""
+
+
 class UnsupportedInstrumentError(DataEngineError):
     """Raised when a requested instrument is outside the supported universe."""
 
@@ -26,6 +30,7 @@ class UnsupportedTimeframeError(DataEngineError):
 __all__ = [
     "DataAccessError",
     "DataEngineError",
+    "DataNormalizationError",
     "DataSourceError",
     "UnsupportedInstrumentError",
     "UnsupportedTimeframeError",

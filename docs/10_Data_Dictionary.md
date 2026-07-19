@@ -68,6 +68,9 @@ event_type
 | close | Float | Closing price |
 | volume | Integer | Trading volume |
 
+For canonical candles, `session_date` is derived from the candle timestamp
+after it has been normalized to the `Asia/Kolkata` trading-session timezone.
+
 ---
 
 # 5. ORB Object

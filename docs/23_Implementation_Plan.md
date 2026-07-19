@@ -222,6 +222,39 @@ M2.3 is complete when the public protocols use canonical `Candle`, `Session`,
 returning canonical candles; and validation/quality operations remain deferred
 until their result models are defined.
 
+## M2.4 — Reusable Canonical Candle Normalization
+
+### Objective
+
+Establish the internal Data Engine normalization boundary that converts
+provider-independent candle values into canonical immutable `Candle` objects.
+
+### Scope
+
+- Reusable canonical candle normalization functions
+- `DataNormalizationError` in the Data Engine exception hierarchy
+- Private timestamp and numeric normalization helpers
+- Contract tests and directly affected Data Engine documentation
+
+Provider adapters remain responsible for provider-specific parsing and field
+mapping before calling normalization. The normalizer accepts canonical-keyed,
+provider-independent values and assigns `Instrument`, `Timeframe`, and a
+session date derived from the normalized `Asia/Kolkata` timestamp.
+
+### Explicit Exclusions
+
+- Concrete providers or provider adapters
+- Provider payload parsing and alias registries
+- Candle validation, duplicate detection, sessions, storage, retrieval, and
+  quality reporting
+- Changes to the M2.3 public protocols
+
+### Acceptance Criteria
+
+M2.4 is complete when adapters have a reusable internal component that creates
+canonical candles with deterministic, non-sensitive normalization errors,
+without introducing provider behavior or downstream Data Engine concerns.
+
 Implement:
 
 - Data Engine

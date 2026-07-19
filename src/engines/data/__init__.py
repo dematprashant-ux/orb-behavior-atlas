@@ -9,6 +9,7 @@ from src.engines.data.models import Candle, Instrument, Session, Timeframe, Week
 from src.engines.data.exceptions import (
     DataAccessError,
     DataEngineError,
+    DataNormalizationError,
     DataSourceError,
     UnsupportedInstrumentError,
     UnsupportedTimeframeError,
@@ -19,6 +20,7 @@ __all__ = [
     "DataAccessError",
     "DataEngine",
     "DataEngineError",
+    "DataNormalizationError",
     "DataSource",
     "DataSourceError",
     "Candle",

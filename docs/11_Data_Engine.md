@@ -121,6 +121,19 @@ Provider-specific parsing occurs inside each provider adapter. Adapters use
 reusable Data Engine normalization components before returning canonical candles
 through the provider-neutral data-source boundary.
 
+## Canonical Normalization Boundary
+
+Normalization accepts provider-independent values with canonical candle keys:
+`timestamp`, `open`, `high`, `low`, `close`, and `volume`. Provider adapters
+own provider-native parsing, field aliases, and source configuration; the Data
+Engine does not maintain a provider alias registry.
+
+Normalization assigns the requested `Instrument` and `Timeframe`, converts
+timestamps to `Asia/Kolkata`, and derives `session_date` from that normalized
+timestamp. It performs structural conversion only. OHLC relationships,
+duplicate detection, ordering, session construction, storage, and quality
+assessment remain separate responsibilities.
+
 ---
 
 # 7. Candle Schema
@@ -162,6 +175,11 @@ Session hours:
 ```
 
 Timezone conversion should occur only once during ingestion.
+
+Naive source timestamps require an explicit source `ZoneInfo` owned by the
+provider adapter. Ambiguous or nonexistent local timestamps are rejected rather
+than inferred. Provider-native timestamp formats must be parsed by the adapter
+before canonical normalization.
 
 ---
 
@@ -287,6 +305,10 @@ The engine should detect and report:
 - Unsupported timeframes
 
 Errors should be descriptive and logged.
+
+Canonical normalization errors must provide deterministic, non-sensitive public
+messages. They may retain their originating conversion error through exception
+chaining, but must not expose provider payload contents or credentials.
 
 ---
 
