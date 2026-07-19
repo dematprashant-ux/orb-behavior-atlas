@@ -958,6 +958,35 @@ delegated in atlas order through the supplied strategy and execution contracts,
 and the resulting immutable execution results are returned in a completed run
 without market-data inspection or simulation.
 
+## M11.1 — Performance Analytics Foundation
+
+### Objective
+
+Establish immutable Performance Analytics context, report, status, and protocol
+contracts without introducing performance calculations or reporting behavior.
+
+### Scope
+
+- Immutable `PerformanceContext`, `PerformanceReport`, and `PerformanceStatus`
+  models
+- Pure context and report builders retaining existing child references
+- Abstract `PerformanceEngine.analyze(context) -> PerformanceReport` protocol
+- Contract tests and directly affected documentation
+
+### Explicit Exclusions
+
+- PnL, returns, drawdown, Sharpe ratio, Sortino ratio, expectancy, win rate,
+  profit factor, charts, reports, and optimization
+- Concrete analytics engines, backtest replay, execution behavior, persistence,
+  caching, visualization, and I/O
+
+### Acceptance Criteria
+
+M11.1 is complete when callers can construct immutable performance contexts
+from existing backtest runs and immutable reports from those contexts, while
+future analytics engines have a stable pure protocol boundary without metrics
+or report generation.
+
 Implement:
 
 - Data Engine
