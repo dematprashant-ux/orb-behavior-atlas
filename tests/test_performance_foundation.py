@@ -111,6 +111,7 @@ class PerformanceFoundationTests(TestCase):
                 "dataclasses",
                 "enum",
                 "src.engines.backtesting.models",
+                "src.engines.execution.models",
             },
         }
 

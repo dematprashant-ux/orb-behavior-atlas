@@ -10,7 +10,10 @@ from src.engines.performance.models import (
     PerformanceContext,
     PerformanceReport,
     PerformanceStatus,
+    TradeOutcome,
+    TradeOutcomeType,
 )
+from src.engines.performance.outcomes import TradeOutcomeEngine, build_trade_outcome
 
 __all__ = [
     "PerformanceContext",
@@ -18,6 +21,10 @@ __all__ = [
     "PerformanceReport",
     "PerformanceStatus",
     "BasicPerformanceEngine",
+    "TradeOutcome",
+    "TradeOutcomeEngine",
+    "TradeOutcomeType",
     "build_performance_context",
     "build_performance_report",
+    "build_trade_outcome",
 ]

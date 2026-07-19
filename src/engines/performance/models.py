@@ -4,8 +4,15 @@ from dataclasses import dataclass
 from enum import Enum
 
 from src.engines.backtesting.models import BacktestRun
+from src.engines.execution.models import ExecutionResult, ExecutionStatus
 
-__all__ = ["PerformanceContext", "PerformanceReport", "PerformanceStatus"]
+__all__ = [
+    "PerformanceContext",
+    "PerformanceReport",
+    "PerformanceStatus",
+    "TradeOutcome",
+    "TradeOutcomeType",
+]
 
 
 class PerformanceStatus(str, Enum):
@@ -14,6 +21,14 @@ class PerformanceStatus(str, Enum):
     CREATED = "CREATED"
     ANALYZED = "ANALYZED"
     FAILED = "FAILED"
+
+
+class TradeOutcomeType(str, Enum):
+    """Identifies the non-financial result of one execution outcome."""
+
+    EXECUTED = "EXECUTED"
+    REJECTED = "REJECTED"
+    SKIPPED = "SKIPPED"
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,9 +73,35 @@ class PerformanceReport:
             )
 
 
+@dataclass(frozen=True, slots=True)
+class TradeOutcome:
+    """Classifies one existing execution result without duplicating its state."""
+
+    execution_result: ExecutionResult
+    outcome_type: TradeOutcomeType
+
+    def __post_init__(self) -> None:
+        """Require only the immutable execution result and outcome model types."""
+        if not isinstance(self.execution_result, ExecutionResult):
+            raise TypeError("execution_result must be an ExecutionResult.")
+        if not isinstance(self.outcome_type, TradeOutcomeType):
+            raise TypeError("outcome_type must be a TradeOutcomeType.")
+        if self.outcome_type is not _outcome_type_for(self.execution_result.status):
+            raise ValueError("outcome_type must match the execution result status.")
+
+
 def _validate_count(value: int, field_name: str) -> None:
     """Require one non-negative integer count without accepting booleans."""
     if isinstance(value, bool) or not isinstance(value, int):
         raise TypeError(f"{field_name} must be an int.")
     if value < 0:
         raise ValueError(f"{field_name} must be non-negative.")
+
+
+def _outcome_type_for(execution_status: ExecutionStatus) -> TradeOutcomeType:
+    """Map one existing execution status to its immutable outcome type."""
+    if execution_status is ExecutionStatus.ACCEPTED:
+        return TradeOutcomeType.EXECUTED
+    if execution_status is ExecutionStatus.REJECTED:
+        return TradeOutcomeType.REJECTED
+    return TradeOutcomeType.SKIPPED

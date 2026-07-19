@@ -1014,6 +1014,33 @@ M11.2 is complete when a completed immutable backtest run deterministically
 produces an immutable analyzed report containing only total and per-status
 execution-result counts.
 
+## M11.3 — Trade Outcome Classification
+
+### Objective
+
+Classify existing immutable execution results into analyzable, non-financial
+trade outcomes without calculating trading performance.
+
+### Scope
+
+- Immutable `TradeOutcome` and `TradeOutcomeType` models
+- Pure `build_trade_outcome()` transformation retaining execution-result
+  references
+- `TradeOutcomeEngine.classify(backtest_run) -> tuple[TradeOutcome, ...]`
+- Contract tests and directly affected documentation
+
+### Explicit Exclusions
+
+- PnL, returns, drawdown, Sharpe ratio, expectancy, win rate, profit factor,
+  charts, reports, and optimization
+- Candle inspection, execution, strategy evaluation, persistence, caching,
+  visualization, and I/O
+
+### Acceptance Criteria
+
+M11.3 is complete when every execution result in a backtest run deterministically
+maps to one immutable executed, rejected, or skipped outcome in unchanged order.
+
 Implement:
 
 - Data Engine
