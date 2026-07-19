@@ -901,6 +901,34 @@ existing strategy decisions and immutable results from existing requests, while
 future execution engines have a stable pure protocol boundary without any
 execution implementation.
 
+## M10.1 — Backtesting Engine Foundation
+
+### Objective
+
+Establish immutable Backtesting Engine context, run, status, and protocol
+contracts without introducing historical replay or performance behavior.
+
+### Scope
+
+- Immutable `BacktestContext`, `BacktestRun`, and `BacktestStatus` models
+- Pure context and run builders retaining existing child references
+- Abstract `BacktestEngine.run(context) -> BacktestRun` protocol
+- Contract tests and directly affected Backtesting Framework documentation
+
+### Explicit Exclusions
+
+- PnL, returns, drawdown, Sharpe ratio, win rate, equity curves, fill
+  simulation, execution behavior, strategy behavior, and research behavior
+- Concrete backtest engines, historical replay, positions, transactions,
+  persistence, caching, analytics, reporting, and I/O
+
+### Acceptance Criteria
+
+M10.1 is complete when callers can construct immutable backtest contexts from
+existing historical research artifacts and injected strategy/execution
+dependencies, and immutable runs from those contexts, while the engine remains
+only a pure protocol boundary.
+
 Implement:
 
 - Data Engine

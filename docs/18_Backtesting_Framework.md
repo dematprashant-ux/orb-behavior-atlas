@@ -18,6 +18,18 @@ The framework evaluates strategies.
 
 It never creates strategies.
 
+## 1.1 Backtesting Engine Foundation
+
+M10.1 establishes only the technology-neutral Backtesting Engine contract:
+immutable `BacktestContext`, `BacktestRun`, and `BacktestStatus` models, pure
+builders, and the `BacktestEngine` protocol. A context references existing
+historical research artifacts, a strategy, and an execution-engine dependency;
+a run references its context.
+
+This foundation does not replay historical data, invoke injected services,
+simulate fills, calculate PnL, returns, drawdown, Sharpe ratio, or win rate,
+build equity curves, duplicate upstream engine logic, or perform I/O.
+
 ---
 
 # 2. Responsibilities
