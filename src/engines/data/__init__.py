@@ -6,6 +6,16 @@ from src.engines.data.interfaces import (
     DataSource,
 )
 from src.engines.data.providers import BaseProviderAdapter, ProviderAdapter, ProviderConfig
+from src.engines.data.quality import (
+    DataQualityReport,
+    QualityCode,
+    QualityIssue,
+    QualitySeverity,
+    SessionQualityMetrics,
+    SessionQualityResult,
+    assess_session,
+    assess_sessions,
+)
 from src.engines.data.sessions import SessionMetadata, build_session, build_sessions
 from src.engines.data.storage import (
     CandleIdentity,
@@ -52,6 +62,7 @@ __all__ = [
     "DataStorageCorruptionError",
     "DataStorageError",
     "DataStore",
+    "DataQualityReport",
     "Candle",
     "CandleIdentity",
     "CandleValidationResult",
@@ -63,10 +74,15 @@ __all__ = [
     "LoadSessionResult",
     "ProviderAdapter",
     "ProviderConfig",
+    "QualityCode",
+    "QualityIssue",
+    "QualitySeverity",
     "Session",
     "SessionConstructionError",
     "SessionIdentity",
     "SessionMetadata",
+    "SessionQualityMetrics",
+    "SessionQualityResult",
     "StoreSessionRequest",
     "StoreSessionResult",
     "Timeframe",
@@ -80,4 +96,6 @@ __all__ = [
     "validate_candles",
     "build_session",
     "build_sessions",
+    "assess_session",
+    "assess_sessions",
 ]

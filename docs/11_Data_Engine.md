@@ -254,32 +254,37 @@ responsibilities. Duplicate and ordering checks inspect only canonical
 
 # 11. Missing Data Detection
 
-The engine should detect:
+Read-only quality assessment may observe unexpected timestamp spacing within
+supplied canonical sessions. It does not repair, reorder, normalize, validate,
+store, or reconstruct candles or sessions.
 
-- Missing candles
-- Missing sessions
-- Incomplete sessions
-- Timestamp gaps
+The expected interval is derived from the canonical `Timeframe` model. Each
+observation contains the previous and current canonical timestamps, along with
+the expected and observed intervals. An irregular interval does not infer a
+cause such as a provider failure, holiday, market closure, or missing candle.
 
-Quality reports should summarize all issues.
+Missing trading-day detection, holiday analysis, and market-day completeness
+require a future exchange-calendar boundary. They are not quality-layer
+responsibilities yet.
 
-Duplicate timestamps are detected by canonical candle validation. Missing-data
-detection and quality-report aggregation remain separate milestones.
+Duplicate timestamps and ordering remain M2.5 validation and M2.7 construction
+concerns. The quality layer reports observational spacing only.
 
 ---
 
 # 12. Data Quality Metrics
 
-Track:
+The quality layer provides immutable, read-only metrics for each supplied
+session and batch report:
 
-- Missing candle count
-- Duplicate count
-- Invalid OHLC count
-- Session completeness
-- Total observations
-- Data coverage %
+- Candle count
+- Unexpected interval count
+- First observed timestamp
+- Last observed timestamp
+- Total assessed sessions and candles
 
-These metrics should be available to downstream engines.
+Quality reports preserve input session order. They do not make claims about
+market-day completeness or data coverage without an exchange calendar.
 
 ---
 

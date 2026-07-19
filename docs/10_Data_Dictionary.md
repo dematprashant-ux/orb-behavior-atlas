@@ -85,6 +85,20 @@ after it has been normalized to the `Asia/Kolkata` trading-session timezone.
 Storage identity never includes provider-native identifiers. Candle
 `session_date` is derived metadata and is not part of candle identity.
 
+## Quality Assessment
+
+| Field | Type | Description |
+|---------|------|-------------|
+| code | QualityCode | Stable observational quality category |
+| severity | QualitySeverity | Informational, warning, or error classification |
+| previous_timestamp | Datetime | Earlier canonical timestamp in an interval observation |
+| current_timestamp | Datetime | Later canonical timestamp in an interval observation |
+| expected_interval | Timedelta | Canonical interval derived from Timeframe |
+| observed_interval | Timedelta | Observed immutable timestamp interval |
+
+Quality findings are observational. They do not diagnose the cause of an
+irregular interval or modify canonical data.
+
 ---
 
 # 5. ORB Object

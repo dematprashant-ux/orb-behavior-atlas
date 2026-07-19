@@ -383,6 +383,35 @@ inclusive session-date ranges and deterministic timestamp ordering; and
 malformed session aggregates and existing storage identities have defined,
 separate failure semantics.
 
+## M2.9 — Data Quality Assessment
+
+### Objective
+
+Provide read-only, deterministic quality observations for canonical constructed
+sessions without repairing, validating, reconstructing, or persisting data.
+
+### Scope
+
+- Immutable quality models, codes, severities, metrics, and reports
+- Single-session and ordered batch assessment APIs
+- Observation of timestamp spacing against each timeframe's canonical duration
+- Contract tests and directly affected Data Engine documentation
+
+### Explicit Exclusions
+
+- Normalization, semantic validation, session construction, storage, retrieval,
+  repair, sorting, deduplication, and reconstruction
+- Exchange calendars, holidays, expiry logic, missing trading-day detection,
+  and market-day completeness inference
+- Analytics, ORB logic, strategy logic, and downstream decision-making
+
+### Acceptance Criteria
+
+M2.9 is complete when immutable constructed sessions can be assessed without
+mutation; unexpected timestamp spacing is reported as self-contained,
+deterministically ordered observations; and unsupported timeframe durations
+fail as deterministic programming or configuration errors.
+
 Implement:
 
 - Data Engine
