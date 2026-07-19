@@ -1,10 +1,10 @@
 # Implementation Plan
 
 **Project:** ORB Behavior Atlas  
-**Document Version:** 1.0  
+**Document Version:** 1.1
 **Status:** Draft  
 **Owner:** Prashant Gawade  
-**Last Updated:** 2026-07-18
+**Last Updated:** 2026-07-19
 
 ---
 
@@ -107,6 +107,59 @@ Project builds successfully.
 ---
 
 # 6. Phase 2 — Core Engines
+
+## M2.1 — Data Engine Architecture
+
+### Objective
+
+Establish the Data Engine as a stable architectural boundary before implementing
+market-data behavior. This milestone defines how the engine is organized and
+how downstream engines depend on it; it does not process market data.
+
+### Scope
+
+M2.1 establishes:
+
+- The `src/engines/data/` package structure
+- Focused module boundaries within the Data Engine
+- The public API surface for future Data Engine operations
+- Interfaces and protocols for data sources and data access
+- A Data Engine-specific exception hierarchy
+- Explicit public exports
+- One-way dependency layout between `core`, the Data Engine, and downstream
+  engines
+
+### Explicit Exclusions
+
+M2.1 must not implement:
+
+- Domain models
+- Validation logic
+- Session construction
+- Data providers
+- Data storage
+- A data quality engine
+
+### Acceptance Criteria
+
+M2.1 is complete when:
+
+- The Data Engine package boundary is present and importable
+- Its public contracts are explicit, typed, documented, and exported from a
+  stable entry point
+- Source and access abstractions do not depend on a concrete provider,
+  persistence mechanism, or downstream engine
+- The exception hierarchy is available for later Data Engine milestones
+- Dependencies flow inward from downstream engines to the Data Engine and from
+  the Data Engine to shared `core` components only
+- No market-data behavior is introduced
+
+### Deferred Milestones
+
+The following responsibilities remain deferred to subsequent Data Engine
+milestones: domain modeling, ingestion, normalization, validation, session
+construction, storage, retrieval behavior, missing-data detection, and quality
+reporting.
 
 Implement:
 
