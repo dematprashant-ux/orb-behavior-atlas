@@ -6,6 +6,7 @@ from src.engines.data.interfaces import (
     DataSource,
 )
 from src.engines.data.providers import BaseProviderAdapter, ProviderAdapter, ProviderConfig
+from src.engines.data.sessions import SessionMetadata, build_session, build_sessions
 from src.engines.data.validation import (
     CandleValidationResult,
     ValidationCode,
@@ -20,6 +21,7 @@ from src.engines.data.exceptions import (
     DataEngineError,
     DataNormalizationError,
     DataSourceError,
+    SessionConstructionError,
     UnsupportedInstrumentError,
     UnsupportedTimeframeError,
 )
@@ -39,6 +41,8 @@ __all__ = [
     "ProviderAdapter",
     "ProviderConfig",
     "Session",
+    "SessionConstructionError",
+    "SessionMetadata",
     "Timeframe",
     "UnsupportedInstrumentError",
     "UnsupportedTimeframeError",
@@ -48,4 +52,6 @@ __all__ = [
     "ValidationSeverity",
     "validate_candle",
     "validate_candles",
+    "build_session",
+    "build_sessions",
 ]

@@ -319,6 +319,37 @@ M2.6 is complete when a future provider can map requests, acquire and parse
 payloads through protected extension points, normalize canonical candles, and
 return them through the unchanged provider-neutral source contract.
 
+## M2.7 — Session Construction & Trading-Day Boundaries
+
+### Objective
+
+Construct immutable trading sessions from canonical candles without adding
+calendar, completeness, quality, or storage behavior.
+
+### Scope
+
+- Group canonical candles by `session_date`, `instrument`, and `timeframe`
+- Preserve the supplied candle order after requiring strictly increasing
+  canonical timestamps
+- Return deterministically ordered immutable `Session` objects
+- Support immutable tri-state `SessionMetadata` supplied by the caller
+- Reject metadata entries that do not correspond to a constructed session
+
+### Explicit Exclusions
+
+- Validation execution, normalization changes, providers, storage, and
+  retrieval
+- Exchange calendars, holidays, expiry inference, gap analysis, and session
+  completeness analysis
+- Quality reporting, ORB logic, analytics, and strategy behavior
+
+### Acceptance Criteria
+
+M2.7 is complete when callers can construct partial immutable sessions from
+canonical candles while preserving each group's input order, representing
+unknown session metadata as `None`, and receiving deterministic failures for
+duplicate or descending timestamps and unmatched metadata keys.
+
 Implement:
 
 - Data Engine

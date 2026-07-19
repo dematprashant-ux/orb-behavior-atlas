@@ -40,17 +40,21 @@ event_type
 
 ---
 
-# 3. Trading Day Object
+# 3. Session Object
 
 | Field | Type | Description |
 |---------|------|-------------|
-| trading_date | Date | Trading session date |
+| session_date | Date | Trading session date |
 | instrument | Instrument | Instrument name |
 | timeframe | Timeframe | Candle timeframe |
 | weekday | Weekday | Day of week |
-| expiry_day | Boolean | Weekly expiry flag |
-| monthly_expiry | Boolean | Monthly expiry flag |
-| holiday_gap | Boolean | Previous day was holiday |
+| is_weekly_expiry | Boolean or None | Weekly expiry: confirmed true, confirmed false, or unknown |
+| is_monthly_expiry | Boolean or None | Monthly expiry: confirmed true, confirmed false, or unknown |
+| has_holiday_gap | Boolean or None | Holiday gap: confirmed true, confirmed false, or unknown |
+| candles | Tuple[Candle, ...] | Canonical candles in supplied strictly increasing timestamp order |
+
+Session metadata is never inferred during session construction. `None` is the
+canonical representation of an undetermined metadata fact.
 
 ---
 

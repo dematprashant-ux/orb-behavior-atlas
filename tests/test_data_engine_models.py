@@ -2,6 +2,7 @@
 
 from dataclasses import FrozenInstanceError, fields, is_dataclass
 from datetime import date, datetime
+from typing import get_type_hints
 import unittest
 
 from src.engines.data import Candle, Instrument, Session, Timeframe, Weekday
@@ -60,6 +61,13 @@ class DataEngineModelTests(unittest.TestCase):
         self.assertTrue(is_dataclass(session))
         with self.assertRaises(FrozenInstanceError):
             candle.volume = 2
+
+    def test_session_metadata_fields_are_tri_state(self) -> None:
+        """Keep unknown session facts distinct from confirmed false facts."""
+        annotations = get_type_hints(Session)
+        self.assertEqual(annotations["is_weekly_expiry"], bool | None)
+        self.assertEqual(annotations["is_monthly_expiry"], bool | None)
+        self.assertEqual(annotations["has_holiday_gap"], bool | None)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ class Session:
     instrument: Instrument
     timeframe: Timeframe
     weekday: Weekday
-    is_weekly_expiry: bool
-    is_monthly_expiry: bool
-    has_holiday_gap: bool
+    is_weekly_expiry: bool | None
+    is_monthly_expiry: bool | None
+    has_holiday_gap: bool | None
     candles: tuple[Candle, ...]

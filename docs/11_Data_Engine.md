@@ -197,15 +197,29 @@ before canonical normalization.
 
 # 9. Session Builder
 
-The Session Builder groups candles into trading days.
+The Session Builder constructs immutable trading sessions from canonical
+`Candle` objects. It groups candles by `session_date`, `instrument`, and
+`timeframe` and uses the canonical `session_date` produced by normalization.
 
 Each session contains:
 
-- Session date
-- Opening candle
-- Closing candle
-- Total candles
-- Trading duration
+- Session date, instrument, timeframe, and weekday
+- The supplied immutable candle collection
+- Optional caller-supplied session metadata
+
+Candles within a session must already be in strictly increasing canonical
+timestamp order. The builder never reorders, deduplicates, validates, or
+completeness-checks them. Output sessions may be sorted deterministically by
+their canonical grouping key.
+
+Session metadata is tri-state: `True` means confirmed, `False` means confirmed
+not applicable, and `None` means not determined. The builder does not infer
+weekly expiry, monthly expiry, holidays, or gaps. Omitted metadata remains
+unknown. Metadata entries that do not match a constructed session are rejected.
+
+Partial sessions are valid construction inputs. Exchange calendars, missing
+candle/session detection, holiday and expiry inference, gap analysis, and
+quality reporting remain separate responsibilities.
 
 ---
 

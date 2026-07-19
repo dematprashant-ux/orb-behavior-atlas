@@ -19,6 +19,10 @@ class DataNormalizationError(DataEngineError):
     """Raised when provider-independent values cannot form a canonical candle."""
 
 
+class SessionConstructionError(DataEngineError):
+    """Raised when canonical candles cannot form a deterministic session."""
+
+
 class UnsupportedInstrumentError(DataEngineError):
     """Raised when a requested instrument is outside the supported universe."""
 
@@ -32,6 +36,7 @@ __all__ = [
     "DataEngineError",
     "DataNormalizationError",
     "DataSourceError",
+    "SessionConstructionError",
     "UnsupportedInstrumentError",
     "UnsupportedTimeframeError",
 ]
