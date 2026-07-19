@@ -62,6 +62,19 @@ trading meaning to the event.
 
 ---
 
+# 1.4 ORB Post-Escape Observation
+
+M4.4 adds `observe_post_escape(opening_range, escape_event, session)`. It
+scans only canonical candles strictly after the first escape candle and records
+their highest high, lowest low, non-negative favorable and adverse excursions
+from the crossed boundary, and whether their observed price interval first
+returns inside the inclusive opening range.
+
+The observation does not label the move. If no candles follow the escape,
+extrema and excursions are unknown (`None`) rather than fabricated.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

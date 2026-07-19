@@ -128,6 +128,20 @@ levels are not part of M4.2.
 An `ORBEscapeEvent` records only the first post-range boundary exit. It does
 not confirm a breakout or classify the market response.
 
+## ORBPostEscapeObservation Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| highest_price | Float or None | Highest candle high strictly after escape |
+| lowest_price | Float or None | Lowest candle low strictly after escape |
+| maximum_favorable_excursion | Float or None | Non-negative distance from crossed boundary in escape direction |
+| maximum_adverse_excursion | Float or None | Non-negative distance from crossed boundary opposite escape direction |
+| returned_inside_range | Boolean | Whether a later candle price interval intersects the opening range |
+| first_return_inside_timestamp | Datetime or None | First later timestamp whose candle interval intersects range |
+
+When no candles follow the escape, extrema and excursions are `None`. This
+record describes only observed facts; it does not classify the escape outcome.
+
 ---
 
 # 6. ORB Levels

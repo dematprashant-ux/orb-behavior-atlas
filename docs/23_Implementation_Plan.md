@@ -550,6 +550,32 @@ M4.3 is complete when the first post-range candle with a high strictly above
 the range high or low strictly below the range low is recorded immutably, or
 `None` is returned when no such candle exists.
 
+## M4.4 — ORB Post-Escape Observation
+
+### Objective
+
+Record objective canonical price facts strictly after the first ORB escape.
+
+### Scope
+
+- Immutable extrema, boundary-relative excursion, and range-return facts
+- Pure post-escape observation from one canonical range, event, and session
+- Intrinsic range/event/session aggregate consistency checks
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Breakout success or failure, fake-breakout, trend, reversal, probabilities,
+  strategy entries, analytics, and behavioral labels
+- Provider or storage access, I/O, persistence, reporting, visualization, and
+  backtesting
+
+### Acceptance Criteria
+
+M4.4 is complete when callers can deterministically observe later canonical
+candle extrema, non-negative boundary-relative excursions, and the first range
+return timestamp without classifying market behavior.
+
 Implement:
 
 - Data Engine

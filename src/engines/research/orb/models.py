@@ -10,6 +10,7 @@ __all__ = [
     "OpeningRange",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
+    "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
 ]
@@ -74,6 +75,56 @@ class ORBEscapeEvent:
                 raise ValueError("upward crossing_price must exceed boundary_crossed")
         elif self.crossing_price >= self.boundary_crossed:
             raise ValueError("downward crossing_price must be below boundary_crossed")
+
+
+@dataclass(frozen=True, slots=True)
+class ORBPostEscapeObservation:
+    """Records objective canonical price facts following an ORB escape event."""
+
+    highest_price: float | None
+    lowest_price: float | None
+    maximum_favorable_excursion: float | None
+    maximum_adverse_excursion: float | None
+    returned_inside_range: bool
+    first_return_inside_timestamp: datetime | None
+
+    def __post_init__(self) -> None:
+        """Keep return-state facts internally consistent and timezone-aware."""
+        measurements = (
+            self.highest_price,
+            self.lowest_price,
+            self.maximum_favorable_excursion,
+            self.maximum_adverse_excursion,
+        )
+        if any(value is None for value in measurements) and not all(
+            value is None for value in measurements
+        ):
+            raise ValueError("post-escape measurements must be all known or all unknown")
+        if all(value is None for value in measurements) and self.returned_inside_range:
+            raise ValueError("an unknown post-escape history cannot contain a range return")
+        if self.highest_price is not None:
+            if (
+                self.lowest_price is None
+                or self.maximum_favorable_excursion is None
+                or self.maximum_adverse_excursion is None
+            ):
+                raise ValueError("post-escape measurements must be all known or all unknown")
+            if self.highest_price < self.lowest_price:
+                raise ValueError("highest_price must not be below lowest_price")
+            if (
+                self.maximum_favorable_excursion < 0
+                or self.maximum_adverse_excursion < 0
+            ):
+                raise ValueError("post-escape excursions must be non-negative")
+        if self.returned_inside_range != (self.first_return_inside_timestamp is not None):
+            raise ValueError(
+                "returned_inside_range must match first_return_inside_timestamp"
+            )
+        if self.first_return_inside_timestamp is not None:
+            _require_timezone_aware(
+                self.first_return_inside_timestamp,
+                "first_return_inside_timestamp",
+            )
 
 
 @dataclass(frozen=True, slots=True)

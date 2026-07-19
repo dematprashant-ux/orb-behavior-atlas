@@ -6,16 +6,20 @@ from src.engines.research.orb.models import (
     OpeningRange,
     ORBEscapeDirection,
     ORBEscapeEvent,
+    ORBPostEscapeObservation,
     ORBSession,
     ORBWindow,
 )
+from src.engines.research.orb.observation import observe_post_escape
 
 __all__ = [
     "OpeningRange",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
+    "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
     "extract_opening_range",
     "find_first_escape_event",
+    "observe_post_escape",
 ]
