@@ -602,6 +602,32 @@ escape and post-escape observations.
 M5.1 is complete when callers can deterministically classify only `NO_ESCAPE`,
 `ESCAPE_WITH_RETURN`, or `ESCAPE_WITHOUT_RETURN` from existing input facts.
 
+## M5.2 — ORB Feature Generation
+
+### Objective
+
+Project existing ORB range, event, observation, and behavior outputs into a
+standardized immutable numerical and categorical feature record.
+
+### Scope
+
+- Immutable `ORBFeatures` model
+- Pure feature mapping from existing research outputs
+- Direct stored-bound range-size projection and direct feature projections
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Candle scanning, market-fact recomputation, session access, I/O, provider or
+  storage access, persistence, analytics, reports, and strategy logic
+- Additional statistics or classifications not supported by current outputs
+
+### Acceptance Criteria
+
+M5.2 is complete when callers can deterministically generate behavior,
+escape-presence and direction, return, MFE, MAE, and range-size features from
+existing immutable inputs only.
+
 Implement:
 
 - Data Engine

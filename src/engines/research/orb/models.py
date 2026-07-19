@@ -12,6 +12,7 @@ __all__ = [
     "ORBBehaviorKind",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
+    "ORBFeatures",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
@@ -70,6 +71,48 @@ class ORBEscapeDirection(str, Enum):
 
     UPWARD = "UPWARD"
     DOWNWARD = "DOWNWARD"
+
+
+@dataclass(frozen=True, slots=True)
+class ORBFeatures:
+    """Standardized numerical and categorical projections of existing ORB facts."""
+
+    behavior: ORBBehaviorKind
+    escape_exists: bool
+    escape_direction: ORBEscapeDirection | None
+    returned_to_range: bool | None
+    mfe: float | None
+    mae: float | None
+    range_size: float
+
+    def __post_init__(self) -> None:
+        """Keep feature presence and behavior-state facts internally consistent."""
+        if self.range_size < 0:
+            raise ValueError("range_size must be non-negative")
+        if not self.escape_exists:
+            if (
+                self.behavior is not ORBBehaviorKind.NO_ESCAPE
+                or self.escape_direction is not None
+                or self.returned_to_range is not None
+                or self.mfe is not None
+                or self.mae is not None
+            ):
+                raise ValueError("no-escape features must contain only no-escape facts")
+            return
+
+        if self.escape_direction is None or self.returned_to_range is None:
+            raise ValueError("escape features require direction and return facts")
+        if (self.mfe is None) != (self.mae is None):
+            raise ValueError("mfe and mae must be both known or both unknown")
+        if self.mfe is not None and (self.mfe < 0 or self.mae < 0):
+            raise ValueError("mfe and mae must be non-negative")
+        expected_behavior = (
+            ORBBehaviorKind.ESCAPE_WITH_RETURN
+            if self.returned_to_range
+            else ORBBehaviorKind.ESCAPE_WITHOUT_RETURN
+        )
+        if self.behavior is not expected_behavior:
+            raise ValueError("behavior must match the supplied escape return fact")
 
 
 @dataclass(frozen=True, slots=True)

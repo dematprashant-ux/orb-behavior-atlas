@@ -88,6 +88,19 @@ strategy labels.
 
 ---
 
+# 1.6 ORB Feature Generation
+
+M5.2 adds `generate_orb_features(opening_range, escape_event,
+post_escape_observation, behavior)`. It projects only current research outputs
+into standardized behavior, escape, return, MFE, MAE, and range-size features.
+Range size is the direct difference of the stored opening-range bounds; the
+generator never reads or scans candles.
+
+Feature generation does not introduce statistics, outcomes, or additional
+classification.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

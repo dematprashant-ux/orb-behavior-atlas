@@ -151,6 +151,21 @@ record describes only observed facts; it does not classify the escape outcome.
 `ORBBehavior` is a pure classification of supplied observations. It contains no
 recalculated market values or outcome inference.
 
+## ORBFeatures Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| behavior | ORBBehaviorKind | Existing objective behavior classification |
+| escape_exists | Boolean | Whether a first escape event exists |
+| escape_direction | ORBEscapeDirection or None | Existing escape direction, if present |
+| returned_to_range | Boolean or None | Existing post-escape return fact, if applicable |
+| mfe | Float or None | Existing maximum favorable excursion, if known |
+| mae | Float or None | Existing maximum adverse excursion, if known |
+| range_size | Float | Direct difference of stored opening-range high and low |
+
+`ORBFeatures` is a deterministic projection of existing research outputs. It
+does not scan candles or add statistics.
+
 ---
 
 # 6. ORB Levels
