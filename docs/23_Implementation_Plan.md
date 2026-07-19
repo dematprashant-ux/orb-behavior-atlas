@@ -677,6 +677,35 @@ M7.1 is complete when callers can build an immutable atlas that preserves
 record order, rejects equal duplicate records, and exposes only minimal
 collection access.
 
+## M7.2 — Behavior Atlas Query Layer
+
+### Objective
+
+Provide the first immutable, in-memory filtering API for completed ORB behavior
+records held by an `ORBBehaviorAtlas`.
+
+### Scope
+
+- Pure `by_behavior()`, `by_escape_direction()`, and `by_return_to_range()`
+  atlas queries
+- Immutable filtered atlas results retaining original record references and
+  order
+- Intrinsic query-argument checks, contract tests, and directly affected
+  Research Engine documentation
+
+### Explicit Exclusions
+
+- Market analysis, behavior classification, feature generation, observation
+  recalculation, candle scanning, record mutation, I/O, and persistence
+- Searching beyond the three supported filters, statistics, aggregation,
+  analytics, reporting, and strategy behavior
+
+### Acceptance Criteria
+
+M7.2 is complete when supported queries return new immutable atlases with only
+matching existing records, preserving canonical order and object references
+without creating or changing research facts.
+
 Implement:
 
 - Data Engine

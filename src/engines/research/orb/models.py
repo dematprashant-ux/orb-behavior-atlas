@@ -219,6 +219,81 @@ class ORBBehaviorAtlas:
         """Return one record by its zero-based canonical position."""
         return self.records[index]
 
+    def by_behavior(self, behavior: ORBBehaviorKind) -> "ORBBehaviorAtlas":
+        """Return records whose existing behavior matches ``behavior``.
+
+        The returned immutable atlas preserves canonical record order and exact
+        record references. It performs no classification or market analysis.
+
+        Args:
+            behavior: Existing behavior kind to retain.
+
+        Raises:
+            TypeError: If ``behavior`` is not an ``ORBBehaviorKind``.
+        """
+        if not isinstance(behavior, ORBBehaviorKind):
+            raise TypeError("behavior must be an ORBBehaviorKind.")
+        return ORBBehaviorAtlas(
+            records=tuple(
+                record for record in self.records if record.behavior.kind is behavior
+            )
+        )
+
+    def by_escape_direction(
+        self,
+        direction: ORBEscapeDirection,
+    ) -> "ORBBehaviorAtlas":
+        """Return records whose existing escape direction matches ``direction``.
+
+        No-escape records do not match because their existing escape event is
+        absent. The returned immutable atlas preserves record order and
+        references without deriving a direction.
+
+        Args:
+            direction: Existing escape direction to retain.
+
+        Raises:
+            TypeError: If ``direction`` is not an ``ORBEscapeDirection``.
+        """
+        if not isinstance(direction, ORBEscapeDirection):
+            raise TypeError("direction must be an ORBEscapeDirection.")
+        return ORBBehaviorAtlas(
+            records=tuple(
+                record
+                for record in self.records
+                if (
+                    record.escape_event is not None
+                    and record.escape_event.direction is direction
+                )
+            )
+        )
+
+    def by_return_to_range(self, returned: bool) -> "ORBBehaviorAtlas":
+        """Return escaped records with the existing requested return fact.
+
+        No-escape records have no return fact and therefore never match. The
+        returned immutable atlas preserves record order and references without
+        observing or recalculating post-escape market data.
+
+        Args:
+            returned: Existing return-to-range fact to retain.
+
+        Raises:
+            TypeError: If ``returned`` is not a boolean.
+        """
+        if not isinstance(returned, bool):
+            raise TypeError("returned must be a bool.")
+        return ORBBehaviorAtlas(
+            records=tuple(
+                record
+                for record in self.records
+                if (
+                    record.post_escape_observation is not None
+                    and record.post_escape_observation.returned_inside_range is returned
+                )
+            )
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class ORBSession:

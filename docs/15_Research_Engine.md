@@ -120,8 +120,17 @@ of completed immutable `ORBBehaviorRecord` objects. It retains supplied record
 references and order, rejects equal duplicates, and provides only iteration,
 length, and indexed access.
 
-The atlas does not analyze, classify, generate features, filter, search,
-persist, or mutate records.
+The atlas does not analyze, classify, generate features, search, persist, or
+mutate records.
+
+## 1.9 Behavior Atlas Query Layer
+
+M7.2 adds immutable collection queries to `ORBBehaviorAtlas`:
+`by_behavior(behavior)`, `by_escape_direction(direction)`, and
+`by_return_to_range(returned)`. Each query filters only facts already present
+in its completed records and returns a new atlas that retains matching record
+references in their original order. No query scans candles, recalculates
+observations, or creates research facts.
 
 ---
 
