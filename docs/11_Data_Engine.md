@@ -86,11 +86,23 @@ The source should be interchangeable without affecting downstream engines.
 # 6. Data Pipeline
 
 ```
-Market Data Source
+Provider Payload
 
 ↓
 
-Download
+Provider Adapter
+
+↓
+
+Data Engine Normalization
+
+↓
+
+Canonical Candles
+
+↓
+
+Data Source Boundary
 
 ↓
 
@@ -98,24 +110,16 @@ Validation
 
 ↓
 
-Normalization
-
-↓
-
 Session Builder
 
 ↓
 
-Storage
-
-↓
-
-Data Quality Checks
-
-↓
-
-Research Engine
+Storage and Data Quality Checks
 ```
+
+Provider-specific parsing occurs inside each provider adapter. Adapters use
+reusable Data Engine normalization components before returning canonical candles
+through the provider-neutral data-source boundary.
 
 ---
 
@@ -257,13 +261,17 @@ get_session()
 get_candles()
 
 get_date_range()
-
-validate_data()
-
-quality_report()
 ```
 
 Interfaces should remain stable even if implementation changes.
+
+`get_candles()` retrieves one session's candles. `get_date_range()` retrieves
+candles across an inclusive range of session dates. Both range boundaries are
+required `date` values. A dedicated `DateRange` value object may be introduced
+in a future milestone to encapsulate these semantics.
+
+Validation and quality-reporting operations remain deferred until their result
+models are defined.
 
 ---
 

@@ -189,6 +189,39 @@ M2.2 is complete when the public package exports immutable, typed models for
 the documented BANKNIFTY five-minute candle and session structures, without
 introducing market-data behavior.
 
+## M2.3 — Data Engine Typed Interfaces
+
+### Objective
+
+Refine the public Data Engine protocols around canonical market-data models and
+define the provider boundary without implementing market-data behavior.
+
+### Scope
+
+- Typed `DataSource`, `DataAccess`, and `DataEngine` protocol signatures
+- Provider-boundary definition and contract tests
+- Directly affected public exports and Data Engine documentation
+
+### Explicit Exclusions
+
+- Providers, normalization, validation, storage, sessions, and quality
+  reporting
+- Undefined validation and quality-result contracts
+- New placeholder packages or directories
+
+### Date Range Design Note
+
+M2.3 uses required inclusive `start_date` and `end_date` parameters of type
+`date`. A dedicated `DateRange` value object may encapsulate these semantics in
+a future milestone; it is not introduced in M2.3.
+
+### Acceptance Criteria
+
+M2.3 is complete when the public protocols use canonical `Candle`, `Session`,
+`Instrument`, and `Timeframe` types; provider adapters are documented as
+returning canonical candles; and validation/quality operations remain deferred
+until their result models are defined.
+
 Implement:
 
 - Data Engine
