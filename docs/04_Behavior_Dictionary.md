@@ -81,6 +81,15 @@ Every behavior must:
 
 ---
 
+## Initial ORB Observation Classifications
+
+M5.1 defines three narrow, immutable classifications from existing ORB escape
+and post-escape observations: `NO_ESCAPE`, `ESCAPE_WITH_RETURN`, and
+`ESCAPE_WITHOUT_RETURN`. They are not the broader behavior definitions below:
+they do not determine trend, success, failure, or a trading outcome.
+
+---
+
 ## BHV-001 — Trend Day
 
 ### Definition

@@ -75,6 +75,19 @@ extrema and excursions are unknown (`None`) rather than fabricated.
 
 ---
 
+# 1.5 ORB Behavior Classification
+
+M5.1 adds `classify_orb_behavior(opening_range, escape_event,
+post_escape_observation)`. It maps existing immutable inputs only: no escape
+is `NO_ESCAPE`; an observed escape with a recorded range return is
+`ESCAPE_WITH_RETURN`; otherwise it is `ESCAPE_WITHOUT_RETURN`.
+
+The classifier never accesses sessions or candles and never recalculates market
+facts. These are narrow objective classifications, not outcome, trend, or
+strategy labels.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

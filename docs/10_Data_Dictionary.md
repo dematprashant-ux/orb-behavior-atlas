@@ -142,6 +142,15 @@ not confirm a breakout or classify the market response.
 When no candles follow the escape, extrema and excursions are `None`. This
 record describes only observed facts; it does not classify the escape outcome.
 
+## ORBBehavior Object
+
+| Field | Type | Description |
+|---------|------|-------------|
+| kind | ORBBehaviorKind | `NO_ESCAPE`, `ESCAPE_WITH_RETURN`, or `ESCAPE_WITHOUT_RETURN` |
+
+`ORBBehavior` is a pure classification of supplied observations. It contains no
+recalculated market values or outcome inference.
+
 ---
 
 # 6. ORB Levels

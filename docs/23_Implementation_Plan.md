@@ -576,6 +576,32 @@ M4.4 is complete when callers can deterministically observe later canonical
 candle extrema, non-negative boundary-relative excursions, and the first range
 return timestamp without classifying market behavior.
 
+## M5.1 — ORB Behavior Classification
+
+### Objective
+
+Classify the smallest objective ORB behavior set supported by existing immutable
+escape and post-escape observations.
+
+### Scope
+
+- Immutable `ORBBehavior` and stable behavior-kind enum
+- Pure mapping from supplied range, optional escape event, and optional
+  post-escape observation
+- Contract tests and directly affected Research and Behavior documentation
+
+### Explicit Exclusions
+
+- Candle scanning, high/low or excursion recalculation, session access, I/O,
+  provider or storage access
+- Trend, fake-breakout, success, failure, liquidity-sweep, reversal, strategy,
+  probability, and analytics classifications
+
+### Acceptance Criteria
+
+M5.1 is complete when callers can deterministically classify only `NO_ESCAPE`,
+`ESCAPE_WITH_RETURN`, or `ESCAPE_WITHOUT_RETURN` from existing input facts.
+
 Implement:
 
 - Data Engine

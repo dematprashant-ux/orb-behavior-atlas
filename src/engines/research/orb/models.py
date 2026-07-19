@@ -8,6 +8,8 @@ from src.engines.data.models import Candle, Session
 
 __all__ = [
     "OpeningRange",
+    "ORBBehavior",
+    "ORBBehaviorKind",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
     "ORBPostEscapeObservation",
@@ -46,6 +48,21 @@ class OpeningRange:
         """Require the observed high to be at least the observed low."""
         if self.high < self.low:
             raise ValueError("high must not be below low")
+
+
+class ORBBehaviorKind(str, Enum):
+    """Identifies the objective ORB behavior states supported by current facts."""
+
+    NO_ESCAPE = "NO_ESCAPE"
+    ESCAPE_WITH_RETURN = "ESCAPE_WITH_RETURN"
+    ESCAPE_WITHOUT_RETURN = "ESCAPE_WITHOUT_RETURN"
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehavior:
+    """Represents one immutable classification from existing ORB observations."""
+
+    kind: ORBBehaviorKind
 
 
 class ORBEscapeDirection(str, Enum):
