@@ -1,1 +1,1 @@
-# banknifty-orb-behavior-atlas
+# orb-behavior-atlas
