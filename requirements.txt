@@ -1,1 +1,10 @@
+# -----------------------------------------------------------------------------
+# ORB Behavior Atlas
+#
+# Primary dependency management is handled through pyproject.toml.
+#
+# This file exists only for compatibility with tools that expect a
+# requirements.txt file.
+# -----------------------------------------------------------------------------
 
+-e .[dev]
