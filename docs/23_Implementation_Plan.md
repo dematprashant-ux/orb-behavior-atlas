@@ -497,6 +497,32 @@ M4.1 is complete when callers can construct immutable ORB window,
 opening-range, and session records from canonical data without performing any
 market inference or derived calculation.
 
+## M4.2 — ORB Window Extraction
+
+### Objective
+
+Extract deterministic, observed opening-range facts from an existing canonical
+Data Engine `Session`.
+
+### Scope
+
+- Pure start-inclusive, end-exclusive opening-window extraction
+- Canonical included candles, window timestamps, and open, high, low, and close
+- Intrinsic duration and required-candle checks
+- Contract tests and directly affected Research Engine documentation
+
+### Explicit Exclusions
+
+- Breakout detection, direction, bias, trend, statistics, and trading signals
+- Provider or storage access, I/O, persistence, analytics, reports,
+  visualization, backtesting, strategy logic, and session reconstruction
+
+### Acceptance Criteria
+
+M4.2 is complete when a caller can extract an immutable opening range from the
+first canonical candles of a session for a positive whole-timeframe duration,
+without mutating or reordering the source session.
+
 Implement:
 
 - Data Engine

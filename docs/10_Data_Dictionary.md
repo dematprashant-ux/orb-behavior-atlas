@@ -101,16 +101,19 @@ irregular interval or modify canonical data.
 
 ---
 
-# 5. ORB Object
+# 5. OpeningRange Object
 
 | Field | Type | Description |
 |---------|------|-------------|
-| orb_high | Float | High of first 15-minute candle |
-| orb_low | Float | Low of first 15-minute candle |
-| orb_mid | Float | Midpoint of ORB |
-| orb_range | Float | ORB High − ORB Low |
-| orb_open | Float | Opening price of ORB candle |
-| orb_close | Float | Closing price of ORB candle |
+| window | ORBWindow | Start-inclusive, end-exclusive canonical timestamp window |
+| open | Float | Opening price of the first included candle |
+| high | Float | Highest observed price among included candles |
+| low | Float | Lowest observed price among included candles |
+| close | Float | Closing price of the final included candle |
+| candles | Tuple[Candle, ...] | Exact canonical candles included in the range |
+
+`OpeningRange` is an immutable observed-fact record. Derived ORB values and
+levels are not part of M4.2.
 
 ---
 

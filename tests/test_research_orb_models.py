@@ -6,7 +6,7 @@ import ast
 import unittest
 from zoneinfo import ZoneInfo
 
-from src.engines.data.models import Instrument, Session, Timeframe, Weekday
+from src.engines.data.models import Candle, Instrument, Session, Timeframe, Weekday
 from src.engines.research import OpeningRange, ORBSession, ORBWindow
 from src.engines.research.orb import OpeningRange as OrbOpeningRange
 
@@ -23,8 +23,8 @@ class ORBResearchModelTests(unittest.TestCase):
     def test_models_are_frozen_slotted_dataclasses(self) -> None:
         """Keep research records immutable and free from mutable instance dictionaries."""
         window = _window()
-        opening_range = OpeningRange(high=102.0, low=99.0)
-        orb_session = ORBSession(_session(), window, opening_range)
+        opening_range = _opening_range()
+        orb_session = ORBSession(_session(), opening_range)
 
         self.assertTrue(all(is_dataclass(model) for model in (window, opening_range, orb_session)))
         self.assertFalse(hasattr(window, "__dict__"))
@@ -34,19 +34,22 @@ class ORBResearchModelTests(unittest.TestCase):
     def test_domain_values_have_deterministic_value_equality(self) -> None:
         """Treat equal observed facts as equal immutable research values."""
         self.assertEqual(_window(), _window())
-        self.assertEqual(OpeningRange(102.0, 99.0), OpeningRange(102.0, 99.0))
+        self.assertEqual(_opening_range(), _opening_range())
         self.assertEqual(
-            ORBSession(_session(), _window(), OpeningRange(102.0, 99.0)),
-            ORBSession(_session(), _window(), OpeningRange(102.0, 99.0)),
+            ORBSession(_session(), _opening_range()),
+            ORBSession(_session(), _opening_range()),
         )
 
     def test_valid_construction_reuses_the_canonical_session_type(self) -> None:
         """Anchor ORB research to the existing immutable Data Engine Session model."""
         session = _session()
-        orb_session = ORBSession(session, _window(), OpeningRange(102.0, 99.0))
+        orb_session = ORBSession(session, _opening_range())
 
         self.assertIs(orb_session.session, session)
-        self.assertEqual(orb_session.window.start_timestamp.tzinfo, ZoneInfo("Asia/Kolkata"))
+        self.assertEqual(
+            orb_session.opening_range.window.start_timestamp.tzinfo,
+            ZoneInfo("Asia/Kolkata"),
+        )
         self.assertEqual(orb_session.opening_range.high, 102.0)
 
     def test_intrinsic_window_and_range_invariants_fail_deterministically(self) -> None:
@@ -60,7 +63,14 @@ class ORBResearchModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must not precede"):
             ORBWindow(end, start)
         with self.assertRaisesRegex(ValueError, "must not be below"):
-            OpeningRange(high=99.0, low=102.0)
+            OpeningRange(
+                window=_window(),
+                open=100.0,
+                high=99.0,
+                low=102.0,
+                close=101.0,
+                candles=(_candle(),),
+            )
 
     def test_models_do_not_depend_on_forbidden_layers_or_libraries(self) -> None:
         """Keep M4.1 independent from providers, storage, and analytical tooling."""
@@ -116,6 +126,33 @@ def _session() -> Session:
         is_monthly_expiry=None,
         has_holiday_gap=None,
         candles=(),
+    )
+
+
+def _opening_range() -> OpeningRange:
+    """Create observed opening-range facts without performing extraction."""
+    return OpeningRange(
+        window=_window(),
+        open=100.0,
+        high=102.0,
+        low=99.0,
+        close=101.0,
+        candles=(_candle(),),
+    )
+
+
+def _candle() -> Candle:
+    """Create one canonical candle as immutable observed range evidence."""
+    return Candle(
+        instrument=Instrument.BANKNIFTY,
+        timeframe=Timeframe.M5,
+        timestamp=datetime(2026, 7, 17, 9, 15, tzinfo=ZoneInfo("Asia/Kolkata")),
+        session_date=date(2026, 7, 17),
+        open=100.0,
+        high=102.0,
+        low=99.0,
+        close=101.0,
+        volume=1,
     )
 
 

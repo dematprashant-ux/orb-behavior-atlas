@@ -34,6 +34,20 @@ later, dedicated milestones.
 
 ---
 
+# 1.2 ORB Window Extraction
+
+M4.2 adds `extract_opening_range(session, *, duration)`, a pure function that
+uses the first canonical candles in a `Session`. Its window is start-inclusive
+and end-exclusive: the v1 15-minute range beginning at 09:15 includes the
+09:15, 09:20, and 09:25 M5 candles and ends at 09:30.
+
+The returned `OpeningRange` preserves the observed window, open, high, low,
+close, and exact included candle tuple. Extraction rejects non-positive or
+timeframe-unaligned durations and sessions that cannot supply every required
+canonical candle. It does not detect breakouts or infer any market behavior.
+
+---
+
 # 2. Responsibilities
 
 The Research Engine is responsible for:

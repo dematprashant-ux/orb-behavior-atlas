@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.engines.data.models import Session
+from src.engines.data.models import Candle, Session
 
 __all__ = ["OpeningRange", "ORBSession", "ORBWindow"]
 
@@ -25,10 +25,14 @@ class ORBWindow:
 
 @dataclass(frozen=True, slots=True)
 class OpeningRange:
-    """Records the observed high and low values of an opening range."""
+    """Records observed canonical values and evidence for an opening range."""
 
+    window: ORBWindow
+    open: float
     high: float
     low: float
+    close: float
+    candles: tuple[Candle, ...]
 
     def __post_init__(self) -> None:
         """Require the observed high to be at least the observed low."""
@@ -38,10 +42,9 @@ class OpeningRange:
 
 @dataclass(frozen=True, slots=True)
 class ORBSession:
-    """Associates one canonical session with its observed ORB window and values."""
+    """Associates one canonical session with its observed opening range."""
 
     session: Session
-    window: ORBWindow
     opening_range: OpeningRange
 
 
