@@ -11,6 +11,7 @@ __all__ = [
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
     "OptimizationRunSummaryAnalysis",
+    "OptimizationRunSummaryCatalog",
     "OptimizationRunSummaryComparison",
     "OptimizationRunSummaryDelta",
     "OptimizationRunSummaryRates",
@@ -408,6 +409,44 @@ class OptimizationRunSummaryComparison:
             raise TypeError("comparison must be an OptimizationRunSummaryAnalysis.")
         delta = OptimizationRunSummaryDelta.between(baseline, comparison)
         return cls(baseline, comparison, delta)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryCatalog:
+    """Retain ordered existing summary comparisons without interpretation."""
+
+    comparisons: tuple[OptimizationRunSummaryComparison, ...]
+
+    def __post_init__(self) -> None:
+        """Normalize one iterable into immutable ordered comparison storage."""
+        try:
+            comparisons = tuple(self.comparisons)
+        except TypeError as error:
+            raise TypeError(
+                "comparisons must be an iterable of OptimizationRunSummaryComparison "
+                "values."
+            ) from error
+        if any(
+            not isinstance(comparison, OptimizationRunSummaryComparison)
+            for comparison in comparisons
+        ):
+            raise TypeError(
+                "comparisons must contain only OptimizationRunSummaryComparison "
+                "values."
+            )
+        object.__setattr__(self, "comparisons", comparisons)
+
+    def __iter__(self) -> Iterator[OptimizationRunSummaryComparison]:
+        """Iterate over retained comparisons in exact insertion order."""
+        return iter(self.comparisons)
+
+    def __len__(self) -> int:
+        """Return the number of retained comparisons without calculation."""
+        return len(self.comparisons)
+
+    def __getitem__(self, index: int) -> OptimizationRunSummaryComparison:
+        """Return one retained comparison by zero-based insertion position."""
+        return self.comparisons[index]
 
 
 def _rate(numerator: int, denominator: int) -> float:

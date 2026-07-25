@@ -354,6 +354,12 @@ only by `OptimizationRunSummaryDelta.between()`. It copies no scalar values and
 performs no duplicated calculation, aggregate or rate reconstruction, summary or
 run traversal, recommendation, ranking, or optimization re-execution.
 
+M23.3 adds `OptimizationRunSummaryCatalog`, an immutable tuple-backed ordered
+collection of existing `OptimizationRunSummaryComparison` objects. It preserves
+insertion order, duplicates, and exact child identities while exposing only
+iteration, length, and indexing. It performs no comparison, calculation,
+sorting, filtering, grouping, ranking, reporting, or optimization execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
