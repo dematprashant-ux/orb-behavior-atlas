@@ -52,6 +52,15 @@ ranges are both valid. Plans retain unique deterministic indices in increasing
 training chronology. This foundation does not inspect datasets, infer sessions,
 slice observations, generate schedules, execute backtests, or optimize.
 
+## 1.4 Dataset Window Builder
+
+M17.2 selects existing canonical `Candle` observations within a requested
+`DateTimeRange`. Selection uses `start <= timestamp < end`, preserves supplied
+non-decreasing timestamp order, and permits duplicate timestamps. Empty and
+out-of-range selections are valid. The builder rejects decreasing input order
+instead of silently sorting and performs no resampling, interpolation, session
+inference, I/O, or caching.
+
 ---
 
 # 2. Responsibilities

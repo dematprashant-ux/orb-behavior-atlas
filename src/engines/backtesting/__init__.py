@@ -13,7 +13,10 @@ from src.engines.backtesting.interfaces import BacktestEngine, TransactionCostMo
 from src.engines.backtesting.models import BacktestContext, BacktestRun, BacktestStatus
 from src.engines.backtesting.orchestrator import DeterministicBacktestEngine
 from src.engines.backtesting.walk_forward import (
+    DatasetWindow,
+    DatasetWindowBuilder,
     DateTimeRange,
+    StandardDatasetWindowBuilder,
     WalkForwardPlan,
     WalkForwardWindow,
 )
@@ -25,9 +28,12 @@ __all__ = [
     "BacktestStatus",
     "DeterministicBacktestEngine",
     "DateTimeRange",
+    "DatasetWindow",
+    "DatasetWindowBuilder",
     "FixedRateTransactionCostModel",
     "TransactionCostBreakdown",
     "TransactionCostModel",
+    "StandardDatasetWindowBuilder",
     "ZeroTransactionCostModel",
     "WalkForwardPlan",
     "WalkForwardWindow",

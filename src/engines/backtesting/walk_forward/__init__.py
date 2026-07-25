@@ -5,5 +5,17 @@ from src.engines.backtesting.walk_forward.models import (
     WalkForwardPlan,
     WalkForwardWindow,
 )
+from src.engines.backtesting.walk_forward.dataset import (
+    DatasetWindow,
+    DatasetWindowBuilder,
+    StandardDatasetWindowBuilder,
+)
 
-__all__ = ["DateTimeRange", "WalkForwardPlan", "WalkForwardWindow"]
+__all__ = [
+    "DatasetWindow",
+    "DatasetWindowBuilder",
+    "DateTimeRange",
+    "StandardDatasetWindowBuilder",
+    "WalkForwardPlan",
+    "WalkForwardWindow",
+]
