@@ -27,6 +27,11 @@ from src.engines.backtesting.objectives import (
     ObjectiveScore,
 )
 from src.engines.backtesting.orchestrator import DeterministicBacktestEngine
+from src.engines.backtesting.optimization import (
+    OptimizationRun,
+    OptimizationRunner,
+    StandardOptimizationRunner,
+)
 from src.engines.backtesting.ranking import (
     ObjectiveRanker,
     ObjectiveRanking,
@@ -94,12 +99,15 @@ __all__ = [
     "ObjectiveRanking",
     "ObjectiveScore",
     "ObjectiveSelection",
+    "OptimizationRun",
+    "OptimizationRunner",
     "RankedObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",
     "StandardDatasetWindowBuilder",
     "StandardGridSearchRunner",
     "StandardObjectiveRanker",
+    "StandardOptimizationRunner",
     "StandardTrainingValidationSplitEngine",
     "StandardRollingWindowGenerator",
     "StandardWalkForwardRunner",

@@ -136,6 +136,20 @@ multi-objective rule, or search orchestration. It does not add random or
 Bayesian search, walk-forward execution, reporting, serialization, I/O, or
 concurrency.
 
+## 1.10 Deterministic Optimization Pipeline
+
+M18.8 adds `OptimizationRunner`, `StandardOptimizationRunner`, and immutable
+`OptimizationRun`. The standard runner receives injected grid-search, scoring,
+ranking, and selection collaborators. It delegates once in that order for one
+existing `ParameterSpace`, retaining the resulting `GridSearchRun`, evaluation-
+ordered `ObjectiveScore` tuple, `ObjectiveRanking`, and `ObjectiveSelection`.
+Cross-stage references are validated without recalculating any result.
+
+The pipeline adds no search algorithm, objective formula, ranking algorithm,
+selection policy, cache, retry, random behavior, walk-forward work, report,
+serialization, I/O, or concurrency. It only composes the existing deterministic
+boundaries for future optimization use.
+
 ---
 
 # 2. Responsibilities
