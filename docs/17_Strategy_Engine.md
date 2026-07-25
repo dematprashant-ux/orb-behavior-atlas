@@ -88,6 +88,23 @@ reporting, serialization, I/O, or concurrency. Future random-search and
 Bayesian-search runners can reuse the same evaluation contract while defining
 their own candidate-generation policies.
 
+## 1.7 Objective and Scoring Contracts
+
+M18.5 adds the protocol-only `CandidateObjective` boundary and immutable
+`ObjectiveScore`. An injected objective converts an existing
+`CandidateEvaluation` into one finite scalar `float` with an explicit
+`ObjectiveDirection`: `maximize` or `minimize`. The score retains the source
+evaluation by reference; finite integer inputs are normalized to the same
+canonical `float` representation used by existing performance metrics. It
+introduces neither a new performance calculation nor an untyped objective
+identifier.
+
+This milestone does not rank, select, normalize, weight, compare, or otherwise
+optimize candidates. It adds no concrete objective formula, search-loop change,
+walk-forward integration, reporting, serialization, I/O, or concurrency.
+Future selection policies can consume these typed scores without changing
+candidate generation or evaluation contracts.
+
 ---
 
 # 2. Responsibilities

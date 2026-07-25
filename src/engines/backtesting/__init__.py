@@ -21,6 +21,11 @@ from src.engines.backtesting.interfaces import (
     TransactionCostModel,
 )
 from src.engines.backtesting.models import BacktestContext, BacktestRun, BacktestStatus
+from src.engines.backtesting.objectives import (
+    CandidateObjective,
+    ObjectiveDirection,
+    ObjectiveScore,
+)
 from src.engines.backtesting.orchestrator import DeterministicBacktestEngine
 from src.engines.backtesting.walk_forward import (
     DatasetWindow,
@@ -63,6 +68,7 @@ __all__ = [
     "BacktestStatus",
     "CandidateEvaluation",
     "CandidateEvaluator",
+    "CandidateObjective",
     "DeterministicBacktestEngine",
     "DateTimeRange",
     "DatasetWindow",
@@ -70,6 +76,8 @@ __all__ = [
     "FixedRateTransactionCostModel",
     "GridSearchRun",
     "GridSearchRunner",
+    "ObjectiveDirection",
+    "ObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",
     "StandardDatasetWindowBuilder",
