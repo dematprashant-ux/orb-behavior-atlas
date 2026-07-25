@@ -22,6 +22,7 @@ __all__ = [
     "DrawdownPoint",
     "DrawdownSummary",
     "RiskAdjustedMetrics",
+    "BacktestReport",
     "PnLSummary",
     "TradePnL",
     "TradeOutcome",
@@ -252,6 +253,29 @@ class RiskAdjustedMetrics:
         if self.recovery_factor != self.return_over_drawdown:
             raise ValueError(
                 "recovery_factor and return_over_drawdown must match."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class BacktestReport:
+    """Composes existing immutable performance artifacts into one report object."""
+
+    performance_metrics: PerformanceMetrics
+    equity_curve: EquityCurve
+    drawdown_summary: DrawdownSummary
+    risk_adjusted_metrics: RiskAdjustedMetrics
+
+    def __post_init__(self) -> None:
+        """Require only the immutable artifact types intrinsic to composition."""
+        if not isinstance(self.performance_metrics, PerformanceMetrics):
+            raise TypeError("performance_metrics must be a PerformanceMetrics.")
+        if not isinstance(self.equity_curve, EquityCurve):
+            raise TypeError("equity_curve must be an EquityCurve.")
+        if not isinstance(self.drawdown_summary, DrawdownSummary):
+            raise TypeError("drawdown_summary must be a DrawdownSummary.")
+        if not isinstance(self.risk_adjusted_metrics, RiskAdjustedMetrics):
+            raise TypeError(
+                "risk_adjusted_metrics must be a RiskAdjustedMetrics."
             )
 
 

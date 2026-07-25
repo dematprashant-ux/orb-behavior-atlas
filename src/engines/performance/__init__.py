@@ -9,6 +9,7 @@ from src.engines.performance.builders import (
     build_drawdown_point,
     build_drawdown_summary,
     build_risk_adjusted_metrics,
+    build_backtest_report,
     build_pnl_summary,
     build_trade_pnl,
 )
@@ -22,6 +23,7 @@ from src.engines.performance.interfaces import (
     RiskMetricsAnalyzer,
 )
 from src.engines.performance.models import (
+    BacktestReport,
     DrawdownPoint,
     DrawdownSummary,
     EquityCurve,
@@ -48,6 +50,7 @@ __all__ = [
     "BasicPerformanceEngine",
     "BasicDrawdownAnalyzer",
     "BasicRiskMetricsAnalyzer",
+    "BacktestReport",
     "CumulativeEquityCurveBuilder",
     "EquityCurve",
     "EquityCurveBuilder",
@@ -78,6 +81,7 @@ __all__ = [
     "build_drawdown_point",
     "build_drawdown_summary",
     "build_risk_adjusted_metrics",
+    "build_backtest_report",
     "build_pnl_summary",
     "build_trade_pnl",
     "build_trade_outcome",

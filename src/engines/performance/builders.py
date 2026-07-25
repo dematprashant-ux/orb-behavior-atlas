@@ -3,6 +3,7 @@
 from src.engines.backtesting.models import BacktestRun
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
+    BacktestReport,
     DrawdownPoint,
     DrawdownSummary,
     EquityCurve,
@@ -25,6 +26,7 @@ __all__ = [
     "build_drawdown_point",
     "build_drawdown_summary",
     "build_risk_adjusted_metrics",
+    "build_backtest_report",
     "build_pnl_summary",
     "build_trade_pnl",
 ]
@@ -272,4 +274,23 @@ def build_risk_adjusted_metrics(
     return RiskAdjustedMetrics(
         recovery_factor=recovery_factor,
         return_over_drawdown=return_over_drawdown,
+    )
+
+
+def build_backtest_report(
+    performance_metrics: PerformanceMetrics,
+    equity_curve: EquityCurve,
+    drawdown_summary: DrawdownSummary,
+    risk_adjusted_metrics: RiskAdjustedMetrics,
+) -> BacktestReport:
+    """Compose existing immutable analytics artifacts into one report object.
+
+    The builder retains each artifact by reference. It performs no rendering,
+    serialization, calculation, or cross-artifact consistency analysis.
+    """
+    return BacktestReport(
+        performance_metrics=performance_metrics,
+        equity_curve=equity_curve,
+        drawdown_summary=drawdown_summary,
+        risk_adjusted_metrics=risk_adjusted_metrics,
     )

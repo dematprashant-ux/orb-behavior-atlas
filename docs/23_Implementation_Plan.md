@@ -1248,6 +1248,40 @@ Derive zero-safe risk-adjusted metrics solely from immutable
 M12.5 is complete when immutable aggregate performance and drawdown artifacts
 deterministically produce zero-safe, finite absolute-return-to-drawdown ratios.
 
+## M13.1 — Backtest Report Domain
+
+### Objective
+
+Compose completed immutable Performance Analytics artifacts into one canonical
+backtest report object without deriving or rendering any new information.
+
+### Scope
+
+- Immutable `BacktestReport` model referencing `PerformanceMetrics`,
+  `EquityCurve`, `DrawdownSummary`, and `RiskAdjustedMetrics`
+- Pure `build_backtest_report()` composition builder
+- Contract tests and directly affected documentation
+
+### Composition Constraints
+
+- The report retains child artifacts by immutable reference and duplicates none
+  of their state.
+- It performs no cross-artifact mathematical consistency checks, calculations,
+  rendering, serialization, or I/O.
+
+### Explicit Exclusions
+
+- Changes to execution, strategy, PnL, equity, drawdown, or risk-metric
+  calculations
+- HTML, PDF, Markdown, CSV, or JSON rendering; serialization; charts;
+  optimization; persistence; caching; and I/O
+
+### Acceptance Criteria
+
+M13.1 is complete when any four existing immutable analytics artifacts compose
+deterministically into one immutable canonical report retaining every child
+reference.
+
 Implement:
 
 - Data Engine
