@@ -199,6 +199,22 @@ orchestration sequence and makes later search strategies pluggable without
 duplicating grid-search or optimization-pipeline behavior. No additional search
 algorithm is implemented by this contract.
 
+## 1.14 Generic Optimization Search Result
+
+M19.4 adds immutable `OptimizationSearchRun`, the algorithm-neutral result of
+an `OptimizationStrategy`. It contains only the ordered existing
+`CandidateEvaluation` objects required by optimization orchestration. It does
+not expose a parameter space, a grid shape, policy settings, scores, rankings,
+selections, or execution metadata.
+
+`GridSearchRun` remains the grid-search subsystem result and retains its source
+parameter space. `GridOptimizationStrategy` adapts it to an
+`OptimizationSearchRun` by retaining the exact evaluation objects in their
+existing order. `StandardOptimizationRunner` now consumes the generic result,
+then performs the unchanged scoring, direction validation, ranking, and
+selection stages. This keeps grid details out of the generic strategy boundary
+without introducing another optimization algorithm.
+
 ---
 
 # 2. Responsibilities

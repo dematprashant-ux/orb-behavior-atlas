@@ -16,6 +16,7 @@ from src.engines.backtesting import (
     OptimizationConfiguration,
     OptimizationRun,
     OptimizationRunner,
+    OptimizationSearchRun,
     OptimizationSpecification,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
@@ -40,7 +41,10 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         grid_search_run = _grid_search_run(parameter_space)
         runner: OptimizationRunner = StandardOptimizationRunner(
-            _OptimizationStrategy(grid_search_run, events),
+            _OptimizationStrategy(
+                OptimizationSearchRun(grid_search_run.evaluations),
+                events,
+            ),
             _Objective(events),
             _Ranker(events),
         )
@@ -51,14 +55,14 @@ class OptimizationPipelineTests(TestCase):
             events,
             ["grid", "objective", "objective", "rank", "select"],
         )
-        self.assertIs(result.grid_search_run, grid_search_run)
+        self.assertEqual(result.search_run.evaluations, grid_search_run.evaluations)
         self.assertEqual(
             tuple(score.evaluation for score in result.objective_scores),
-            grid_search_run.evaluations,
+            result.search_run.evaluations,
         )
         for score, evaluation in zip(
             result.objective_scores,
-            grid_search_run.evaluations,
+            result.search_run.evaluations,
         ):
             self.assertIs(score.evaluation, evaluation)
         self.assertEqual(
@@ -73,7 +77,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = ParameterSpace(())
         grid_search_run = GridSearchRun(parameter_space, ())
         runner = StandardOptimizationRunner(
-            _OptimizationStrategy(grid_search_run, []),
+            _OptimizationStrategy(OptimizationSearchRun(), []),
             _Objective([]),
             _Ranker([]),
         )
@@ -97,7 +101,10 @@ class OptimizationPipelineTests(TestCase):
         events: list[str] = []
         parameter_space = _space()
         runner = StandardOptimizationRunner(
-            _OptimizationStrategy(_grid_search_run(parameter_space), events),
+            _OptimizationStrategy(
+                OptimizationSearchRun(_grid_search_run(parameter_space).evaluations),
+                events,
+            ),
             _FailingObjective(events),
             _Ranker(events),
         )
@@ -111,7 +118,10 @@ class OptimizationPipelineTests(TestCase):
         events: list[str] = []
         parameter_space = _space()
         runner = StandardOptimizationRunner(
-            _OptimizationStrategy(_grid_search_run(parameter_space), events),
+            _OptimizationStrategy(
+                OptimizationSearchRun(_grid_search_run(parameter_space).evaluations),
+                events,
+            ),
             _MixedDirectionObjective(events),
             _Ranker(events),
         )
@@ -128,7 +138,10 @@ class OptimizationPipelineTests(TestCase):
 
         with self.assertRaisesRegex(TypeError, "specification"):
             StandardOptimizationRunner(
-                _OptimizationStrategy(grid_search_run, []),
+                _OptimizationStrategy(
+                    OptimizationSearchRun(grid_search_run.evaluations),
+                    [],
+                ),
                 _Objective([]),
                 _Ranker([]),
             ).run(None)  # type: ignore[arg-type]
@@ -138,15 +151,15 @@ class OptimizationPipelineTests(TestCase):
                 _Objective([]),
                 _Ranker([]),
             )
-        with self.assertRaisesRegex(ValueError, "parameter_space"):
+        with self.assertRaisesRegex(TypeError, "OptimizationSearchRun"):
             StandardOptimizationRunner(
-                _ForeignOptimizationStrategy(GridSearchRun(_space(), (evaluation,))),
+                _GridResultStrategy(GridSearchRun(_space(), (evaluation,))),
                 _Objective([]),
                 _Ranker([]),
             ).run(_specification(parameter_space, []))
         with self.assertRaisesRegex(ValueError, "in order"):
             OptimizationRun(
-                grid_search_run,
+                OptimizationSearchRun(grid_search_run.evaluations),
                 (
                     ObjectiveScore(
                         _evaluation("other"),
@@ -171,28 +184,29 @@ class OptimizationPipelineTests(TestCase):
 
 
 class _OptimizationStrategy:
-    """Test-only strategy returning one configured immutable grid-search result."""
+    """Test-only strategy returning one configured generic search result."""
 
-    def __init__(self, result: GridSearchRun, events: list[str]) -> None:
+    def __init__(self, result: OptimizationSearchRun, events: list[str]) -> None:
         self.result = result
         self.events = events
 
-    def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
+    def execute(
+        self,
+        specification: OptimizationSpecification,
+    ) -> OptimizationSearchRun:
         """Record one call and retain the supplied specification identity."""
         self.events.append("grid")
-        if specification.parameter_space is not self.result.parameter_space:
-            raise AssertionError("unexpected parameter space")
         return self.result
 
 
-class _ForeignOptimizationStrategy:
-    """Test-only strategy returning a result for a foreign parameter space."""
+class _GridResultStrategy:
+    """Test-only invalid strategy exposing a grid-specific result directly."""
 
     def __init__(self, result: GridSearchRun) -> None:
         self.result = result
 
     def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
-        """Return a foreign result without invoking any search or scoring logic."""
+        """Return the configured invalid generic-boundary type unchanged."""
         del specification
         return self.result
 

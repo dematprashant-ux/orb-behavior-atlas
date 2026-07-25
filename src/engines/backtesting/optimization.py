@@ -5,12 +5,12 @@ from typing import Protocol
 
 from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.evaluation import CandidateEvaluation
-from src.engines.backtesting.grid_search import GridSearchRun
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
 from src.engines.backtesting.ranking import ObjectiveRanker, ObjectiveRanking
 from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategies import OptimizationStrategy
+from src.engines.backtesting.search import OptimizationSearchRun
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
 
@@ -19,15 +19,15 @@ __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"
 class OptimizationRun:
     """Retain one complete immutable search-to-selection orchestration result."""
 
-    grid_search_run: GridSearchRun
+    search_run: OptimizationSearchRun
     objective_scores: tuple[ObjectiveScore, ...]
     ranking: ObjectiveRanking
     selection: ObjectiveSelection
 
     def __post_init__(self) -> None:
         """Require exact cross-stage references without recomputing any result."""
-        if not isinstance(self.grid_search_run, GridSearchRun):
-            raise TypeError("grid_search_run must be a GridSearchRun.")
+        if not isinstance(self.search_run, OptimizationSearchRun):
+            raise TypeError("search_run must be an OptimizationSearchRun.")
         if not isinstance(self.objective_scores, tuple):
             raise TypeError(
                 "objective_scores must be a tuple of ObjectiveScore values."
@@ -42,10 +42,10 @@ class OptimizationRun:
             raise TypeError("selection must be an ObjectiveSelection.")
         if not _same_references(
             tuple(score.evaluation for score in self.objective_scores),
-            self.grid_search_run.evaluations,
+            self.search_run.evaluations,
         ):
             raise ValueError(
-                "objective_scores must reference grid search evaluations in order."
+                "objective_scores must reference search evaluations in order."
             )
         if not _same_references_regardless_of_order(
             tuple(
@@ -88,17 +88,15 @@ class StandardOptimizationRunner:
         if not isinstance(specification, OptimizationSpecification):
             raise TypeError("specification must be an OptimizationSpecification.")
         configuration = specification.configuration
-        grid_search_run = self.optimization_strategy.execute(specification)
-        if not isinstance(grid_search_run, GridSearchRun):
+        search_run = self.optimization_strategy.execute(specification)
+        if not isinstance(search_run, OptimizationSearchRun):
             raise TypeError(
-                "optimization_strategy.execute must return a GridSearchRun."
+                "optimization_strategy.execute must return an OptimizationSearchRun."
             )
-        if grid_search_run.parameter_space is not specification.parameter_space:
-            raise ValueError("grid_search_run must retain the source parameter_space.")
 
         objective_scores = tuple(
             self._score_evaluation(evaluation, configuration)
-            for evaluation in grid_search_run.evaluations
+            for evaluation in search_run.evaluations
         )
         ranking = self.objective_ranker.rank(objective_scores)
         if not isinstance(ranking, ObjectiveRanking):
@@ -113,7 +111,7 @@ class StandardOptimizationRunner:
                 "selection_policy.select must return an ObjectiveSelection."
             )
 
-        return OptimizationRun(grid_search_run, objective_scores, ranking, selection)
+        return OptimizationRun(search_run, objective_scores, ranking, selection)
 
     def _score_evaluation(
         self,

@@ -40,6 +40,7 @@ from src.engines.backtesting.ranking import (
     StandardObjectiveRanker,
 )
 from src.engines.backtesting.specification import OptimizationSpecification
+from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.strategies import (
     GridOptimizationStrategy,
     OptimizationStrategy,
@@ -109,6 +110,7 @@ __all__ = [
     "OptimizationConfiguration",
     "OptimizationRun",
     "OptimizationRunner",
+    "OptimizationSearchRun",
     "OptimizationSpecification",
     "OptimizationStrategy",
     "RankedObjectiveScore",

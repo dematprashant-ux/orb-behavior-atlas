@@ -10,6 +10,7 @@ from src.engines.backtesting import (
     ObjectiveRanking,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategy,
 )
@@ -19,7 +20,7 @@ from src.engines.strategy import DiscreteParameter, ParameterSpace
 class OptimizationStrategyTests(TestCase):
     """Verify strategy delegation without scoring, ranking, or selection logic."""
 
-    def test_grid_strategy_delegates_once_and_retains_the_grid_result(self) -> None:
+    def test_grid_strategy_delegates_once_and_adapts_the_grid_result(self) -> None:
         specification = _specification()
         expected = GridSearchRun(specification.parameter_space)
         grid_search_runner = _GridSearchRunner(expected)
@@ -27,7 +28,8 @@ class OptimizationStrategyTests(TestCase):
 
         result = strategy.execute(specification)
 
-        self.assertIs(result, expected)
+        self.assertIsInstance(result, OptimizationSearchRun)
+        self.assertIs(result.evaluations, expected.evaluations)
         self.assertEqual(
             grid_search_runner.parameter_spaces,
             [specification.parameter_space],

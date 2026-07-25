@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     ObjectiveScore,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationSearchRun,
     OptimizationSpecification,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
@@ -177,12 +178,15 @@ class _GridRunner:
         self.result = result
         self.events = events
 
-    def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
+    def execute(
+        self,
+        specification: OptimizationSpecification,
+    ) -> OptimizationSearchRun:
         """Record one call and return the source-owned configured result."""
         self.events.append("grid")
         if specification.parameter_space is not self.result.parameter_space:
             raise AssertionError("unexpected parameter space")
-        return self.result
+        return OptimizationSearchRun(self.result.evaluations)
 
 
 class _Objective:
