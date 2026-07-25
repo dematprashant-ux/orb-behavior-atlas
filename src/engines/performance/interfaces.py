@@ -4,6 +4,7 @@ from typing import Protocol
 
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
+    DrawdownSummary,
     EquityCurve,
     PerformanceContext,
     PerformanceMetrics,
@@ -13,6 +14,7 @@ from src.engines.performance.models import (
 
 __all__ = [
     "EquityCurveBuilder",
+    "DrawdownAnalyzer",
     "PerformanceAnalyzer",
     "PerformanceEngine",
     "PnLEngine",
@@ -45,3 +47,10 @@ class EquityCurveBuilder(Protocol):
 
     def build(self, summary: PnLSummary) -> EquityCurve:
         """Return an ordered immutable cumulative-realized-equity curve."""
+
+
+class DrawdownAnalyzer(Protocol):
+    """Defines pure absolute-drawdown analysis over immutable equity curves."""
+
+    def analyze(self, curve: EquityCurve) -> DrawdownSummary:
+        """Return ordered running peaks and absolute drawdowns."""

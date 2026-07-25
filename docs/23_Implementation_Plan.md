@@ -1177,6 +1177,42 @@ M12.3 is complete when every ordered immutable PnL summary deterministically
 produces one immutable cumulative point per trade and a final equity matching
 the final cumulative value.
 
+## M12.4 — Drawdown Analytics
+
+### Objective
+
+Derive immutable absolute drawdown facts solely from ordered `EquityCurve`
+artifacts.
+
+### Scope
+
+- Immutable `DrawdownPoint` and `DrawdownSummary` models
+- Pure drawdown-point and drawdown-summary builders
+- `DrawdownAnalyzer` protocol and `BasicDrawdownAnalyzer`
+- Contract tests and directly affected documentation
+
+### Calculation Constraints
+
+- The running peak is the highest cumulative realized equity observed from the
+  curve's `0.0` starting equity through the current point.
+- Drawdown is `running_peak - cumulative_realized_pnl`; maximum drawdown is the
+  largest observed absolute drawdown.
+- No percentage drawdown, risk-adjusted metric, rolling statistic, or portfolio
+  analysis is calculated.
+
+### Explicit Exclusions
+
+- Sharpe, Sortino, Calmar, volatility, CAGR, optimization, charts, reports,
+  and all other risk or portfolio analytics
+- Execution, strategy, PnL, equity-calculation, persistence, caching, and I/O
+  changes
+
+### Acceptance Criteria
+
+M12.4 is complete when any immutable equity curve deterministically produces
+ordered non-negative absolute drawdown points and a maximum matching the
+largest observed drawdown.
+
 Implement:
 
 - Data Engine

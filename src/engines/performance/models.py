@@ -19,6 +19,8 @@ __all__ = [
     "PerformanceStatus",
     "EquityCurve",
     "EquityPoint",
+    "DrawdownPoint",
+    "DrawdownSummary",
     "PnLSummary",
     "TradePnL",
     "TradeOutcome",
@@ -169,6 +171,67 @@ class EquityCurve:
         )
         if self.final_equity != expected_final_equity:
             raise ValueError("final_equity must match the last cumulative value.")
+
+
+@dataclass(frozen=True, slots=True)
+class DrawdownPoint:
+    """Records one equity point, its running peak, and absolute drawdown."""
+
+    source_equity_point: EquityPoint
+    running_peak: float
+    drawdown: float
+
+    def __post_init__(self) -> None:
+        """Require finite non-negative drawdown facts consistent with the point."""
+        if not isinstance(self.source_equity_point, EquityPoint):
+            raise TypeError("source_equity_point must be an EquityPoint.")
+        _validate_finite_float(self.running_peak, "running_peak")
+        _validate_finite_float(self.drawdown, "drawdown")
+        if self.running_peak < self.source_equity_point.cumulative_realized_pnl:
+            raise ValueError("running_peak must not be below cumulative equity.")
+        if self.drawdown < 0:
+            raise ValueError("drawdown must be non-negative.")
+        if self.drawdown != (
+            self.running_peak - self.source_equity_point.cumulative_realized_pnl
+        ):
+            raise ValueError(
+                "drawdown must match running peak minus cumulative equity."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class DrawdownSummary:
+    """Records ordered immutable drawdown points and maximum absolute drawdown."""
+
+    drawdown_points: tuple[DrawdownPoint, ...]
+    maximum_drawdown: float
+
+    def __post_init__(self) -> None:
+        """Require ordered point facts with a consistent maximum drawdown."""
+        if not isinstance(self.drawdown_points, tuple):
+            raise TypeError("drawdown_points must be a tuple of DrawdownPoint values.")
+        if any(
+            not isinstance(drawdown_point, DrawdownPoint)
+            for drawdown_point in self.drawdown_points
+        ):
+            raise TypeError("drawdown_points must contain only DrawdownPoint values.")
+        _validate_finite_float(self.maximum_drawdown, "maximum_drawdown")
+        if self.maximum_drawdown < 0:
+            raise ValueError("maximum_drawdown must be non-negative.")
+        if any(
+            current.running_peak < previous.running_peak
+            for previous, current in zip(
+                self.drawdown_points,
+                self.drawdown_points[1:],
+            )
+        ):
+            raise ValueError("running_peak must not decrease.")
+        expected_maximum_drawdown = max(
+            (point.drawdown for point in self.drawdown_points),
+            default=0.0,
+        )
+        if self.maximum_drawdown != expected_maximum_drawdown:
+            raise ValueError("maximum_drawdown must match supplied drawdown points.")
 
 
 @dataclass(frozen=True, slots=True)

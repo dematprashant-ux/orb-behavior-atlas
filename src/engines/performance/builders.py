@@ -3,6 +3,8 @@
 from src.engines.backtesting.models import BacktestRun
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
+    DrawdownPoint,
+    DrawdownSummary,
     EquityCurve,
     EquityPoint,
     PerformanceContext,
@@ -19,6 +21,8 @@ __all__ = [
     "build_performance_report",
     "build_equity_curve",
     "build_equity_point",
+    "build_drawdown_point",
+    "build_drawdown_summary",
     "build_pnl_summary",
     "build_trade_pnl",
 ]
@@ -212,3 +216,43 @@ def build_equity_curve(
             equity_points[-1].cumulative_realized_pnl if equity_points else 0.0
         )
     return EquityCurve(equity_points=equity_points, final_equity=final_equity)
+
+
+def build_drawdown_point(
+    source_equity_point: EquityPoint,
+    running_peak: float,
+    drawdown: float,
+) -> DrawdownPoint:
+    """Build one immutable absolute-drawdown point from existing equity facts."""
+    return DrawdownPoint(
+        source_equity_point=source_equity_point,
+        running_peak=running_peak,
+        drawdown=drawdown,
+    )
+
+
+def build_drawdown_summary(
+    drawdown_points: tuple[DrawdownPoint, ...],
+    maximum_drawdown: float | None = None,
+) -> DrawdownSummary:
+    """Build an immutable ordered absolute-drawdown summary.
+
+    An omitted maximum retains the largest supplied drawdown, or zero for an
+    empty summary. No percentage or risk-adjusted metric is calculated.
+    """
+    if not isinstance(drawdown_points, tuple):
+        raise TypeError("drawdown_points must be a tuple of DrawdownPoint values.")
+    if any(
+        not isinstance(drawdown_point, DrawdownPoint)
+        for drawdown_point in drawdown_points
+    ):
+        raise TypeError("drawdown_points must contain only DrawdownPoint values.")
+    if maximum_drawdown is None:
+        maximum_drawdown = max(
+            (point.drawdown for point in drawdown_points),
+            default=0.0,
+        )
+    return DrawdownSummary(
+        drawdown_points=drawdown_points,
+        maximum_drawdown=maximum_drawdown,
+    )
