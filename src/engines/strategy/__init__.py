@@ -8,6 +8,13 @@ from src.engines.strategy.models import (
     StrategyDecisionType,
 )
 from src.engines.strategy.orb_rule import ORBRuleStrategy
+from src.engines.strategy.parameters import (
+    CandidateParameterSet,
+    DiscreteParameter,
+    ParameterDefinition,
+    ParameterSpace,
+    ParameterValue,
+)
 
 __all__ = [
     "Strategy",
@@ -15,5 +22,10 @@ __all__ = [
     "StrategyDecision",
     "StrategyDecisionType",
     "ORBRuleStrategy",
+    "CandidateParameterSet",
+    "DiscreteParameter",
+    "ParameterDefinition",
+    "ParameterSpace",
+    "ParameterValue",
     "build_strategy_context",
 ]

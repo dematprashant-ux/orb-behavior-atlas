@@ -39,6 +39,15 @@ It does not inspect candles, recalculate research facts, generate features,
 execute trades, manage positions, calculate PnL, or backtest. Its structural
 setup results do not authorize an executable trading strategy.
 
+## 1.3 Parameter Space Domain
+
+M18.1 adds immutable `DiscreteParameter`, `ParameterSpace`, and
+`CandidateParameterSet` values to describe finite candidate strategy
+parameters. Values are explicit ordered scalar or enum-backed alternatives;
+the domain rejects blank names, mutable collections, duplicate values, and
+mixed parameter value types. It defines no strategy configuration, search,
+optimization, training, scoring, ranking, execution, serialization, or I/O.
+
 ---
 
 # 2. Responsibilities
