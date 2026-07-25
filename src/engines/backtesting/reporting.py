@@ -19,6 +19,7 @@ __all__ = [
     "OptimizationResultReportRenderer",
     "OptimizationResultReportingPipeline",
     "OptimizationSelectionOutcomeReportRenderer",
+    "OptimizationSelectionOutcomeReportingPipeline",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
@@ -95,6 +96,36 @@ class OptimizationSelectionOutcomeReportRenderer(
         report: OptimizationSelectionOutcomeReport,
     ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
         """Return one renderer-defined value without changing the outcome."""
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationSelectionOutcomeReportingPipeline(
+    Generic[_RenderedOptimizationResultPayload],
+):
+    """Compose one canonical selection outcome through an injected renderer."""
+
+    renderer: OptimizationSelectionOutcomeReportRenderer[
+        _RenderedOptimizationResultPayload
+    ]
+
+    def __post_init__(self) -> None:
+        """Require one explicit outcome renderer without invoking it."""
+        if self.renderer is None:
+            raise TypeError("renderer must not be None.")
+        if not callable(getattr(self.renderer, "render", None)):
+            raise TypeError("renderer must define a callable render method.")
+
+    def render_report(
+        self,
+        result_report: OptimizationResultReport,
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Render one canonical outcome without reranking or reselection."""
+        if not isinstance(result_report, OptimizationResultReport):
+            raise TypeError("result_report must be an OptimizationResultReport.")
+        outcome_report = OptimizationSelectionOutcomeReport.from_result_report(
+            result_report
+        )
+        return self.renderer.render(outcome_report)
 
 
 @dataclass(frozen=True, slots=True)

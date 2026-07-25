@@ -447,6 +447,16 @@ escaped for pipes and line breaks. The renderer performs no calculation,
 ranking, selection, tie breaking, optimization, recommendation, interpretation,
 printing, file writing, or persistence; no other result format is provided.
 
+M25.6 adds `OptimizationSelectionOutcomeReportingPipeline`, the thin
+application-level bridge from an existing `OptimizationResultReport` to its
+canonical `OptimizationSelectionOutcomeReport`. It creates that outcome only
+through the existing factory, passes the exact outcome once to an injected
+outcome renderer, and returns the renderer's exact result unchanged. Empty,
+unique, and tied selection cardinalities remain owned by the outcome report;
+the pipeline performs no winner selection, tie breaking, ranking, selection,
+scoring, optimization execution, payload inspection, printing, file writing,
+or persistence.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
