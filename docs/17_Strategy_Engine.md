@@ -278,6 +278,16 @@ reports deterministic all-child rejection, and NOT reports acceptance of its
 wrapped child. Diagnostics are contract-only and are not retained by search or
 optimization results.
 
+M21.4 adds immutable `ConstraintRejection` and ordered
+`ConstraintDiagnostics` to retain the exact rejected candidate and exact
+M21.3-produced diagnostic in successful optimization results. Strategies use
+the diagnostic operation as the single eligibility traversal, preserve candidate
+encounter order, and never evaluate or budget rejected candidates. Each
+`OptimizationSearchRun` owns one explicit diagnostics object, and
+`OptimizationRun` exposes that same object by identity. Diagnostics are
+informational only: they do not alter progress, termination, scoring, ranking,
+or selection; no post-budget traversal is introduced for diagnostic collection.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

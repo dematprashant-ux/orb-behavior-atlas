@@ -67,8 +67,9 @@ class AllOfConstraint:
         """Return the first failing child diagnostic in deterministic order."""
         _validate_candidate(candidate)
         for constraint in self.constraints:
-            if not constraint.is_eligible(candidate):
-                return _diagnostic_for(constraint, candidate)
+            diagnostic = constraint.diagnostic(candidate)
+            if diagnostic is not None:
+                return diagnostic
         return None
 
 
@@ -92,8 +93,9 @@ class AnyOfConstraint:
     ) -> ConstraintDiagnostic | None:
         """Describe all-child rejection only after deterministic child evaluation."""
         _validate_candidate(candidate)
-        if any(constraint.is_eligible(candidate) for constraint in self.constraints):
-            return None
+        for constraint in self.constraints:
+            if constraint.diagnostic(candidate) is None:
+                return None
         return ConstraintDiagnostic("any_of_constraint", "all_children_rejected")
 
 
@@ -118,7 +120,7 @@ class NotConstraint:
     ) -> ConstraintDiagnostic | None:
         """Describe rejection when the wrapped constraint accepts the candidate."""
         _validate_candidate(candidate)
-        if not self.constraint.is_eligible(candidate):
+        if self.constraint.diagnostic(candidate) is not None:
             return None
         return ConstraintDiagnostic("not_constraint", "wrapped_constraint_accepted")
 
@@ -143,19 +145,6 @@ class OptimizationConstraints:
     ) -> ConstraintDiagnostic | None:
         """Return the first top-level failing diagnostic in declared order."""
         return AllOfConstraint(self.constraints).diagnostic(candidate)
-
-
-def _diagnostic_for(
-    constraint: OptimizationConstraint,
-    candidate: CandidateParameterSet,
-) -> ConstraintDiagnostic:
-    """Use explicit diagnostics or a stable legacy-constraint fallback identifier."""
-    diagnostic = getattr(constraint, "diagnostic", None)
-    if diagnostic is not None:
-        result = diagnostic(candidate)
-        if isinstance(result, ConstraintDiagnostic):
-            return result
-    return ConstraintDiagnostic(type(constraint).__name__, "rejected")
 
 
 def _validate_constraints(constraints: tuple[OptimizationConstraint, ...]) -> None:

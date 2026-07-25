@@ -8,6 +8,7 @@ from src.engines.backtesting import (
     BacktestRun,
     BacktestStatus,
     CandidateEvaluation,
+    ConstraintDiagnostics,
     ObjectiveDirection,
     ObjectiveRanking,
     ObjectiveScore,
@@ -198,6 +199,7 @@ class _GridRunner:
                 len(self.result.evaluations),
             ),
             OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+            ConstraintDiagnostics(),
         )
 
 

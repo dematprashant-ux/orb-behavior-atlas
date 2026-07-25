@@ -4,6 +4,10 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from src.engines.backtesting.budget import OptimizationBudget
+from src.engines.backtesting.constraint_diagnostics import (
+    ConstraintDiagnostics,
+    ConstraintRejection,
+)
 from src.engines.backtesting.constraints import OptimizationConstraints
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.interfaces import CandidateEvaluator
@@ -20,6 +24,7 @@ class GridSearchRun:
     parameter_space: ParameterSpace
     evaluations: tuple[CandidateEvaluation, ...] = ()
     total_candidates: int | None = None
+    constraint_diagnostics: ConstraintDiagnostics = ConstraintDiagnostics()
 
     def __post_init__(self) -> None:
         """Require immutable typed aggregate values without ranking them."""
@@ -43,6 +48,8 @@ class GridSearchRun:
             raise TypeError("total_candidates must be an int.")
         if self.total_candidates < len(self.evaluations):
             raise ValueError("total_candidates must cover all evaluations.")
+        if not isinstance(self.constraint_diagnostics, ConstraintDiagnostics):
+            raise TypeError("constraint_diagnostics must be a ConstraintDiagnostics.")
 
 
 class GridSearchRunner(Protocol):
@@ -105,10 +112,16 @@ class StandardGridSearchRunner:
                 "CandidateParameterSet values."
             )
 
+        eligible_candidates: list[CandidateParameterSet] = []
+        rejections: list[ConstraintRejection] = []
+        for candidate in candidates:
+            diagnostic = constraints.diagnostic(candidate)
+            if diagnostic is not None:
+                rejections.append(ConstraintRejection(candidate, diagnostic))
+                continue
+            eligible_candidates.append(candidate)
+
         evaluations: list[CandidateEvaluation] = []
-        eligible_candidates = tuple(
-            candidate for candidate in candidates if constraints.is_eligible(candidate)
-        )
         for candidate in eligible_candidates[: budget.maximum_evaluations]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
@@ -124,4 +137,5 @@ class StandardGridSearchRunner:
             parameter_space,
             tuple(evaluations),
             len(eligible_candidates),
+            ConstraintDiagnostics(tuple(rejections)),
         )

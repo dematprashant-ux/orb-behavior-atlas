@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from src.engines.backtesting.constraint_diagnostics import ConstraintDiagnostics
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
@@ -18,6 +19,7 @@ class OptimizationSearchRun:
     evaluations: tuple[CandidateEvaluation, ...]
     progress: OptimizationProgress
     termination_reason: OptimizationTerminationReason
+    constraint_diagnostics: ConstraintDiagnostics
 
     def __post_init__(self) -> None:
         """Require immutable typed evaluations without sorting or filtering them."""
@@ -42,6 +44,8 @@ class OptimizationSearchRun:
             raise TypeError(
                 "termination_reason must be an OptimizationTerminationReason."
             )
+        if not isinstance(self.constraint_diagnostics, ConstraintDiagnostics):
+            raise TypeError("constraint_diagnostics must be a ConstraintDiagnostics.")
         if (
             self.termination_reason
             is OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED

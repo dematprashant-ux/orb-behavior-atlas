@@ -8,6 +8,7 @@ from src.engines.backtesting import (
     BacktestRun,
     BacktestStatus,
     CandidateEvaluation,
+    ConstraintDiagnostics,
     OptimizationSearchRun,
     OptimizationStrategyMetadata,
     OptimizationProgress,
@@ -41,6 +42,7 @@ class OptimizationSearchRunTests(TestCase):
             (first, second),
             OptimizationProgress(2, 2),
             OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+            ConstraintDiagnostics(),
         )
 
         self.assertIs(run.strategy_metadata, metadata)
@@ -54,6 +56,7 @@ class OptimizationSearchRunTests(TestCase):
                 [],
                 OptimizationProgress(0, 0),
                 OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+                ConstraintDiagnostics(),
             )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "only"):
             OptimizationSearchRun(
@@ -61,6 +64,7 @@ class OptimizationSearchRunTests(TestCase):
                 (None,),
                 OptimizationProgress(1, 1),
                 OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+                ConstraintDiagnostics(),
             )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "strategy_metadata"):
             OptimizationSearchRun(
@@ -68,6 +72,7 @@ class OptimizationSearchRunTests(TestCase):
                 (),
                 OptimizationProgress(0, 0),
                 OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+                ConstraintDiagnostics(),
             )  # type: ignore[arg-type]
 
     def test_public_export_is_intentional(self) -> None:
@@ -122,4 +127,5 @@ def _search_run(
         evaluations,
         OptimizationProgress(len(evaluations), len(evaluations)),
         OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+        ConstraintDiagnostics(),
     )

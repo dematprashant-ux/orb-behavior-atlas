@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from src.engines.backtesting.configuration import OptimizationConfiguration
+from src.engines.backtesting.constraint_diagnostics import ConstraintDiagnostics
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
 from src.engines.backtesting.progress import OptimizationProgress
@@ -41,6 +42,11 @@ class OptimizationRun:
     def termination_reason(self) -> OptimizationTerminationReason:
         """Expose the exact successful termination reason from the search run."""
         return self.search_run.termination_reason
+
+    @property
+    def constraint_diagnostics(self) -> ConstraintDiagnostics:
+        """Expose the exact rejected-candidate diagnostics from the search run."""
+        return self.search_run.constraint_diagnostics
 
     def __post_init__(self) -> None:
         """Require exact cross-stage references without recomputing any result."""

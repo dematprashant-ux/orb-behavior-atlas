@@ -19,6 +19,10 @@ from src.engines.backtesting.constraints import (
     OptimizationConstraint,
     OptimizationConstraints,
 )
+from src.engines.backtesting.constraint_diagnostics import (
+    ConstraintDiagnostics,
+    ConstraintRejection,
+)
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.grid_search import (
     GridSearchRun,
@@ -135,6 +139,8 @@ __all__ = [
     "AllOfConstraint",
     "AnyOfConstraint",
     "ConstraintDiagnostic",
+    "ConstraintDiagnostics",
+    "ConstraintRejection",
     "NotConstraint",
     "OptimizationRun",
     "OptimizationProgress",

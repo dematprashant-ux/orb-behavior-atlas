@@ -3,6 +3,10 @@
 from dataclasses import dataclass, field
 
 from src.engines.backtesting.evaluation import CandidateEvaluation
+from src.engines.backtesting.constraint_diagnostics import (
+    ConstraintDiagnostics,
+    ConstraintRejection,
+)
 from src.engines.backtesting.interfaces import CandidateEvaluator
 from src.engines.backtesting.random_sampling import (
     RandomCandidateSampler,
@@ -13,6 +17,7 @@ from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
+from src.engines.strategy.parameters import CandidateParameterSet
 
 __all__ = ["RandomOptimizationConfiguration", "RandomOptimizationStrategy"]
 
@@ -49,13 +54,19 @@ class RandomOptimizationStrategy:
             specification.parameter_space,
             self.configuration,
         )
-        eligible_candidates = tuple(
-            candidate
-            for candidate in candidates
-            if specification.constraints.is_eligible(candidate)
-        )
+        eligible_candidates: list[CandidateParameterSet] = []
+        rejections: list[ConstraintRejection] = []
+        for candidate in candidates:
+            diagnostic = specification.constraints.diagnostic(candidate)
+            if diagnostic is not None:
+                rejections.append(ConstraintRejection(candidate, diagnostic))
+                continue
+            eligible_candidates.append(candidate)
+
         evaluations: list[CandidateEvaluation] = []
-        for candidate in eligible_candidates[: specification.budget.maximum_evaluations]:
+        for candidate in eligible_candidates[
+            : specification.budget.maximum_evaluations
+        ]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
                 raise TypeError(
@@ -64,8 +75,7 @@ class RandomOptimizationStrategy:
             if evaluation.candidate is not candidate:
                 raise ValueError("evaluation candidate must match sampled candidate.")
             evaluations.append(evaluation)
-        total_candidates = len(eligible_candidates)
-        progress = OptimizationProgress(len(evaluations), total_candidates)
+        progress = OptimizationProgress(len(evaluations), len(eligible_candidates))
         termination_reason = (
             OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED
             if progress.evaluated_candidates == progress.total_candidates
@@ -76,4 +86,5 @@ class RandomOptimizationStrategy:
             tuple(evaluations),
             progress,
             termination_reason,
+            ConstraintDiagnostics(tuple(rejections)),
         )

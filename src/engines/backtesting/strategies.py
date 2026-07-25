@@ -68,6 +68,7 @@ class GridOptimizationStrategy:
             grid_search_run.evaluations,
             progress,
             termination_reason,
+            grid_search_run.constraint_diagnostics,
         )
 
 
