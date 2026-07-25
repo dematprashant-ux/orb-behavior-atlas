@@ -1320,6 +1320,41 @@ M13.2 is complete when equivalent immutable reports produce equivalent ordered
 plain data without mutation, rendering, serialization to an external format,
 or numeric conversion.
 
+## M13.3 — JSON Report Export
+
+### Objective
+
+Encode plain report data from `DictionaryReportSerializer` as deterministic,
+compact JSON without changing any analytics artifact or serialization value.
+
+### Scope
+
+- `JsonReportExporter` protocol and immutable `StandardJsonReportExporter`
+- Compact stable-key UTF-8-compatible JSON encoding of plain report data
+- Contract tests and directly affected documentation
+
+### Export Contract
+
+- JSON object keys are lexicographically stable, while ordered collections keep
+  their existing order.
+- Output uses no indentation or pretty printing, preserves native finite
+  numeric values and `null`, and does not round or format values as strings.
+- The exporter performs no rendering, file writing, persistence, network I/O,
+  or recalculation.
+
+### Explicit Exclusions
+
+- HTML, PDF, Markdown, or CSV rendering; charts; file output; persistence;
+  network calls; optimization; and I/O
+- Changes to analytics, execution, strategy, PnL, equity, drawdown, risk
+  metrics, or the M13.2 plain-data serialization contract
+
+### Acceptance Criteria
+
+M13.3 is complete when equivalent plain report mappings produce equivalent
+compact JSON with stable object keys, preserved collection order, UTF-8
+compatibility, and no mutation.
+
 Implement:
 
 - Data Engine

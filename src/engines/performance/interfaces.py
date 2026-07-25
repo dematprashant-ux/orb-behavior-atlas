@@ -23,6 +23,7 @@ __all__ = [
     "PnLEngine",
     "RiskMetricsAnalyzer",
     "ReportSerializer",
+    "JsonReportExporter",
 ]
 
 
@@ -77,3 +78,10 @@ class ReportSerializer(Protocol):
 
     def serialize(self, report: BacktestReport) -> Mapping[str, object]:
         """Return deterministic in-memory data without rendering or I/O."""
+
+
+class JsonReportExporter(Protocol):
+    """Defines pure deterministic JSON export from plain report data."""
+
+    def export(self, serialized_report: Mapping[str, object]) -> str:
+        """Return compact stable-key JSON without rendering or file I/O."""
