@@ -2018,3 +2018,18 @@ equity, or trade PnL.
 
 **Out of scope:** Transaction costs, TradePnL, equity, drawdown, risk metrics,
 reports, serialization, rendering, export, execution, and rounding.
+## M15.6 — Net Risk-Adjusted Metrics
+
+**Objective:** Preserve risk-adjusted metric formulas while recording whether
+their supplied aggregate performance basis is gross or net.
+
+**Scope:** `RiskAdjustedMetricMode`; mode propagation from existing immutable
+`PerformanceMetrics`; focused gross/net contract tests and directly affected
+documentation. The risk analyzer adds no duplicate mode configuration.
+
+**Compatibility:** Existing upstream defaults remain gross. A net
+`PerformanceMetrics` input yields net risk-adjusted result metadata; all ratio
+formulas and zero-drawdown behavior remain unchanged.
+
+**Out of scope:** Transaction costs, TradePnL, equity, drawdown, performance
+metrics, reports, serialization, rendering, export, execution, and rounding.

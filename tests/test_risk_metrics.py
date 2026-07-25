@@ -1,18 +1,22 @@
 """Contract tests for zero-safe risk-adjusted performance metrics."""
 
 import ast
-from dataclasses import FrozenInstanceError, is_dataclass
+from dataclasses import FrozenInstanceError, is_dataclass, replace
 from math import inf
 from unittest import TestCase
 
+from src.engines.backtesting import FixedRateTransactionCostModel
 from src.engines.execution import ExecutionSide
 from src.engines.performance import (
     BasicDrawdownAnalyzer,
     BasicPerformanceAnalyzer,
     BasicRiskMetricsAnalyzer,
     CumulativeEquityCurveBuilder,
+    EquityCurveMode,
+    PerformanceMetricMode,
     RealizedPnLEngine,
     RiskAdjustedMetrics,
+    RiskAdjustedMetricMode,
     RiskMetricsAnalyzer,
     build_risk_adjusted_metrics,
 )
@@ -56,6 +60,63 @@ class RiskMetricsTests(TestCase):
             (None, None),
         )
 
+    def test_net_inputs_produce_net_mode_with_unchanged_ratio_formula(self) -> None:
+        """Use existing net aggregates and drawdown without recomputing either."""
+        trades = (
+            _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+            _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+        )
+        summary = RealizedPnLEngine(
+            FixedRateTransactionCostModel(0.1, 0.0, 0.0, 0.0, 0.0)
+        ).calculate(trades)
+        gross_performance = BasicPerformanceAnalyzer().analyze(summary)
+        gross_drawdown = BasicDrawdownAnalyzer().analyze(
+            CumulativeEquityCurveBuilder().build(summary)
+        )
+        net_performance = BasicPerformanceAnalyzer(
+            PerformanceMetricMode.NET
+        ).analyze(summary)
+        net_drawdown = BasicDrawdownAnalyzer().analyze(
+            CumulativeEquityCurveBuilder(EquityCurveMode.NET).build(summary)
+        )
+
+        gross = BasicRiskMetricsAnalyzer().analyze(
+            gross_performance,
+            gross_drawdown,
+        )
+        net = BasicRiskMetricsAnalyzer().analyze(net_performance, net_drawdown)
+
+        self.assertIs(gross.mode, RiskAdjustedMetricMode.GROSS)
+        self.assertEqual(gross.recovery_factor, 1.0)
+        self.assertIs(net.mode, RiskAdjustedMetricMode.NET)
+        self.assertEqual(net.recovery_factor, -1.0)
+
+    def test_zero_cost_gross_and_net_results_are_equal_except_mode(self) -> None:
+        """Retain equal ratios when existing net and gross inputs are identical."""
+        summary = RealizedPnLEngine().calculate(
+            (
+                _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+                _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+            )
+        )
+        gross = BasicRiskMetricsAnalyzer().analyze(
+            BasicPerformanceAnalyzer().analyze(summary),
+            BasicDrawdownAnalyzer().analyze(
+                CumulativeEquityCurveBuilder().build(summary)
+            ),
+        )
+        net = BasicRiskMetricsAnalyzer().analyze(
+            BasicPerformanceAnalyzer(PerformanceMetricMode.NET).analyze(summary),
+            BasicDrawdownAnalyzer().analyze(
+                CumulativeEquityCurveBuilder(EquityCurveMode.NET).build(summary)
+            ),
+        )
+
+        self.assertEqual(
+            gross,
+            replace(net, mode=RiskAdjustedMetricMode.GROSS),
+        )
+
     def test_analysis_is_deterministic_and_output_is_immutable(self) -> None:
         """Return equal frozen models without changing supplied source artifacts."""
         performance, drawdown = _artifacts((10.0, -5.0))
@@ -84,6 +145,8 @@ class RiskMetricsTests(TestCase):
             build_risk_adjusted_metrics(inf, inf)
         with self.assertRaises(ValueError):
             build_risk_adjusted_metrics(1.0, 2.0)
+        with self.assertRaises(TypeError):
+            build_risk_adjusted_metrics(1.0, 1.0, mode="NET")
 
     def test_risk_metrics_depend_only_on_aggregate_contracts(self) -> None:
         """Keep risk metrics independent from execution and market layers."""

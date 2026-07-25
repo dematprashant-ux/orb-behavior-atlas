@@ -6,14 +6,16 @@ from src.engines.performance.builders import build_risk_adjusted_metrics
 from src.engines.performance.models import (
     DrawdownSummary,
     PerformanceMetrics,
+    PerformanceMetricMode,
     RiskAdjustedMetrics,
+    RiskAdjustedMetricMode,
 )
 
 __all__ = ["BasicRiskMetricsAnalyzer"]
 
 
 class BasicRiskMetricsAnalyzer:
-    """Calculate absolute return-over-drawdown values without portfolio analysis."""
+    """Calculate gross or net ratios from existing aggregate artifacts only."""
 
     def analyze(
         self,
@@ -27,8 +29,8 @@ class BasicRiskMetricsAnalyzer:
             drawdown: Existing immutable absolute drawdown summary.
 
         Returns:
-            Immutable recovery-factor and return-over-drawdown values, or
-            ``None`` for both when maximum drawdown is zero.
+            Immutable ratios in the mode already selected by ``performance``,
+            or ``None`` for both when maximum drawdown is zero.
 
         Raises:
             TypeError: If either input is not the required immutable model.
@@ -38,10 +40,18 @@ class BasicRiskMetricsAnalyzer:
             raise TypeError("performance must be a PerformanceMetrics.")
         if not isinstance(drawdown, DrawdownSummary):
             raise TypeError("drawdown must be a DrawdownSummary.")
+        mode = _risk_mode_for(performance.mode)
         if drawdown.maximum_drawdown == 0.0:
-            return build_risk_adjusted_metrics(None, None)
+            return build_risk_adjusted_metrics(None, None, mode=mode)
 
         ratio = performance.net_profit / drawdown.maximum_drawdown
         if not isfinite(ratio):
             raise ValueError("risk-adjusted metrics must be finite.")
-        return build_risk_adjusted_metrics(ratio, ratio)
+        return build_risk_adjusted_metrics(ratio, ratio, mode=mode)
+
+
+def _risk_mode_for(performance_mode: PerformanceMetricMode) -> RiskAdjustedMetricMode:
+    """Map the already-selected aggregate performance basis into result metadata."""
+    if performance_mode is PerformanceMetricMode.GROSS:
+        return RiskAdjustedMetricMode.GROSS
+    return RiskAdjustedMetricMode.NET

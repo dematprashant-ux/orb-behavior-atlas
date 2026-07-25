@@ -273,6 +273,19 @@ Metrics retain the selected immutable mode. This milestone does not alter
 equity, drawdown, risk metrics, reports, serialization, rendering, export, or
 execution behavior.
 
+## 9.6 Gross and Net Risk-Adjusted Metrics
+
+M15.6 adds `RiskAdjustedMetricMode` to immutable risk-adjusted results. The
+`BasicRiskMetricsAnalyzer` derives that mode from the supplied
+`PerformanceMetrics.mode`, avoiding duplicate configuration. Default upstream
+performance selection remains gross; net performance inputs yield net
+risk-adjusted results. The recovery-factor and return-over-drawdown formulas
+are unchanged and operate only on the supplied aggregate artifacts.
+
+The caller remains responsible for pairing performance metrics with drawdown
+from the same upstream gross or net basis. Risk analysis does not inspect trade
+PnL, recalculate costs or drawdown, or alter reports and downstream rendering.
+
 The framework supports configurable costs, including:
 
 - Brokerage

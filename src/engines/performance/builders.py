@@ -16,6 +16,7 @@ from src.engines.performance.models import (
     PerformanceStatus,
     PnLSummary,
     RiskAdjustedMetrics,
+    RiskAdjustedMetricMode,
     TradePnL,
 )
 
@@ -280,6 +281,7 @@ def build_drawdown_summary(
 def build_risk_adjusted_metrics(
     recovery_factor: float | None,
     return_over_drawdown: float | None,
+    mode: RiskAdjustedMetricMode = RiskAdjustedMetricMode.GROSS,
 ) -> RiskAdjustedMetrics:
     """Build zero-safe absolute-return-to-drawdown metric values.
 
@@ -289,6 +291,7 @@ def build_risk_adjusted_metrics(
     return RiskAdjustedMetrics(
         recovery_factor=recovery_factor,
         return_over_drawdown=return_over_drawdown,
+        mode=mode,
     )
 
 

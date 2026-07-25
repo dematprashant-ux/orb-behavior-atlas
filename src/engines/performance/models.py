@@ -24,6 +24,7 @@ __all__ = [
     "DrawdownPoint",
     "DrawdownSummary",
     "RiskAdjustedMetrics",
+    "RiskAdjustedMetricMode",
     "BacktestReport",
     "PnLSummary",
     "TradePnL",
@@ -49,6 +50,13 @@ class EquityCurveMode(str, Enum):
 
 class PerformanceMetricMode(str, Enum):
     """Identifies whether aggregate metrics use gross or net trade PnL."""
+
+    GROSS = "GROSS"
+    NET = "NET"
+
+
+class RiskAdjustedMetricMode(str, Enum):
+    """Identifies whether ratios use gross or net aggregate performance facts."""
 
     GROSS = "GROSS"
     NET = "NET"
@@ -282,10 +290,11 @@ class DrawdownSummary:
 
 @dataclass(frozen=True, slots=True)
 class RiskAdjustedMetrics:
-    """Records zero-safe absolute-return-to-drawdown ratios."""
+    """Records zero-safe gross or net absolute-return-to-drawdown ratios."""
 
     recovery_factor: float | None
     return_over_drawdown: float | None
+    mode: RiskAdjustedMetricMode = RiskAdjustedMetricMode.GROSS
 
     def __post_init__(self) -> None:
         """Require finite, equivalent values for the identical documented ratios."""
@@ -294,6 +303,8 @@ class RiskAdjustedMetrics:
             self.return_over_drawdown,
             "return_over_drawdown",
         )
+        if not isinstance(self.mode, RiskAdjustedMetricMode):
+            raise TypeError("mode must be a RiskAdjustedMetricMode.")
         if self.recovery_factor != self.return_over_drawdown:
             raise ValueError(
                 "recovery_factor and return_over_drawdown must match."
