@@ -12,6 +12,13 @@ from src.engines.portfolio.allocation import (
     PercentageCapitalAllocationPolicy,
 )
 from src.engines.portfolio.models import PortfolioPosition, PortfolioSnapshot
+from src.engines.portfolio.engine import StandardPortfolioEngine
+from src.engines.portfolio.events import (
+    PortfolioCloseEvent,
+    PortfolioEvent,
+    PortfolioOpenEvent,
+)
+from src.engines.portfolio.interfaces import PortfolioEngine
 
 __all__ = [
     "AllocationDecision",
@@ -19,8 +26,13 @@ __all__ = [
     "CapitalAllocationPolicy",
     "FixedCapitalAllocationPolicy",
     "PercentageCapitalAllocationPolicy",
+    "PortfolioCloseEvent",
+    "PortfolioEngine",
+    "PortfolioEvent",
+    "PortfolioOpenEvent",
     "PortfolioPosition",
     "PortfolioSnapshot",
+    "StandardPortfolioEngine",
     "build_portfolio_position",
     "build_portfolio_snapshot",
 ]

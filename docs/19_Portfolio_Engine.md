@@ -45,6 +45,21 @@ market data, calculate costs, or use global configuration. A zero-capital
 decision is a valid deterministic allocation fact; later lifecycle code owns
 the decision whether it can create a position.
 
+## 1.3 Multi-Position Portfolio Engine
+
+M16.3 adds `StandardPortfolioEngine`, which applies caller-supplied
+`PortfolioOpenEvent` and `PortfolioCloseEvent` values in their exact supplied
+order. It begins with an immutable snapshot and returns that snapshot followed
+by a new immutable snapshot for every accepted event. Equal timestamps retain
+their input order; decreasing event timestamps are rejected.
+
+On an open, the injected allocation policy supplies a capital cap. The engine
+uses whole integer units, matching the existing `CompletedTrade` quantity
+contract, deducts actual entry capital, and leaves any non-purchasable
+remainder as cash. On close, it removes the active position and restores
+`quantity * exit_price` exactly once. The engine neither recomputes transaction
+costs nor performs valuation, analytics, reporting, retries, or I/O.
+
 ---
 
 # 2. Responsibilities
