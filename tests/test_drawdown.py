@@ -4,13 +4,16 @@ import ast
 from dataclasses import FrozenInstanceError, is_dataclass
 from unittest import TestCase
 
+from src.engines.backtesting import FixedRateTransactionCostModel
 from src.engines.execution import ExecutionSide
 from src.engines.performance import (
     BasicDrawdownAnalyzer,
+    CumulativeEquityCurveBuilder,
     DrawdownAnalyzer,
     DrawdownPoint,
     DrawdownSummary,
     EquityCurve,
+    EquityCurveMode,
     RealizedPnLEngine,
     build_drawdown_point,
     build_drawdown_summary,
@@ -90,6 +93,58 @@ class DrawdownTests(TestCase):
             strict=True,
         ):
             self.assertIs(drawdown_point.source_equity_point, equity_point)
+
+    def test_net_curve_uses_existing_net_equity_without_double_cost_subtraction(
+        self,
+    ) -> None:
+        """Analyze a net curve exactly as supplied, with unchanged drawdown rules."""
+        trades = (
+            _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+            _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+        )
+        summary = RealizedPnLEngine(
+            FixedRateTransactionCostModel(0.1, 0.0, 0.0, 0.0, 0.0)
+        ).calculate(trades)
+
+        gross_drawdown = BasicDrawdownAnalyzer().analyze(
+            CumulativeEquityCurveBuilder().build(summary)
+        )
+        net_curve = CumulativeEquityCurveBuilder(EquityCurveMode.NET).build(summary)
+        net_drawdown = BasicDrawdownAnalyzer().analyze(net_curve)
+
+        self.assertEqual(gross_drawdown.maximum_drawdown, 5.0)
+        self.assertIs(net_curve.mode, EquityCurveMode.NET)
+        self.assertEqual(
+            tuple(point.cumulative_realized_pnl for point in net_curve.equity_points),
+            (-11.0, -35.5),
+        )
+        self.assertEqual(
+            tuple(point.running_peak for point in net_drawdown.drawdown_points),
+            (0.0, 0.0),
+        )
+        self.assertEqual(
+            tuple(point.drawdown for point in net_drawdown.drawdown_points),
+            (11.0, 35.5),
+        )
+        self.assertEqual(net_drawdown.maximum_drawdown, 35.5)
+
+    def test_zero_cost_gross_and_net_curves_have_equal_drawdowns(self) -> None:
+        """Preserve equality when existing TradePnL net values equal gross values."""
+        summary = RealizedPnLEngine().calculate(
+            (
+                _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+                _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+            )
+        )
+
+        gross = BasicDrawdownAnalyzer().analyze(
+            CumulativeEquityCurveBuilder().build(summary)
+        )
+        net = BasicDrawdownAnalyzer().analyze(
+            CumulativeEquityCurveBuilder(EquityCurveMode.NET).build(summary)
+        )
+
+        self.assertEqual(gross, net)
 
     def test_analysis_is_deterministic_and_models_are_immutable(self) -> None:
         """Return equal frozen output without mutating the supplied equity curve."""

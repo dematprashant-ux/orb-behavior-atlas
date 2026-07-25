@@ -252,6 +252,15 @@ existing results. `NET` accumulates only the already-calculated
 No drawdown, metrics, reporting, serialization, rendering, export, execution,
 or transaction-cost calculation changes in this milestone.
 
+## 9.4 Gross and Net Drawdown Support
+
+M15.4 confirms that `BasicDrawdownAnalyzer` operates only on the supplied
+immutable `EquityCurve`. A gross curve and a net curve use the same unchanged
+running-peak and absolute-drawdown calculation; curve mode remains owned by
+the equity-construction boundary. Drawdown never inspects trade PnL, subtracts
+costs, or reconstructs equity. Existing gross behavior remains the default
+through the default gross equity-curve builder.
+
 The framework supports configurable costs, including:
 
 - Brokerage

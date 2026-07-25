@@ -1987,3 +1987,19 @@ cost-model calculations are repeated.
 
 **Out of scope:** Drawdown, metrics, reports, serialization, rendering, export,
 execution, transaction-cost models, brokerage logic, and rounding.
+## M15.4 — Net Drawdown Support
+
+**Objective:** Confirm that the existing drawdown analyzer consumes either
+gross or net immutable equity curves without changing drawdown mathematics.
+
+**Scope:** Focused gross/net curve drawdown contract tests and directly affected
+drawdown documentation. Mode selection remains exclusively at the existing
+equity-curve boundary; no drawdown API or algorithm is added.
+
+**Compatibility:** A gross curve retains existing drawdown results. A net curve
+uses its already-cumulative net equity values, in the same order, with no cost
+recalculation or second cost subtraction.
+
+**Out of scope:** Transaction costs, TradePnL, equity calculation, metrics,
+risk metrics, reports, serialization, rendering, export, execution, and
+rounding.

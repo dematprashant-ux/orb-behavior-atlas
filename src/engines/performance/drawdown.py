@@ -1,4 +1,4 @@
-"""Pure absolute-drawdown analysis over immutable cumulative equity curves."""
+"""Pure absolute-drawdown analysis over immutable gross or net equity curves."""
 
 from src.engines.performance.builders import (
     build_drawdown_point,
@@ -20,7 +20,7 @@ class BasicDrawdownAnalyzer:
         """Return running peaks and non-negative absolute drawdowns in curve order.
 
         Args:
-            curve: Existing immutable cumulative realized-equity curve.
+            curve: Existing immutable cumulative gross or net equity curve.
 
         Returns:
             An immutable summary with one drawdown point per equity point.
