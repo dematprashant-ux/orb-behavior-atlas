@@ -215,6 +215,20 @@ then performs the unchanged scoring, direction validation, ranking, and
 selection stages. This keeps grid details out of the generic strategy boundary
 without introducing another optimization algorithm.
 
+## 1.15 Optimization Strategy Metadata
+
+M19.5 adds immutable `OptimizationStrategyMetadata`, a name-only description
+of the algorithm that produced a search result. Metadata is separate from
+execution: it has no collaborator, configuration, parameter space, runtime
+state, statistic, or policy. `GridOptimizationStrategy` exposes immutable
+`grid` metadata, and each `OptimizationSearchRun` retains that exact object.
+`OptimizationRun` exposes the same object through its retained search run.
+
+This records algorithm identity without changing candidate generation,
+evaluation, scoring, ranking, selection, or optimization orchestration. Future
+strategies can provide their own metadata without claiming an implementation
+exists today.
+
 ---
 
 # 2. Responsibilities

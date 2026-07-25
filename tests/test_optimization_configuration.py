@@ -15,6 +15,7 @@ from src.engines.backtesting import (
     OptimizationConfiguration,
     OptimizationSearchRun,
     OptimizationSpecification,
+    OptimizationStrategyMetadata,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
 )
@@ -186,7 +187,10 @@ class _GridRunner:
         self.events.append("grid")
         if specification.parameter_space is not self.result.parameter_space:
             raise AssertionError("unexpected parameter space")
-        return OptimizationSearchRun(self.result.evaluations)
+        return OptimizationSearchRun(
+            OptimizationStrategyMetadata("test"),
+            self.result.evaluations,
+        )
 
 
 class _Objective:

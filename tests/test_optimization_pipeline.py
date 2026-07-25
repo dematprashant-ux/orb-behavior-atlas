@@ -18,6 +18,7 @@ from src.engines.backtesting import (
     OptimizationRunner,
     OptimizationSearchRun,
     OptimizationSpecification,
+    OptimizationStrategyMetadata,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
 )
@@ -42,7 +43,7 @@ class OptimizationPipelineTests(TestCase):
         grid_search_run = _grid_search_run(parameter_space)
         runner: OptimizationRunner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(grid_search_run.evaluations),
+                OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
                 events,
             ),
             _Objective(events),
@@ -70,6 +71,7 @@ class OptimizationPipelineTests(TestCase):
             tuple(reversed(result.objective_scores)),
         )
         self.assertIs(result.selection.ranking, result.ranking)
+        self.assertIs(result.strategy_metadata, runner.optimization_strategy.metadata)
 
     def test_run_is_immutable_deterministic_and_accepts_empty_search_results(
         self,
@@ -77,7 +79,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = ParameterSpace(())
         grid_search_run = GridSearchRun(parameter_space, ())
         runner = StandardOptimizationRunner(
-            _OptimizationStrategy(OptimizationSearchRun(), []),
+            _OptimizationStrategy(OptimizationSearchRun(_metadata()), []),
             _Objective([]),
             _Ranker([]),
         )
@@ -102,7 +104,10 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         runner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(_grid_search_run(parameter_space).evaluations),
+                OptimizationSearchRun(
+                    _metadata(),
+                    _grid_search_run(parameter_space).evaluations,
+                ),
                 events,
             ),
             _FailingObjective(events),
@@ -119,7 +124,10 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         runner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(_grid_search_run(parameter_space).evaluations),
+                OptimizationSearchRun(
+                    _metadata(),
+                    _grid_search_run(parameter_space).evaluations,
+                ),
                 events,
             ),
             _MixedDirectionObjective(events),
@@ -139,7 +147,7 @@ class OptimizationPipelineTests(TestCase):
         with self.assertRaisesRegex(TypeError, "specification"):
             StandardOptimizationRunner(
                 _OptimizationStrategy(
-                    OptimizationSearchRun(grid_search_run.evaluations),
+                    OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
                     [],
                 ),
                 _Objective([]),
@@ -159,7 +167,7 @@ class OptimizationPipelineTests(TestCase):
             ).run(_specification(parameter_space, []))
         with self.assertRaisesRegex(ValueError, "in order"):
             OptimizationRun(
-                OptimizationSearchRun(grid_search_run.evaluations),
+                OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
                 (
                     ObjectiveScore(
                         _evaluation("other"),
@@ -189,6 +197,7 @@ class _OptimizationStrategy:
     def __init__(self, result: OptimizationSearchRun, events: list[str]) -> None:
         self.result = result
         self.events = events
+        self.metadata = result.strategy_metadata
 
     def execute(
         self,
@@ -294,6 +303,11 @@ def _configuration(events: list[str]) -> OptimizationConfiguration:
         ObjectiveDirection.MAXIMIZE,
         _SelectionPolicy(events),
     )
+
+
+def _metadata() -> OptimizationStrategyMetadata:
+    """Return one immutable strategy identity for generic search-run fixtures."""
+    return OptimizationStrategyMetadata("test")
 
 
 def _specification(

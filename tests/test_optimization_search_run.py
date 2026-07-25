@@ -9,6 +9,7 @@ from src.engines.backtesting import (
     BacktestStatus,
     CandidateEvaluation,
     OptimizationSearchRun,
+    OptimizationStrategyMetadata,
 )
 from src.engines.execution import ExecutionRequest, ExecutionResult, ExecutionStatus
 from src.engines.research import ORBBehaviorAtlas
@@ -19,8 +20,8 @@ class OptimizationSearchRunTests(TestCase):
     """Verify generic ordered evaluations without algorithm-specific state."""
 
     def test_empty_run_is_immutable_and_deterministic(self) -> None:
-        first = OptimizationSearchRun()
-        second = OptimizationSearchRun()
+        first = OptimizationSearchRun(_metadata())
+        second = OptimizationSearchRun(_metadata())
 
         self.assertTrue(is_dataclass(first))
         self.assertFalse(hasattr(first, "__dict__"))
@@ -32,16 +33,20 @@ class OptimizationSearchRunTests(TestCase):
     def test_populated_run_retains_exact_evaluation_references_in_order(self) -> None:
         first = _evaluation("first")
         second = _evaluation("second")
-        run = OptimizationSearchRun((first, second))
+        metadata = _metadata()
+        run = OptimizationSearchRun(metadata, (first, second))
 
+        self.assertIs(run.strategy_metadata, metadata)
         self.assertIs(run.evaluations[0], first)
         self.assertIs(run.evaluations[1], second)
 
     def test_run_rejects_non_tuple_or_non_evaluation_values(self) -> None:
         with self.assertRaisesRegex(TypeError, "tuple"):
-            OptimizationSearchRun([])  # type: ignore[arg-type]
+            OptimizationSearchRun(_metadata(), [])  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "only"):
-            OptimizationSearchRun((None,))  # type: ignore[arg-type]
+            OptimizationSearchRun(_metadata(), (None,))  # type: ignore[arg-type]
+        with self.assertRaisesRegex(TypeError, "strategy_metadata"):
+            OptimizationSearchRun(None)  # type: ignore[arg-type]
 
     def test_public_export_is_intentional(self) -> None:
         from src.engines.backtesting import OptimizationSearchRun as PackageRun
@@ -68,3 +73,8 @@ def _evaluation(name: str) -> CandidateEvaluation:
         CandidateParameterSet((("candidate", name),)),
         BacktestRun(context, BacktestStatus.COMPLETED),
     )
+
+
+def _metadata() -> OptimizationStrategyMetadata:
+    """Return one immutable algorithm identity for generic search-run tests."""
+    return OptimizationStrategyMetadata("test")

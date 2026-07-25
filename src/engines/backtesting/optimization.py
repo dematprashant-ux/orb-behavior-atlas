@@ -11,6 +11,7 @@ from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategies import OptimizationStrategy
 from src.engines.backtesting.search import OptimizationSearchRun
+from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
 
@@ -23,6 +24,11 @@ class OptimizationRun:
     objective_scores: tuple[ObjectiveScore, ...]
     ranking: ObjectiveRanking
     selection: ObjectiveSelection
+
+    @property
+    def strategy_metadata(self) -> OptimizationStrategyMetadata:
+        """Expose the exact search-strategy metadata retained by the search run."""
+        return self.search_run.strategy_metadata
 
     def __post_init__(self) -> None:
         """Require exact cross-stage references without recomputing any result."""

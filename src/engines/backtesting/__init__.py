@@ -45,6 +45,7 @@ from src.engines.backtesting.strategies import (
     GridOptimizationStrategy,
     OptimizationStrategy,
 )
+from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.selection import (
     BestRankSelectionPolicy,
     ObjectiveSelection,
@@ -113,6 +114,7 @@ __all__ = [
     "OptimizationSearchRun",
     "OptimizationSpecification",
     "OptimizationStrategy",
+    "OptimizationStrategyMetadata",
     "RankedObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",

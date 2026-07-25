@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategy,
+    OptimizationStrategyMetadata,
 )
 from src.engines.strategy import DiscreteParameter, ParameterSpace
 
@@ -29,6 +30,7 @@ class OptimizationStrategyTests(TestCase):
         result = strategy.execute(specification)
 
         self.assertIsInstance(result, OptimizationSearchRun)
+        self.assertIs(result.strategy_metadata, strategy.metadata)
         self.assertIs(result.evaluations, expected.evaluations)
         self.assertEqual(
             grid_search_runner.parameter_spaces,
