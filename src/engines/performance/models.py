@@ -14,6 +14,7 @@ from src.engines.execution.models import (
 
 __all__ = [
     "PerformanceContext",
+    "PerformanceMetrics",
     "PerformanceReport",
     "PerformanceStatus",
     "PnLSummary",
@@ -37,6 +38,61 @@ class TradeOutcomeType(str, Enum):
     EXECUTED = "EXECUTED"
     REJECTED = "REJECTED"
     SKIPPED = "SKIPPED"
+
+
+@dataclass(frozen=True, slots=True)
+class PerformanceMetrics:
+    """Records deterministic non-portfolio metrics over realized trade PnL."""
+
+    total_trades: int
+    winning_trades: int
+    losing_trades: int
+    flat_trades: int
+    gross_profit: float
+    gross_loss: float
+    net_profit: float
+    win_rate: float
+    loss_rate: float
+    flat_rate: float
+    average_trade_pnl: float
+    average_winning_trade: float
+    average_losing_trade: float
+    profit_factor: float | None
+    expectancy: float
+
+    def __post_init__(self) -> None:
+        """Require internally consistent counts and metrics without rounding."""
+        counts = (
+            (self.total_trades, "total_trades"),
+            (self.winning_trades, "winning_trades"),
+            (self.losing_trades, "losing_trades"),
+            (self.flat_trades, "flat_trades"),
+        )
+        for count, field_name in counts:
+            _validate_count(count, field_name)
+        if (
+            self.winning_trades + self.losing_trades + self.flat_trades
+            != self.total_trades
+        ):
+            raise ValueError("trade counts must equal total_trades.")
+
+        metrics = (
+            (self.gross_profit, "gross_profit"),
+            (self.gross_loss, "gross_loss"),
+            (self.net_profit, "net_profit"),
+            (self.win_rate, "win_rate"),
+            (self.loss_rate, "loss_rate"),
+            (self.flat_rate, "flat_rate"),
+            (self.average_trade_pnl, "average_trade_pnl"),
+            (self.average_winning_trade, "average_winning_trade"),
+            (self.average_losing_trade, "average_losing_trade"),
+            (self.expectancy, "expectancy"),
+        )
+        for value, field_name in metrics:
+            _validate_finite_float(value, field_name)
+        if self.gross_profit < 0 or self.gross_loss < 0:
+            raise ValueError("gross_profit and gross_loss must be non-negative.")
+        _validate_metric_relationships(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +205,52 @@ def _validate_finite_float(value: float, field_name: str) -> None:
         raise TypeError(f"{field_name} must be a float.")
     if not isfinite(value):
         raise ValueError(f"{field_name} must be finite.")
+
+
+def _validate_metric_relationships(metrics: PerformanceMetrics) -> None:
+    """Require metrics to follow the documented zero-safe aggregate formulas."""
+    if metrics.total_trades == 0:
+        expected_rates = (0.0, 0.0, 0.0)
+        expected_averages = (0.0, 0.0, 0.0, 0.0)
+    else:
+        expected_rates = (
+            metrics.winning_trades / metrics.total_trades,
+            metrics.losing_trades / metrics.total_trades,
+            metrics.flat_trades / metrics.total_trades,
+        )
+        expected_averages = (
+            metrics.net_profit / metrics.total_trades,
+            (
+                metrics.gross_profit / metrics.winning_trades
+                if metrics.winning_trades
+                else 0.0
+            ),
+            (
+                -metrics.gross_loss / metrics.losing_trades
+                if metrics.losing_trades
+                else 0.0
+            ),
+            metrics.net_profit / metrics.total_trades,
+        )
+    if (
+        (metrics.win_rate, metrics.loss_rate, metrics.flat_rate) != expected_rates
+        or (
+            metrics.average_trade_pnl,
+            metrics.average_winning_trade,
+            metrics.average_losing_trade,
+            metrics.expectancy,
+        )
+        != expected_averages
+    ):
+        raise ValueError("rates and averages must match the aggregate trade facts.")
+
+    if metrics.profit_factor is not None:
+        _validate_finite_float(metrics.profit_factor, "profit_factor")
+    expected_profit_factor = (
+        metrics.gross_profit / metrics.gross_loss if metrics.gross_loss else None
+    )
+    if metrics.profit_factor != expected_profit_factor:
+        raise ValueError("profit_factor must match gross profit and gross loss.")
 
 
 def _calculate_realized_pnl(completed_trade: CompletedTrade) -> float:

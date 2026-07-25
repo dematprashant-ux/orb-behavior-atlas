@@ -5,11 +5,12 @@ from typing import Protocol
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
     PerformanceContext,
+    PerformanceMetrics,
     PerformanceReport,
     PnLSummary,
 )
 
-__all__ = ["PerformanceEngine", "PnLEngine"]
+__all__ = ["PerformanceAnalyzer", "PerformanceEngine", "PnLEngine"]
 
 
 class PerformanceEngine(Protocol):
@@ -24,3 +25,10 @@ class PnLEngine(Protocol):
 
     def calculate(self, trades: tuple[CompletedTrade, ...]) -> PnLSummary:
         """Return an immutable summary calculated only from explicit trade facts."""
+
+
+class PerformanceAnalyzer(Protocol):
+    """Defines pure aggregate analysis over an immutable realized-PnL summary."""
+
+    def analyze(self, summary: PnLSummary) -> PerformanceMetrics:
+        """Return deterministic non-portfolio performance metrics."""

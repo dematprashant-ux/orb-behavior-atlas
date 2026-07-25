@@ -4,6 +4,7 @@ from src.engines.backtesting.models import BacktestRun
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
     PerformanceContext,
+    PerformanceMetrics,
     PerformanceReport,
     PerformanceStatus,
     PnLSummary,
@@ -12,6 +13,7 @@ from src.engines.performance.models import (
 
 __all__ = [
     "build_performance_context",
+    "build_performance_metrics",
     "build_performance_report",
     "build_pnl_summary",
     "build_trade_pnl",
@@ -130,4 +132,44 @@ def build_pnl_summary(
     return PnLSummary(
         trade_pnls=trade_pnls,
         total_realized_pnl=total_realized_pnl,
+    )
+
+
+def build_performance_metrics(
+    total_trades: int,
+    winning_trades: int,
+    losing_trades: int,
+    flat_trades: int,
+    gross_profit: float,
+    gross_loss: float,
+    net_profit: float,
+    win_rate: float,
+    loss_rate: float,
+    flat_rate: float,
+    average_trade_pnl: float,
+    average_winning_trade: float,
+    average_losing_trade: float,
+    profit_factor: float | None,
+    expectancy: float,
+) -> PerformanceMetrics:
+    """Build immutable metrics after enforcing their aggregate invariants.
+
+    The builder calculates no additional metrics and applies no rounding.
+    """
+    return PerformanceMetrics(
+        total_trades=total_trades,
+        winning_trades=winning_trades,
+        losing_trades=losing_trades,
+        flat_trades=flat_trades,
+        gross_profit=gross_profit,
+        gross_loss=gross_loss,
+        net_profit=net_profit,
+        win_rate=win_rate,
+        loss_rate=loss_rate,
+        flat_rate=flat_rate,
+        average_trade_pnl=average_trade_pnl,
+        average_winning_trade=average_winning_trade,
+        average_losing_trade=average_losing_trade,
+        profit_factor=profit_factor,
+        expectancy=expectancy,
     )

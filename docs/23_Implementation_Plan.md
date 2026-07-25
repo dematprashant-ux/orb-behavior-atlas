@@ -1105,6 +1105,44 @@ M12.1 is complete when ordered explicit completed trades deterministically
 produce immutable per-trade and aggregate realized PnL without costs, rounding,
 or assumptions beyond the supplied facts.
 
+## M12.2 — Trading Performance Metrics
+
+### Objective
+
+Derive deterministic statistical trading metrics solely from immutable
+`PnLSummary` artifacts.
+
+### Scope
+
+- Immutable `PerformanceMetrics` model and pure builder
+- `PerformanceAnalyzer` protocol and `BasicPerformanceAnalyzer`
+- Counts, gross/net profit, rates, averages, profit factor, and expectancy
+- Contract tests and directly affected documentation
+
+### Metric Definitions
+
+- Winning, losing, and flat trades have positive, negative, and zero realized
+  PnL respectively.
+- Gross loss is the absolute sum of negative PnL; average losing trade remains
+  negative.
+- Empty summaries produce zero rates, averages, and expectancy, with
+  `profit_factor=None`; zero gross loss also produces `profit_factor=None`.
+- All calculations use native float arithmetic without rounding. No portfolio
+  analytics, drawdown, or equity curve is produced.
+
+### Explicit Exclusions
+
+- Equity curves, drawdown, Sharpe, Sortino, Calmar, optimization, charts, and
+  reports
+- Candle inspection, costs, fee/commission/slippage inference, execution or
+  strategy changes, persistence, caching, and I/O
+
+### Acceptance Criteria
+
+M12.2 is complete when any immutable PnL summary deterministically produces
+internally consistent trading counts, aggregates, rates, averages, profit
+factor, and expectancy without portfolio analytics or rounding.
+
 Implement:
 
 - Data Engine
