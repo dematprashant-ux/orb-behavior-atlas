@@ -103,6 +103,16 @@ does not generate schedules, construct datasets itself, optimize, search
 parameters, retry, return partial results, calculate analytics, report,
 serialize, or perform I/O.
 
+## 1.9 Walk-Forward Reporting and Pipeline
+
+M17.7 represents completed `WalkForwardRun` values through an immutable
+`WalkForwardReport` and a deterministic structural summary. The injected
+`StandardWalkForwardAnalyticsPipeline` invokes a rolling-window generator,
+walk-forward runner, and report builder once each in that order. It performs
+no optimization, analytics calculation, serialization, rendering, or I/O.
+Dedicated serializers and in-memory Markdown, HTML, and PDF renderers project
+only existing report facts; they do not execute runs or alter the report.
+
 ---
 
 # 2. Responsibilities
