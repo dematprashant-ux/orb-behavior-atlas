@@ -4,11 +4,17 @@ from dataclasses import dataclass
 from html import escape
 from typing import Generic, Protocol, TypeVar
 
-from src.engines.backtesting.summary import OptimizationRunSummaryReport
+from src.engines.backtesting.summary import (
+    OptimizationRunSummaries,
+    OptimizationRunSummary,
+    OptimizationRunSummaryAnalysis,
+    OptimizationRunSummaryReport,
+)
 
 __all__ = [
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
+    "OptimizationRunSummaryReportingPipeline",
     "HtmlOptimizationRunSummaryReportRenderer",
     "MarkdownOptimizationRunSummaryReportRenderer",
     "PlainTextOptimizationRunSummaryReportRenderer",
@@ -47,6 +53,41 @@ class OptimizationRunSummaryReportRenderer(
         _RenderedOptimizationRunSummaryPayload
     ]:
         """Return one future rendered value without defining its representation."""
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryReportingPipeline(
+    Generic[_RenderedOptimizationRunSummaryPayload],
+):
+    """Compose canonical one-run reporting stages through one injected renderer."""
+
+    renderer: OptimizationRunSummaryReportRenderer[
+        _RenderedOptimizationRunSummaryPayload
+    ]
+
+    def __post_init__(self) -> None:
+        """Require one explicit renderer contract without invoking it."""
+        if self.renderer is None:
+            raise TypeError("renderer must not be None.")
+        if not callable(getattr(self.renderer, "render", None)):
+            raise TypeError("renderer must define a callable render method.")
+
+    def render_run(
+        self,
+        run: "OptimizationRun",
+    ) -> OptimizationRunSummaryRenderedReport[
+        _RenderedOptimizationRunSummaryPayload
+    ]:
+        """Render one completed run through canonical summary composition only."""
+        from src.engines.backtesting.optimization import OptimizationRun
+
+        if not isinstance(run, OptimizationRun):
+            raise TypeError("run must be an OptimizationRun.")
+        summary = OptimizationRunSummary.from_run(run)
+        summaries = OptimizationRunSummaries((summary,))
+        analysis = OptimizationRunSummaryAnalysis.from_summaries(summaries)
+        report = OptimizationRunSummaryReport.from_analysis(analysis)
+        return self.renderer.render(report)
 
 
 @dataclass(frozen=True, slots=True)

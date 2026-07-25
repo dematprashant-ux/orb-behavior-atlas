@@ -404,6 +404,14 @@ library at the value boundary; there is no full HTML document, CSS, JavaScript,
 recalculation, summary traversal, other-renderer delegation, printing, file
 writing, persistence, or optimization re-execution.
 
+M25.1 adds `OptimizationRunSummaryReportingPipeline`, the thin application-level
+entry point for one completed `OptimizationRun`. It retains one explicitly
+injected renderer and composes the existing canonical summary, one-item
+collection, analysis, and report factories before calling that renderer exactly
+once. The renderer's exact result is returned unchanged; the pipeline performs
+no optimization re-execution, calculation duplication, payload inspection,
+renderer selection, printing, file writing, persistence, or global registration.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

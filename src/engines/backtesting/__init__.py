@@ -53,6 +53,7 @@ from src.engines.backtesting.reporting import (
     MarkdownOptimizationRunSummaryReportRenderer,
     OptimizationRunSummaryRenderedReport,
     OptimizationRunSummaryReportRenderer,
+    OptimizationRunSummaryReportingPipeline,
     PlainTextOptimizationRunSummaryReportRenderer,
 )
 from src.engines.backtesting.ranking import (
@@ -173,6 +174,7 @@ __all__ = [
     "OptimizationRunSummaryReport",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
+    "OptimizationRunSummaryReportingPipeline",
     "HtmlOptimizationRunSummaryReportRenderer",
     "MarkdownOptimizationRunSummaryReportRenderer",
     "PlainTextOptimizationRunSummaryReportRenderer",
