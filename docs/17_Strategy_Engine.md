@@ -339,6 +339,15 @@ semantics. The composition adds no sorting, filtering, grouping, comparison,
 ranking, selection, reporting, formatting, persistence, serialization, or
 optimization re-execution.
 
+M23.1 adds `OptimizationRunSummaryDelta`, an immutable scalar-only directional
+comparison of two existing analyses. Its canonical `between()` factory calculates
+every count and rate as comparison minus baseline, preserving signed differences
+without rounding, clamping, absolute values, or relative percentage changes.
+Comparing the same analysis, including two empty analyses, produces zero deltas.
+The delta retains no source analyses or nested values and traverses neither
+summaries nor runs; it makes no better/worse judgment and introduces no ranking,
+selection, reporting, persistence, serialization, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

@@ -11,6 +11,7 @@ __all__ = [
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
     "OptimizationRunSummaryAnalysis",
+    "OptimizationRunSummaryDelta",
     "OptimizationRunSummaryRates",
 ]
 
@@ -267,6 +268,113 @@ class OptimizationRunSummaryAnalysis:
         aggregate = OptimizationRunSummaryAggregate.from_summaries(summaries)
         rates = OptimizationRunSummaryRates.from_aggregate(aggregate)
         return cls(summaries, aggregate, rates)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryDelta:
+    """Describe scalar directional differences between two summary analyses."""
+
+    run_count_delta: int
+    evaluated_candidate_count_delta: int
+    total_eligible_candidate_count_delta: int
+    recorded_rejection_count_delta: int
+    search_space_exhausted_count_delta: int
+    evaluation_budget_reached_count_delta: int
+    candidate_completion_rate_delta: float
+    recorded_rejection_rate_delta: float
+    search_space_exhausted_rate_delta: float
+    evaluation_budget_reached_rate_delta: float
+
+    def __post_init__(self) -> None:
+        """Require signed scalar differences without interpreting their direction."""
+        for value, name in (
+            (self.run_count_delta, "run_count_delta"),
+            (self.evaluated_candidate_count_delta, "evaluated_candidate_count_delta"),
+            (
+                self.total_eligible_candidate_count_delta,
+                "total_eligible_candidate_count_delta",
+            ),
+            (self.recorded_rejection_count_delta, "recorded_rejection_count_delta"),
+            (
+                self.search_space_exhausted_count_delta,
+                "search_space_exhausted_count_delta",
+            ),
+            (
+                self.evaluation_budget_reached_count_delta,
+                "evaluation_budget_reached_count_delta",
+            ),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an int.")
+        for value, name in (
+            (self.candidate_completion_rate_delta, "candidate_completion_rate_delta"),
+            (self.recorded_rejection_rate_delta, "recorded_rejection_rate_delta"),
+            (
+                self.search_space_exhausted_rate_delta,
+                "search_space_exhausted_rate_delta",
+            ),
+            (
+                self.evaluation_budget_reached_rate_delta,
+                "evaluation_budget_reached_rate_delta",
+            ),
+        ):
+            if not isinstance(value, float):
+                raise TypeError(f"{name} must be a float.")
+            if not -1.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be between -1.0 and 1.0.")
+
+    @classmethod
+    def between(
+        cls,
+        baseline: OptimizationRunSummaryAnalysis,
+        comparison: OptimizationRunSummaryAnalysis,
+    ) -> "OptimizationRunSummaryDelta":
+        """Calculate comparison-minus-baseline scalar differences only."""
+        if not isinstance(baseline, OptimizationRunSummaryAnalysis):
+            raise TypeError("baseline must be an OptimizationRunSummaryAnalysis.")
+        if not isinstance(comparison, OptimizationRunSummaryAnalysis):
+            raise TypeError("comparison must be an OptimizationRunSummaryAnalysis.")
+        return cls(
+            run_count_delta=(
+                comparison.aggregate.run_count - baseline.aggregate.run_count
+            ),
+            evaluated_candidate_count_delta=(
+                comparison.aggregate.evaluated_candidate_count
+                - baseline.aggregate.evaluated_candidate_count
+            ),
+            total_eligible_candidate_count_delta=(
+                comparison.aggregate.total_eligible_candidate_count
+                - baseline.aggregate.total_eligible_candidate_count
+            ),
+            recorded_rejection_count_delta=(
+                comparison.aggregate.recorded_rejection_count
+                - baseline.aggregate.recorded_rejection_count
+            ),
+            search_space_exhausted_count_delta=(
+                comparison.aggregate.search_space_exhausted_count
+                - baseline.aggregate.search_space_exhausted_count
+            ),
+            evaluation_budget_reached_count_delta=(
+                comparison.aggregate.evaluation_budget_reached_count
+                - baseline.aggregate.evaluation_budget_reached_count
+            ),
+            candidate_completion_rate_delta=(
+                comparison.rates.candidate_completion_rate
+                - baseline.rates.candidate_completion_rate
+            ),
+            recorded_rejection_rate_delta=(
+                comparison.rates.recorded_rejection_rate
+                - baseline.rates.recorded_rejection_rate
+            ),
+            search_space_exhausted_rate_delta=(
+                comparison.rates.search_space_exhausted_rate
+                - baseline.rates.search_space_exhausted_rate
+            ),
+            evaluation_budget_reached_rate_delta=(
+                comparison.rates.evaluation_budget_reached_rate
+                - baseline.rates.evaluation_budget_reached_rate
+            ),
+        )
 
 
 def _rate(numerator: int, denominator: int) -> float:
