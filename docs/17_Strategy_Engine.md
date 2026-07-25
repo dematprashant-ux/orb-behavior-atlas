@@ -72,6 +72,22 @@ walk-forward integration, reporting, serialization, or I/O. Future search
 approaches can reuse the same candidate-evaluation boundary without changing
 candidate generation.
 
+## 1.6 Deterministic Grid Search Runner
+
+M18.4 adds `GridSearchRunner`, `StandardGridSearchRunner`, and immutable
+`GridSearchRun`. The standard runner receives injected `CandidateGenerator`
+and `CandidateEvaluator` collaborators, generates candidates once from one
+existing `ParameterSpace`, then evaluates each candidate sequentially in the
+generator's exact order. The run retains the source parameter space and its
+ordered `CandidateEvaluation` values without copying, sorting, or selecting
+them.
+
+This runner performs orchestration only. It defines no score, ranking metric,
+winner selection, optimizer heuristic, random behavior, walk-forward work,
+reporting, serialization, I/O, or concurrency. Future random-search and
+Bayesian-search runners can reuse the same evaluation contract while defining
+their own candidate-generation policies.
+
 ---
 
 # 2. Responsibilities

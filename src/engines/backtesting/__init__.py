@@ -10,6 +10,11 @@ from src.engines.backtesting.costs import (
     ZeroTransactionCostModel,
 )
 from src.engines.backtesting.evaluation import CandidateEvaluation
+from src.engines.backtesting.grid_search import (
+    GridSearchRun,
+    GridSearchRunner,
+    StandardGridSearchRunner,
+)
 from src.engines.backtesting.interfaces import (
     BacktestEngine,
     CandidateEvaluator,
@@ -63,9 +68,12 @@ __all__ = [
     "DatasetWindow",
     "DatasetWindowBuilder",
     "FixedRateTransactionCostModel",
+    "GridSearchRun",
+    "GridSearchRunner",
     "TransactionCostBreakdown",
     "TransactionCostModel",
     "StandardDatasetWindowBuilder",
+    "StandardGridSearchRunner",
     "StandardTrainingValidationSplitEngine",
     "StandardRollingWindowGenerator",
     "StandardWalkForwardRunner",
