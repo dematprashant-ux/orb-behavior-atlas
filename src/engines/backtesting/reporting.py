@@ -5,6 +5,7 @@ from html import escape
 from typing import Generic, Protocol, TypeVar
 
 from src.engines.backtesting.summary import (
+    OptimizationResultReport,
     OptimizationRunSummaries,
     OptimizationRunSummary,
     OptimizationRunSummaryAnalysis,
@@ -12,6 +13,9 @@ from src.engines.backtesting.summary import (
 )
 
 __all__ = [
+    "OptimizationResultRenderedReport",
+    "OptimizationResultReportRenderer",
+    "OptimizationResultReportingPipeline",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
     "OptimizationRunSummaryReportingPipeline",
@@ -25,6 +29,56 @@ _RenderedOptimizationRunSummaryPayload = TypeVar(
     "_RenderedOptimizationRunSummaryPayload",
     covariant=True,
 )
+
+_RenderedOptimizationResultPayload = TypeVar(
+    "_RenderedOptimizationResultPayload",
+    covariant=True,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationResultRenderedReport(Generic[_RenderedOptimizationResultPayload]):
+    """Retain one result-renderer payload without defining its representation."""
+
+    payload: _RenderedOptimizationResultPayload
+
+    def __post_init__(self) -> None:
+        """Require one explicit payload while preserving its exact identity."""
+        if self.payload is None:
+            raise TypeError("payload must not be None.")
+
+
+class OptimizationResultReportRenderer(Protocol[_RenderedOptimizationResultPayload]):
+    """Define renderer-independent presentation of one optimization result."""
+
+    def render(
+        self,
+        report: OptimizationResultReport,
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Return one renderer-defined result value without inspecting it."""
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationResultReportingPipeline(Generic[_RenderedOptimizationResultPayload]):
+    """Delegate one completed result report through one injected renderer."""
+
+    renderer: OptimizationResultReportRenderer[_RenderedOptimizationResultPayload]
+
+    def __post_init__(self) -> None:
+        """Require one explicit result renderer without invoking it."""
+        if self.renderer is None:
+            raise TypeError("renderer must not be None.")
+        if not callable(getattr(self.renderer, "render", None)):
+            raise TypeError("renderer must define a callable render method.")
+
+    def render_report(
+        self,
+        report: OptimizationResultReport,
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Return the injected renderer's exact output for one existing report."""
+        if not isinstance(report, OptimizationResultReport):
+            raise TypeError("report must be an OptimizationResultReport.")
+        return self.renderer.render(report)
 
 
 @dataclass(frozen=True, slots=True)

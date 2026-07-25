@@ -419,6 +419,14 @@ ranking is owned by that run. It neither reruns nor recalculates ranking,
 selection, candidate evaluation, or scoring; it copies no candidate parameters
 or score values and introduces no rendering, persistence, timestamps, or IDs.
 
+M25.3 adds `OptimizationResultReportingPipeline`, a thin application-level
+boundary for an existing `OptimizationResultReport`. It accepts one injected
+`OptimizationResultReportRenderer`, forwards the exact report once, and returns
+the exact `OptimizationResultRenderedReport` unchanged. This result-specific
+pipeline does not overlap the summary pipeline: it builds no summaries, and it
+performs no optimization, ranking, selection, candidate evaluation, rendering
+choice, payload inspection, calculation, mutation, persistence, or I/O.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
