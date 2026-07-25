@@ -61,6 +61,15 @@ out-of-range selections are valid. The builder rejects decreasing input order
 instead of silently sorting and performs no resampling, interpolation, session
 inference, I/O, or caching.
 
+## 1.5 Training and Validation Split Engine
+
+M17.3 composes one `WalkForwardWindow` and an injected dataset-window builder.
+It invokes the builder exactly once for training and then exactly once for
+validation, retaining the source window and resulting immutable selections.
+Empty selections are valid. The engine does not generate schedules, shift
+boundaries, infer availability, execute a backtest, optimize, or catch builder
+failures.
+
 ---
 
 # 2. Responsibilities
