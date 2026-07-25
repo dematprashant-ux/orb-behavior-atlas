@@ -1393,6 +1393,44 @@ in-memory Markdown without changing analytics or writing external output.
 M13.4 is complete when equivalent serialized reports produce equivalent,
 ordered, newline-terminated Markdown with no mutation or mathematical analysis.
 
+## M13.5 — HTML Backtest Report Rendering
+
+### Objective
+
+Render serialized backtest-report plain data as deterministic standalone,
+in-memory HTML without external assets, analytics changes, or file output.
+
+### Scope
+
+- `HtmlReportRenderer` protocol and immutable `StandardHtmlReportRenderer`
+- Standalone semantic HTML, embedded responsive and printable CSS, and stable
+  tables for performance, risk, equity, and drawdown data
+- Contract tests and directly affected documentation
+
+### Rendering Contract
+
+- The document includes a doctype, English HTML root, UTF-8 and viewport
+  metadata, stable title, embedded CSS, and body with no external resources.
+- Sections appear in this order: Backtest Report, Performance Metrics,
+  Risk-Adjusted Metrics, Equity Curve, Drawdown Summary.
+- Dynamic plain-data strings are HTML escaped. Existing numeric values retain
+  their native `str()` representation without rounding or percentage conversion;
+  unavailable values render as `N/A`.
+- Output has stable table columns, preserves point-list order, and ends with
+  exactly one newline.
+
+### Explicit Exclusions
+
+- File writing; PDF output; charts; JavaScript; external CSS or fonts; network
+  calls; optimization; persistence; and I/O
+- Recalculation or changes to analytics, serialization, JSON export, Markdown
+  rendering, execution, strategy, PnL, equity, drawdown, or risk metrics
+
+### Acceptance Criteria
+
+M13.5 is complete when equivalent serialized reports produce equivalent,
+escaped, self-contained HTML documents with embedded styling and no mutation.
+
 Implement:
 
 - Data Engine

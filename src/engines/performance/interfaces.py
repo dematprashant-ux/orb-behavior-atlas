@@ -25,6 +25,7 @@ __all__ = [
     "ReportSerializer",
     "JsonReportExporter",
     "MarkdownReportRenderer",
+    "HtmlReportRenderer",
 ]
 
 
@@ -93,3 +94,10 @@ class MarkdownReportRenderer(Protocol):
 
     def render(self, serialized_report: Mapping[str, object]) -> str:
         """Return deterministic Markdown without file I/O or calculations."""
+
+
+class HtmlReportRenderer(Protocol):
+    """Defines pure standalone HTML rendering from plain report data."""
+
+    def render(self, serialized_report: Mapping[str, object]) -> str:
+        """Return deterministic HTML without external resources or file I/O."""
