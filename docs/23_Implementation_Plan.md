@@ -1575,6 +1575,41 @@ artifacts without accepting domain models or performing report processing.
 M14.4 is complete when equivalent safe artifact mappings produce byte-identical
 in-memory ZIP archives with stable metadata and entry order.
 
+## M14.5 — Binary Report Writer
+
+### Objective
+
+Persist already-produced binary report artifacts through a dedicated atomic
+writer boundary that remains independent from renderers and bundle builders.
+
+### Scope
+
+- `BinaryReportWriter` protocol and `AtomicBinaryReportWriter`
+- Exact bytes-only persistence, parent-directory creation, temporary sibling
+  files, atomic replacement where supported, and failure cleanup
+- Contract tests and directly affected documentation
+
+### Writer Contract
+
+- Writers accept only `bytes` and an explicit `Path` destination, preserving
+  every artifact byte without format inspection or transformation.
+- A replacement is written to a temporary file in the destination directory
+  before `os.replace` is invoked. Existing destinations remain intact when a
+  pre-replacement write fails, and temporary files are cleaned up where practical.
+- Empty bytes are valid. Writers create missing parent directories and report
+  filesystem failures through deterministic chained exceptions.
+
+### Explicit Exclusions
+
+- Report generation, domain-model access, serialization, PDF rendering, ZIP
+  bundle construction, text encoding, format validation, calculations, and
+  network access
+
+### Acceptance Criteria
+
+M14.5 is complete when supplied binary bytes are persisted exactly through an
+atomic replacement boundary with validated destinations and safe failure cleanup.
+
 Implement:
 
 - Data Engine

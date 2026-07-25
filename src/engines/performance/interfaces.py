@@ -31,6 +31,7 @@ __all__ = [
     "ReportExportService",
     "PdfReportRenderer",
     "ReportBundleBuilder",
+    "BinaryReportWriter",
 ]
 
 
@@ -140,3 +141,10 @@ class ReportBundleBuilder(Protocol):
 
     def build(self, artifacts: Mapping[str, str | bytes]) -> bytes:
         """Return a complete ZIP archive without report processing or file I/O."""
+
+
+class BinaryReportWriter(Protocol):
+    """Defines exact persistence of already-produced binary report artifacts."""
+
+    def write(self, content: bytes, destination: Path) -> None:
+        """Persist exact binary bytes to one destination without format inspection."""

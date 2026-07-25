@@ -29,6 +29,7 @@ from src.engines.performance.interfaces import (
     ReportExportService,
     PdfReportRenderer,
     ReportBundleBuilder,
+    BinaryReportWriter,
 )
 from src.engines.performance.models import (
     BacktestReport,
@@ -60,6 +61,7 @@ from src.engines.performance.writers import TextReportWriter
 from src.engines.performance.export_service import StandardReportExportService
 from src.engines.performance.pdf import StandardPdfReportRenderer
 from src.engines.performance.bundles import StandardReportBundleBuilder
+from src.engines.performance.binary_writers import AtomicBinaryReportWriter
 
 __all__ = [
     "BasicPerformanceAnalyzer",
@@ -89,6 +91,7 @@ __all__ = [
     "ReportExportService",
     "ReportWriter",
     "ReportBundleBuilder",
+    "BinaryReportWriter",
     "PdfReportRenderer",
     "JsonReportExporter",
     "HtmlReportRenderer",
@@ -100,6 +103,7 @@ __all__ = [
     "StandardReportExportService",
     "StandardPdfReportRenderer",
     "StandardReportBundleBuilder",
+    "AtomicBinaryReportWriter",
     "TradePnL",
     "TextReportWriter",
     "TradeOutcome",
