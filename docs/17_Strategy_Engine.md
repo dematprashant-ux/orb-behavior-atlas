@@ -264,6 +264,12 @@ count only eligible evaluations, while progress and termination describe the
 filtered searchable set. Constraints do not score, rank, select, or control
 termination.
 
+M21.2 adds reusable `AllOfConstraint`, `AnyOfConstraint`, and `NotConstraint`
+objects. They support nested deterministic eligibility expressions, preserving
+child order and short-circuiting on the first AND failure or OR success. Empty
+ALL is eligible and empty ANY is ineligible. Composition remains filtering only;
+it does not alter scoring, ranking, selection, or execution ordering.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
