@@ -4,6 +4,7 @@ from src.engines.performance.builders import (
     build_drawdown_point,
     build_drawdown_summary,
 )
+from src.engines.performance._drawdown_values import calculate_absolute_drawdowns
 from src.engines.performance.models import (
     DrawdownPoint,
     DrawdownSummary,
@@ -31,11 +32,18 @@ class BasicDrawdownAnalyzer:
         if not isinstance(curve, EquityCurve):
             raise TypeError("curve must be an EquityCurve.")
 
-        running_peak = 0.0
+        values = calculate_absolute_drawdowns(
+            tuple(
+                equity_point.cumulative_realized_pnl
+                for equity_point in curve.equity_points
+            )
+        )
         drawdown_points: list[DrawdownPoint] = []
-        for equity_point in curve.equity_points:
-            running_peak = max(running_peak, equity_point.cumulative_realized_pnl)
-            drawdown = running_peak - equity_point.cumulative_realized_pnl
+        for equity_point, (running_peak, drawdown) in zip(
+            curve.equity_points,
+            values,
+            strict=True,
+        ):
             drawdown_points.append(
                 build_drawdown_point(equity_point, running_peak, drawdown)
             )

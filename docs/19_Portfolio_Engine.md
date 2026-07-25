@@ -75,6 +75,21 @@ Closed positions contribute only through snapshot cash, so entry capital is
 not double counted. The boundary accesses no market data, recalculates no
 transaction costs, and produces no performance, drawdown, or reporting data.
 
+## 1.5 Portfolio Performance Metrics
+
+M16.5 derives immutable performance facts only from `PortfolioEquityCurve`.
+`PortfolioPerformanceMetrics` records initial and final equity, absolute and
+total return, equity extrema, and point count. Absolute return is `final -
+initial`; total return is `absolute_return / initial`. Empty curves have zero
+equity facts and an unavailable (`None`) total return, avoiding invented
+infinities. Single-point curves have zero absolute and total return when their
+initial equity is non-zero.
+
+Portfolio metrics do not inspect positions, value holdings, calculate costs,
+or recreate trade statistics. Portfolio drawdown has a separate result model
+but reuses the existing shared absolute-drawdown mathematics; it is calculated
+from the same portfolio equity curve and retains source equity-point references.
+
 ---
 
 # 2. Responsibilities

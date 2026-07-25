@@ -20,7 +20,9 @@ from src.engines.portfolio.events import (
 )
 from src.engines.portfolio.interfaces import PortfolioEngine
 from src.engines.portfolio.interfaces import (
+    PortfolioDrawdownAnalyzer,
     PortfolioEquityCurveBuilder,
+    PortfolioPerformanceAnalyzer,
     PortfolioValuationPolicy,
 )
 from src.engines.portfolio.equity import (
@@ -30,6 +32,15 @@ from src.engines.portfolio.equity import (
     StandardPortfolioEquityCurveBuilder,
     build_portfolio_equity_curve,
     build_portfolio_equity_point,
+)
+from src.engines.portfolio.analytics import (
+    PortfolioDrawdownPoint,
+    PortfolioDrawdownSummary,
+    PortfolioPerformanceMetrics,
+    StandardPortfolioDrawdownAnalyzer,
+    StandardPortfolioPerformanceAnalyzer,
+    build_portfolio_drawdown_summary,
+    build_portfolio_performance_metrics,
 )
 
 __all__ = [
@@ -44,15 +55,24 @@ __all__ = [
     "PortfolioEquityCurve",
     "PortfolioEquityCurveBuilder",
     "PortfolioEquityPoint",
+    "PortfolioDrawdownAnalyzer",
+    "PortfolioDrawdownPoint",
+    "PortfolioDrawdownSummary",
     "PortfolioEvent",
     "PortfolioOpenEvent",
     "PortfolioPosition",
     "PortfolioSnapshot",
     "PortfolioValuationPolicy",
+    "PortfolioPerformanceAnalyzer",
+    "PortfolioPerformanceMetrics",
+    "StandardPortfolioDrawdownAnalyzer",
     "StandardPortfolioEquityCurveBuilder",
+    "StandardPortfolioPerformanceAnalyzer",
     "StandardPortfolioEngine",
     "build_portfolio_position",
     "build_portfolio_snapshot",
     "build_portfolio_equity_curve",
     "build_portfolio_equity_point",
+    "build_portfolio_drawdown_summary",
+    "build_portfolio_performance_metrics",
 ]

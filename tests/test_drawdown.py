@@ -193,6 +193,7 @@ class DrawdownTests(TestCase):
         expected_imports = {
             "src/engines/performance/drawdown.py": {
                 "src.engines.performance.builders",
+                "src.engines.performance._drawdown_values",
                 "src.engines.performance.models",
             },
             "src/engines/performance/interfaces.py": {

@@ -8,6 +8,8 @@ from src.engines.portfolio.models import PortfolioSnapshot
 __all__ = [
     "PortfolioEngine",
     "PortfolioEquityCurveBuilder",
+    "PortfolioPerformanceAnalyzer",
+    "PortfolioDrawdownAnalyzer",
     "PortfolioValuationPolicy",
 ]
 
@@ -35,3 +37,17 @@ class PortfolioEquityCurveBuilder(Protocol):
 
     def build(self, snapshots: tuple[PortfolioSnapshot, ...]) -> "PortfolioEquityCurve":
         """Return ordered cash-plus-valued-position points without market access."""
+
+
+class PortfolioPerformanceAnalyzer(Protocol):
+    """Defines pure portfolio-equity metric analysis."""
+
+    def analyze(self, curve: "PortfolioEquityCurve") -> "PortfolioPerformanceMetrics":
+        """Return metrics computed only from the existing portfolio equity curve."""
+
+
+class PortfolioDrawdownAnalyzer(Protocol):
+    """Defines shared-mathematics absolute drawdown over portfolio equity."""
+
+    def analyze(self, curve: "PortfolioEquityCurve") -> "PortfolioDrawdownSummary":
+        """Return drawdown facts from the supplied portfolio equity curve."""
