@@ -31,6 +31,20 @@ valuation, unrealized PnL, an exit state, lifecycle transition, allocation, or
 portfolio analytics. Empty snapshots are valid. Construction retains supplied
 immutable position references and does not mutate caller collections.
 
+## 1.2 Capital Allocation Foundation
+
+M16.2 keeps capital-allocation decisions separate from portfolio state changes.
+An immutable `AllocationRequest` contains available cash only, and an
+immutable `AllocationDecision` contains allocated capital only. The
+`CapitalAllocationPolicy` protocol is stateless and deterministic. Its fixed
+policy caps configured capital at available cash; its percentage policy uses
+available cash as its explicit and only capital base.
+
+Allocation does not size orders, open or close positions, alter cash, access
+market data, calculate costs, or use global configuration. A zero-capital
+decision is a valid deterministic allocation fact; later lifecycle code owns
+the decision whether it can create a position.
+
 ---
 
 # 2. Responsibilities
