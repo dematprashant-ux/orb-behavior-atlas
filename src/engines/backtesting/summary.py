@@ -14,6 +14,7 @@ __all__ = [
     "OptimizationRunSummaryCatalog",
     "OptimizationRunSummaryComparison",
     "OptimizationRunSummaryDelta",
+    "OptimizationRunSummaryReport",
     "OptimizationRunSummaryRates",
 ]
 
@@ -447,6 +448,28 @@ class OptimizationRunSummaryCatalog:
     def __getitem__(self, index: int) -> OptimizationRunSummaryComparison:
         """Return one retained comparison by zero-based insertion position."""
         return self.comparisons[index]
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryReport:
+    """Retain one canonical summary analysis as structured report-domain data."""
+
+    analysis: OptimizationRunSummaryAnalysis
+
+    def __post_init__(self) -> None:
+        """Require one existing immutable analysis without reconstruction."""
+        if not isinstance(self.analysis, OptimizationRunSummaryAnalysis):
+            raise TypeError("analysis must be an OptimizationRunSummaryAnalysis.")
+
+    @classmethod
+    def from_analysis(
+        cls,
+        analysis: OptimizationRunSummaryAnalysis,
+    ) -> "OptimizationRunSummaryReport":
+        """Construct a report that retains the supplied analysis by identity."""
+        if not isinstance(analysis, OptimizationRunSummaryAnalysis):
+            raise TypeError("analysis must be an OptimizationRunSummaryAnalysis.")
+        return cls(analysis)
 
 
 def _rate(numerator: int, denominator: int) -> float:

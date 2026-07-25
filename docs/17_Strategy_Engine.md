@@ -360,6 +360,14 @@ insertion order, duplicates, and exact child identities while exposing only
 iteration, length, and indexing. It performs no comparison, calculation,
 sorting, filtering, grouping, ranking, reporting, or optimization execution.
 
+M24.1 adds `OptimizationRunSummaryReport`, the immutable report-domain boundary
+for one exact `OptimizationRunSummaryAnalysis`. The analysis remains the single
+canonical source for its summaries, aggregate, and rates: no nested scalar is
+copied or recalculated. Empty and duplicate summary semantics, including order,
+remain available only through that retained analysis. This milestone adds no
+rendering, formatting, tables, charts, persistence, serialization, ranking,
+recommendations, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
