@@ -387,6 +387,14 @@ aggregate and raw-rate fields. It uses retained integer and float values without
 rounding, percentage conversion, recalculation, summary traversal, printing,
 file writing, persistence, or optimization re-execution.
 
+M24.5 adds `MarkdownOptimizationRunSummaryReportRenderer`, an independent
+stateless adapter accepting one report and returning an
+`OptimizationRunSummaryRenderedReport[str]`. It emits a fixed level-one heading
+followed by one blank line and a two-column table in canonical aggregate/rate
+order. It reads raw retained integers and floats with no rounding, percentages,
+recalculation, summary traversal, plain-text-renderer delegation, printing,
+file writing, persistence, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
