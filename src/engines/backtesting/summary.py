@@ -3,6 +3,7 @@
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 
+from src.engines.backtesting.ranking import RankedObjectiveScore
 from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
@@ -17,6 +18,7 @@ __all__ = [
     "OptimizationRunSummaryDelta",
     "OptimizationRunSummaryReport",
     "OptimizationResultReport",
+    "OptimizationSelectionOutcomeReport",
     "OptimizationRunSummaryRates",
 ]
 
@@ -500,6 +502,42 @@ class OptimizationResultReport:
     ) -> "OptimizationResultReport":
         """Construct a read-only result report without rerunning any stage."""
         return cls(run, selection)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationSelectionOutcomeReport:
+    """Retain every canonical outcome from one completed result selection."""
+
+    result_report: OptimizationResultReport
+    selected_outcomes: tuple[RankedObjectiveScore, ...]
+
+    def __post_init__(self) -> None:
+        """Require the exact immutable selected collection owned by the report."""
+        if not isinstance(self.result_report, OptimizationResultReport):
+            raise TypeError("result_report must be an OptimizationResultReport.")
+        if not isinstance(self.selected_outcomes, tuple):
+            raise TypeError(
+                "selected_outcomes must be a tuple of RankedObjectiveScore values."
+            )
+        if self.selected_outcomes is not self.result_report.selection.selected_scores:
+            raise ValueError(
+                "selected_outcomes must be the exact collection from result_report."
+            )
+
+    @property
+    def selection_count(self) -> int:
+        """Return the existing canonical selection cardinality without choosing one."""
+        return len(self.selected_outcomes)
+
+    @classmethod
+    def from_result_report(
+        cls,
+        result_report: OptimizationResultReport,
+    ) -> "OptimizationSelectionOutcomeReport":
+        """Project the complete existing selection without rerunning any stage."""
+        if not isinstance(result_report, OptimizationResultReport):
+            raise TypeError("result_report must be an OptimizationResultReport.")
+        return cls(result_report, result_report.selection.selected_scores)
 
 
 def _rate(numerator: int, denominator: int) -> float:

@@ -427,6 +427,16 @@ pipeline does not overlap the summary pipeline: it builds no summaries, and it
 performs no optimization, ranking, selection, candidate evaluation, rendering
 choice, payload inspection, calculation, mutation, persistence, or I/O.
 
+M25.4 adds `OptimizationSelectionOutcomeReport`, an immutable report-domain
+projection over one `OptimizationResultReport`. It retains the exact canonical
+`ObjectiveSelection.selected_scores` tuple, preserving empty, unique, and tied
+outcomes in source order with exact `RankedObjectiveScore` identities. Its
+`selection_count` reads only the existing tuple length: it assumes no winner,
+performs no tie breaking, ranking, selection, scoring, rendering, persistence,
+recommendation, interpretation, or optimization execution. Concrete result
+rendering is deferred until the zero, unique, and tied presentation semantics
+are explicitly defined.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
