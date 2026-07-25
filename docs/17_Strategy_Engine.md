@@ -312,6 +312,14 @@ insertion order, and permits empty and duplicate observations. It performs no
 sorting, deduplication, comparison, ranking, aggregation, optimization
 re-execution, reporting, persistence, or serialization.
 
+M22.3 adds `OptimizationRunSummaryAggregate`, a pure scalar projection of one
+`OptimizationRunSummaries` collection. It counts runs, evaluated candidates,
+total eligible candidates, recorded rejections, and the two existing
+termination reasons using exact integer addition. Empty collections produce zero
+totals and duplicate summaries contribute independently. It performs no sorting,
+grouping, comparison, ranking, selection, rates, averages, optimization
+re-execution, reporting, persistence, or serialization.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

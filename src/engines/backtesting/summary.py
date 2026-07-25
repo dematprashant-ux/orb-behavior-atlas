@@ -6,7 +6,11 @@ from dataclasses import dataclass
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
 
-__all__ = ["OptimizationRunSummaries", "OptimizationRunSummary"]
+__all__ = [
+    "OptimizationRunSummaries",
+    "OptimizationRunSummary",
+    "OptimizationRunSummaryAggregate",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,3 +101,81 @@ class OptimizationRunSummaries:
     def __getitem__(self, index: int) -> OptimizationRunSummary:
         """Return one supplied summary by its zero-based insertion position."""
         return self.summaries[index]
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryAggregate:
+    """Retain scalar totals derived from one summary collection without analysis."""
+
+    run_count: int
+    evaluated_candidate_count: int
+    total_eligible_candidate_count: int
+    recorded_rejection_count: int
+    search_space_exhausted_count: int
+    evaluation_budget_reached_count: int
+
+    def __post_init__(self) -> None:
+        """Require non-negative deterministic integer totals only."""
+        for value, name in (
+            (self.run_count, "run_count"),
+            (self.evaluated_candidate_count, "evaluated_candidate_count"),
+            (self.total_eligible_candidate_count, "total_eligible_candidate_count"),
+            (self.recorded_rejection_count, "recorded_rejection_count"),
+            (self.search_space_exhausted_count, "search_space_exhausted_count"),
+            (
+                self.evaluation_budget_reached_count,
+                "evaluation_budget_reached_count",
+            ),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an int.")
+            if value < 0:
+                raise ValueError(f"{name} must not be negative.")
+        if (
+            self.search_space_exhausted_count
+            + self.evaluation_budget_reached_count
+            != self.run_count
+        ):
+            raise ValueError("termination counts must match run_count.")
+
+    @classmethod
+    def from_summaries(
+        cls,
+        summaries: OptimizationRunSummaries,
+    ) -> "OptimizationRunSummaryAggregate":
+        """Derive scalar totals from one existing immutable summary collection."""
+        if not isinstance(summaries, OptimizationRunSummaries):
+            raise TypeError("summaries must be an OptimizationRunSummaries.")
+
+        run_count = 0
+        evaluated_candidate_count = 0
+        total_eligible_candidate_count = 0
+        recorded_rejection_count = 0
+        search_space_exhausted_count = 0
+        evaluation_budget_reached_count = 0
+        for summary in summaries:
+            run_count += 1
+            evaluated_candidate_count += summary.evaluated_candidate_count
+            total_eligible_candidate_count += summary.total_eligible_candidate_count
+            recorded_rejection_count += summary.rejection_count
+            if (
+                summary.termination_reason
+                is OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED
+            ):
+                search_space_exhausted_count += 1
+            elif (
+                summary.termination_reason
+                is OptimizationTerminationReason.EVALUATION_BUDGET_REACHED
+            ):
+                evaluation_budget_reached_count += 1
+            else:
+                raise ValueError("summary has an unsupported termination reason.")
+
+        return cls(
+            run_count,
+            evaluated_candidate_count,
+            total_eligible_candidate_count,
+            recorded_rejection_count,
+            search_space_exhausted_count,
+            evaluation_budget_reached_count,
+        )
