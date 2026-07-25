@@ -14,6 +14,7 @@ from src.engines.backtesting import (
     ObjectiveScore,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationBudget,
     OptimizationRun,
     OptimizationRunner,
     OptimizationSearchRun,
@@ -315,7 +316,11 @@ def _specification(
     events: list[str],
 ) -> OptimizationSpecification:
     """Create one immutable test specification with explicit policy settings."""
-    return OptimizationSpecification(parameter_space, _configuration(events))
+    return OptimizationSpecification(
+        parameter_space,
+        _configuration(events),
+        OptimizationBudget(2),
+    )
 
 
 def _grid_search_run(parameter_space: ParameterSpace) -> GridSearchRun:

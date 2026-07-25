@@ -231,6 +231,15 @@ exists today.
 
 ## 1.16 Finite Parameter-Space Indexing and Random Sampling
 
+M20.4 adds immutable `OptimizationBudget(maximum_evaluations)`, an explicit
+deterministic execution limit owned by `OptimizationSpecification`. It is
+separate from `OptimizationConfiguration`: configuration defines objective and
+selection policy, while the budget caps only candidate evaluations. Grid and
+random strategies preserve their established candidate order and evaluate at
+most the specification budget; a larger budget simply permits every available
+candidate. The budget provides no time limit, adaptive stopping, execution
+state, scoring, ranking, or selection behavior.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

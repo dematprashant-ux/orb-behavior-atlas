@@ -10,6 +10,7 @@ from src.engines.backtesting import (
     CandidateEvaluation,
     GridSearchRun,
     GridSearchRunner,
+    OptimizationBudget,
     StandardGridSearchRunner,
 )
 from src.engines.execution import ExecutionRequest, ExecutionResult, ExecutionStatus
@@ -38,7 +39,7 @@ class GridSearchRunnerTests(TestCase):
         evaluator = _RecordingEvaluator()
         runner: GridSearchRunner = StandardGridSearchRunner(generator, evaluator)
 
-        run = runner.run(parameter_space)
+        run = runner.run(parameter_space, _budget())
 
         self.assertIs(run.parameter_space, parameter_space)
         self.assertEqual(tuple(item.candidate for item in run.evaluations), generated)
@@ -51,19 +52,28 @@ class GridSearchRunnerTests(TestCase):
         evaluator = _RecordingEvaluator()
 
         run = StandardGridSearchRunner(GridCandidateGenerator(), evaluator).run(
-            parameter_space
+            parameter_space,
+            _budget(),
         )
 
-        self.assertEqual(tuple(item.candidate for item in run.evaluations), (candidate,))
+        self.assertEqual(
+            tuple(item.candidate for item in run.evaluations),
+            (candidate,),
+        )
         self.assertEqual(evaluator.candidates, [candidate])
 
-    def test_run_and_aggregate_are_deterministic_immutable_and_non_mutating(self) -> None:
+    def test_run_and_aggregate_are_deterministic_immutable_and_non_mutating(
+        self,
+    ) -> None:
         parameter_space = _space()
         generated = (CandidateParameterSet((("orb_minutes", 5),)),)
-        runner = StandardGridSearchRunner(_RecordingGenerator(generated), _RecordingEvaluator())
+        runner = StandardGridSearchRunner(
+            _RecordingGenerator(generated),
+            _RecordingEvaluator(),
+        )
 
-        first = runner.run(parameter_space)
-        second = runner.run(parameter_space)
+        first = runner.run(parameter_space, _budget())
+        second = runner.run(parameter_space, _budget())
 
         self.assertEqual(first, second)
         self.assertEqual(repr(first), repr(second))
@@ -73,15 +83,20 @@ class GridSearchRunnerTests(TestCase):
         with self.assertRaises(FrozenInstanceError):
             first.evaluations = ()  # type: ignore[misc]
 
-    def test_runner_stops_and_propagates_evaluator_failure_without_a_partial_run(self) -> None:
+    def test_runner_stops_and_propagates_evaluator_failure_without_a_partial_run(
+        self,
+    ) -> None:
         parameter_space = _space()
         first = CandidateParameterSet((("orb_minutes", 5),))
         second = CandidateParameterSet((("orb_minutes", 15),))
         evaluator = _FailingEvaluator()
-        runner = StandardGridSearchRunner(_RecordingGenerator((first, second)), evaluator)
+        runner = StandardGridSearchRunner(
+            _RecordingGenerator((first, second)),
+            evaluator,
+        )
 
         with self.assertRaisesRegex(RuntimeError, "evaluation failed"):
-            runner.run(parameter_space)
+            runner.run(parameter_space, _budget())
 
         self.assertEqual(evaluator.candidates, [first])
 
@@ -90,18 +105,33 @@ class GridSearchRunnerTests(TestCase):
         parameter_space = _space()
 
         with self.assertRaisesRegex(TypeError, "parameter_space"):
-            StandardGridSearchRunner(_RecordingGenerator(()), _RecordingEvaluator()).run(
-                None  # type: ignore[arg-type]
+            StandardGridSearchRunner(
+                _RecordingGenerator(()),
+                _RecordingEvaluator(),
+            ).run(
+                None,  # type: ignore[arg-type]
+                _budget(),
             )
+        with self.assertRaisesRegex(TypeError, "budget"):
+            StandardGridSearchRunner(
+                _RecordingGenerator(()),
+                _RecordingEvaluator(),
+            ).run(parameter_space, None)  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "candidate_generator"):
-            StandardGridSearchRunner(None, _RecordingEvaluator())  # type: ignore[arg-type]
+            StandardGridSearchRunner(
+                None,
+                _RecordingEvaluator(),
+            )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "candidate_evaluator"):
-            StandardGridSearchRunner(_RecordingGenerator(()), None)  # type: ignore[arg-type]
+            StandardGridSearchRunner(
+                _RecordingGenerator(()),
+                None,
+            )  # type: ignore[arg-type]
         with self.assertRaisesRegex(ValueError, "match"):
             StandardGridSearchRunner(
                 _RecordingGenerator((candidate,)),
                 _MismatchedEvaluator(),
-            ).run(parameter_space)
+            ).run(parameter_space, _budget())
         with self.assertRaisesRegex(TypeError, "evaluations"):
             GridSearchRun(parameter_space, [])  # type: ignore[arg-type]
 
@@ -122,7 +152,10 @@ class _RecordingGenerator:
         self.candidates = candidates
         self.spaces: list[ParameterSpace] = []
 
-    def generate(self, parameter_space: ParameterSpace) -> tuple[CandidateParameterSet, ...]:
+    def generate(
+        self,
+        parameter_space: ParameterSpace,
+    ) -> tuple[CandidateParameterSet, ...]:
         """Record the supplied space and return configured candidates unchanged."""
         self.spaces.append(parameter_space)
         return self.candidates
@@ -180,3 +213,8 @@ def _outcome() -> BacktestRun:
         execution_engine=_SkippedExecutionEngine(),
     )
     return BacktestRun(context, BacktestStatus.COMPLETED)
+
+
+def _budget() -> OptimizationBudget:
+    """Return one explicit evaluation budget for grid-runner contract tests."""
+    return OptimizationBudget(2)

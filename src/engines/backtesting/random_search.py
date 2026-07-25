@@ -48,7 +48,7 @@ class RandomOptimizationStrategy:
             self.configuration,
         )
         evaluations: list[CandidateEvaluation] = []
-        for candidate in candidates:
+        for candidate in candidates[: specification.budget.maximum_evaluations]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
                 raise TypeError(

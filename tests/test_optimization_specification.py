@@ -8,6 +8,7 @@ from src.engines.backtesting import (
     ObjectiveRanking,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationBudget,
     OptimizationSpecification,
 )
 from src.engines.strategy import DiscreteParameter, ParameterSpace
@@ -19,28 +20,54 @@ class OptimizationSpecificationTests(TestCase):
     def test_specification_is_immutable_and_retains_exact_references(self) -> None:
         parameter_space = _parameter_space()
         configuration = _configuration()
-        specification = OptimizationSpecification(parameter_space, configuration)
+        budget = _budget()
+        specification = OptimizationSpecification(
+            parameter_space,
+            configuration,
+            budget,
+        )
 
         self.assertTrue(is_dataclass(specification))
         self.assertFalse(hasattr(specification, "__dict__"))
         self.assertIs(specification.parameter_space, parameter_space)
         self.assertIs(specification.configuration, configuration)
+        self.assertIs(specification.budget, budget)
         with self.assertRaises(FrozenInstanceError):
             specification.parameter_space = parameter_space  # type: ignore[misc]
 
     def test_specification_has_deterministic_value_semantics(self) -> None:
-        first = OptimizationSpecification(_parameter_space(), _configuration())
-        second = OptimizationSpecification(_parameter_space(), _configuration())
+        first = OptimizationSpecification(
+            _parameter_space(),
+            _configuration(),
+            _budget(),
+        )
+        second = OptimizationSpecification(
+            _parameter_space(),
+            _configuration(),
+            _budget(),
+        )
 
         self.assertEqual(first, second)
         self.assertEqual(repr(first), repr(second))
 
     def test_specification_rejects_invalid_component_values(self) -> None:
         with self.assertRaisesRegex(TypeError, "parameter_space"):
-            OptimizationSpecification(None, _configuration())  # type: ignore[arg-type]
+            OptimizationSpecification(
+                None,
+                _configuration(),
+                _budget(),
+            )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "configuration"):
             OptimizationSpecification(
-                _parameter_space(), None
+                _parameter_space(),
+                None,
+                _budget(),
+            )  # type: ignore[arg-type]
+        with self.assertRaisesRegex(TypeError, "budget"):
+            OptimizationSpecification(
+                _parameter_space(),
+                _configuration(),
+                None,
             )  # type: ignore[arg-type]
 
     def test_public_export_is_intentional(self) -> None:
@@ -66,3 +93,8 @@ def _parameter_space() -> ParameterSpace:
 def _configuration() -> OptimizationConfiguration:
     """Build one existing immutable policy configuration for specification tests."""
     return OptimizationConfiguration(ObjectiveDirection.MAXIMIZE, _SelectionPolicy())
+
+
+def _budget() -> OptimizationBudget:
+    """Build one explicit immutable evaluation budget for specification tests."""
+    return OptimizationBudget(2)

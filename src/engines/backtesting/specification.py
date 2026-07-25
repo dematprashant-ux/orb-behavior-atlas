@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from src.engines.backtesting.budget import OptimizationBudget
 from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.strategy.parameters import ParameterSpace
 
@@ -14,6 +15,7 @@ class OptimizationSpecification:
 
     parameter_space: ParameterSpace
     configuration: OptimizationConfiguration
+    budget: OptimizationBudget
 
     def __post_init__(self) -> None:
         """Require existing immutable parameter and policy descriptions."""
@@ -21,3 +23,5 @@ class OptimizationSpecification:
             raise TypeError("parameter_space must be a ParameterSpace.")
         if not isinstance(self.configuration, OptimizationConfiguration):
             raise TypeError("configuration must be an OptimizationConfiguration.")
+        if not isinstance(self.budget, OptimizationBudget):
+            raise TypeError("budget must be an OptimizationBudget.")

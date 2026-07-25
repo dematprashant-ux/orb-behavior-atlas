@@ -4,6 +4,7 @@ from src.engines.backtesting.builders import (
     build_backtest_context,
     build_backtest_run,
 )
+from src.engines.backtesting.budget import OptimizationBudget
 from src.engines.backtesting.costs import (
     FixedRateTransactionCostModel,
     TransactionCostBreakdown,
@@ -117,6 +118,7 @@ __all__ = [
     "ObjectiveRanking",
     "ObjectiveScore",
     "ObjectiveSelection",
+    "OptimizationBudget",
     "OptimizationConfiguration",
     "OptimizationRun",
     "OptimizationRunner",

@@ -10,6 +10,7 @@ from src.engines.backtesting import (
     ObjectiveRanking,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationBudget,
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategy,
@@ -36,6 +37,7 @@ class OptimizationStrategyTests(TestCase):
             grid_search_runner.parameter_spaces,
             [specification.parameter_space],
         )
+        self.assertEqual(grid_search_runner.budgets, [specification.budget])
 
     def test_grid_strategy_rejects_intrinsic_misuse(self) -> None:
         with self.assertRaisesRegex(TypeError, "grid_search_runner"):
@@ -63,10 +65,16 @@ class _GridSearchRunner:
     def __init__(self, result: GridSearchRun) -> None:
         self.result = result
         self.parameter_spaces: list[ParameterSpace] = []
+        self.budgets: list[OptimizationBudget] = []
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
+    def run(
+        self,
+        parameter_space: ParameterSpace,
+        budget: OptimizationBudget,
+    ) -> GridSearchRun:
         """Record the exact supplied space and return the configured result."""
         self.parameter_spaces.append(parameter_space)
+        self.budgets.append(budget)
         return self.result
 
 
@@ -89,4 +97,5 @@ def _specification() -> OptimizationSpecification:
     return OptimizationSpecification(
         _space(),
         OptimizationConfiguration(ObjectiveDirection.MAXIMIZE, _SelectionPolicy()),
+        OptimizationBudget(2),
     )

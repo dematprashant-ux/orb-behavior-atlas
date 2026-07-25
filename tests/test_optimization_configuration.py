@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     ObjectiveScore,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationBudget,
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategyMetadata,
@@ -241,6 +242,7 @@ def _specification(
     return OptimizationSpecification(
         parameter_space,
         OptimizationConfiguration(direction, selection_policy),
+        OptimizationBudget(2),
     )
 
 

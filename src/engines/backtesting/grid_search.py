@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Protocol
 
+from src.engines.backtesting.budget import OptimizationBudget
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.interfaces import CandidateEvaluator
 from src.engines.strategy.interfaces import CandidateGenerator
@@ -23,7 +24,9 @@ class GridSearchRun:
         if not isinstance(self.parameter_space, ParameterSpace):
             raise TypeError("parameter_space must be a ParameterSpace.")
         if not isinstance(self.evaluations, tuple):
-            raise TypeError("evaluations must be a tuple of CandidateEvaluation values.")
+            raise TypeError(
+                "evaluations must be a tuple of CandidateEvaluation values."
+            )
         if any(
             not isinstance(evaluation, CandidateEvaluation)
             for evaluation in self.evaluations
@@ -34,8 +37,12 @@ class GridSearchRun:
 class GridSearchRunner(Protocol):
     """Define deterministic candidate orchestration without optimization logic."""
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
-        """Generate and evaluate candidates in source order without ranking."""
+    def run(
+        self,
+        parameter_space: ParameterSpace,
+        budget: OptimizationBudget,
+    ) -> GridSearchRun:
+        """Generate and evaluate source-order candidates within one budget."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,7 +59,11 @@ class StandardGridSearchRunner:
         if self.candidate_evaluator is None:
             raise TypeError("candidate_evaluator must not be None.")
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
+    def run(
+        self,
+        parameter_space: ParameterSpace,
+        budget: OptimizationBudget,
+    ) -> GridSearchRun:
         """Evaluate every generated candidate once in generation order.
 
         Collaborator exceptions intentionally propagate unchanged. A run is only
@@ -61,6 +72,8 @@ class StandardGridSearchRunner:
         """
         if not isinstance(parameter_space, ParameterSpace):
             raise TypeError("parameter_space must be a ParameterSpace.")
+        if not isinstance(budget, OptimizationBudget):
+            raise TypeError("budget must be an OptimizationBudget.")
 
         candidates = self.candidate_generator.generate(parameter_space)
         if not isinstance(candidates, tuple):
@@ -68,14 +81,17 @@ class StandardGridSearchRunner:
                 "candidate_generator.generate must return a tuple of "
                 "CandidateParameterSet values."
             )
-        if any(not isinstance(candidate, CandidateParameterSet) for candidate in candidates):
+        if any(
+            not isinstance(candidate, CandidateParameterSet)
+            for candidate in candidates
+        ):
             raise TypeError(
                 "candidate_generator.generate must return only "
                 "CandidateParameterSet values."
             )
 
         evaluations: list[CandidateEvaluation] = []
-        for candidate in candidates:
+        for candidate in candidates[: budget.maximum_evaluations]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
                 raise TypeError(

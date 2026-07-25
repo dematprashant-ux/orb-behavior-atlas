@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     ObjectiveScore,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationBudget,
     OptimizationSpecification,
     RandomOptimizationConfiguration,
     RandomOptimizationStrategy,
@@ -182,6 +183,7 @@ def _specification(
             )
         ),
         OptimizationConfiguration(ObjectiveDirection.MAXIMIZE, _SelectionPolicy()),
+        OptimizationBudget(6),
     )
 
 

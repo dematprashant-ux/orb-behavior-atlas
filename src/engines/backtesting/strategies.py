@@ -47,7 +47,10 @@ class GridOptimizationStrategy:
         """Delegate once and adapt its exact ordered evaluations to a generic run."""
         if not isinstance(specification, OptimizationSpecification):
             raise TypeError("specification must be an OptimizationSpecification.")
-        grid_search_run = self.grid_search_runner.run(specification.parameter_space)
+        grid_search_run = self.grid_search_runner.run(
+            specification.parameter_space,
+            specification.budget,
+        )
         if not isinstance(grid_search_run, GridSearchRun):
             raise TypeError("grid_search_runner.run must return a GridSearchRun.")
         if grid_search_run.parameter_space is not specification.parameter_space:
