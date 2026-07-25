@@ -21,6 +21,7 @@ __all__ = [
     "EquityPoint",
     "DrawdownPoint",
     "DrawdownSummary",
+    "RiskAdjustedMetrics",
     "PnLSummary",
     "TradePnL",
     "TradeOutcome",
@@ -235,6 +236,26 @@ class DrawdownSummary:
 
 
 @dataclass(frozen=True, slots=True)
+class RiskAdjustedMetrics:
+    """Records zero-safe absolute-return-to-drawdown ratios."""
+
+    recovery_factor: float | None
+    return_over_drawdown: float | None
+
+    def __post_init__(self) -> None:
+        """Require finite, equivalent values for the identical documented ratios."""
+        _validate_optional_finite_float(self.recovery_factor, "recovery_factor")
+        _validate_optional_finite_float(
+            self.return_over_drawdown,
+            "return_over_drawdown",
+        )
+        if self.recovery_factor != self.return_over_drawdown:
+            raise ValueError(
+                "recovery_factor and return_over_drawdown must match."
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class PerformanceContext:
     """References one existing immutable backtest run for future analysis."""
 
@@ -307,6 +328,12 @@ def _validate_finite_float(value: float, field_name: str) -> None:
         raise TypeError(f"{field_name} must be a float.")
     if not isfinite(value):
         raise ValueError(f"{field_name} must be finite.")
+
+
+def _validate_optional_finite_float(value: float | None, field_name: str) -> None:
+    """Allow an unavailable ratio or require one finite float value."""
+    if value is not None:
+        _validate_finite_float(value, field_name)
 
 
 def _validate_metric_relationships(metrics: PerformanceMetrics) -> None:

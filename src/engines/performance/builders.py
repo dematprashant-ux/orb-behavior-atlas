@@ -12,6 +12,7 @@ from src.engines.performance.models import (
     PerformanceReport,
     PerformanceStatus,
     PnLSummary,
+    RiskAdjustedMetrics,
     TradePnL,
 )
 
@@ -23,6 +24,7 @@ __all__ = [
     "build_equity_point",
     "build_drawdown_point",
     "build_drawdown_summary",
+    "build_risk_adjusted_metrics",
     "build_pnl_summary",
     "build_trade_pnl",
 ]
@@ -255,4 +257,19 @@ def build_drawdown_summary(
     return DrawdownSummary(
         drawdown_points=drawdown_points,
         maximum_drawdown=maximum_drawdown,
+    )
+
+
+def build_risk_adjusted_metrics(
+    recovery_factor: float | None,
+    return_over_drawdown: float | None,
+) -> RiskAdjustedMetrics:
+    """Build zero-safe absolute-return-to-drawdown metric values.
+
+    Both documented metric names use the same formula in this milestone. The
+    model therefore requires their values to match and applies no rounding.
+    """
+    return RiskAdjustedMetrics(
+        recovery_factor=recovery_factor,
+        return_over_drawdown=return_over_drawdown,
     )

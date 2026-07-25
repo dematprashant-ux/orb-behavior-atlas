@@ -8,6 +8,7 @@ from src.engines.performance.builders import (
     build_equity_point,
     build_drawdown_point,
     build_drawdown_summary,
+    build_risk_adjusted_metrics,
     build_pnl_summary,
     build_trade_pnl,
 )
@@ -18,6 +19,7 @@ from src.engines.performance.interfaces import (
     PerformanceAnalyzer,
     PerformanceEngine,
     PnLEngine,
+    RiskMetricsAnalyzer,
 )
 from src.engines.performance.models import (
     DrawdownPoint,
@@ -29,6 +31,7 @@ from src.engines.performance.models import (
     PerformanceReport,
     PerformanceStatus,
     PnLSummary,
+    RiskAdjustedMetrics,
     TradePnL,
     TradeOutcome,
     TradeOutcomeType,
@@ -38,11 +41,13 @@ from src.engines.performance.pnl import RealizedPnLEngine
 from src.engines.performance.metrics import BasicPerformanceAnalyzer
 from src.engines.performance.equity import CumulativeEquityCurveBuilder
 from src.engines.performance.drawdown import BasicDrawdownAnalyzer
+from src.engines.performance.risk import BasicRiskMetricsAnalyzer
 
 __all__ = [
     "BasicPerformanceAnalyzer",
     "BasicPerformanceEngine",
     "BasicDrawdownAnalyzer",
+    "BasicRiskMetricsAnalyzer",
     "CumulativeEquityCurveBuilder",
     "EquityCurve",
     "EquityCurveBuilder",
@@ -58,6 +63,8 @@ __all__ = [
     "PerformanceStatus",
     "PnLEngine",
     "PnLSummary",
+    "RiskAdjustedMetrics",
+    "RiskMetricsAnalyzer",
     "RealizedPnLEngine",
     "TradePnL",
     "TradeOutcome",
@@ -70,6 +77,7 @@ __all__ = [
     "build_equity_point",
     "build_drawdown_point",
     "build_drawdown_summary",
+    "build_risk_adjusted_metrics",
     "build_pnl_summary",
     "build_trade_pnl",
     "build_trade_outcome",

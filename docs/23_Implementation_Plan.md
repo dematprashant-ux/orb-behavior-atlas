@@ -1213,6 +1213,41 @@ M12.4 is complete when any immutable equity curve deterministically produces
 ordered non-negative absolute drawdown points and a maximum matching the
 largest observed drawdown.
 
+## M12.5 — Risk-Adjusted Performance Metrics
+
+### Objective
+
+Derive zero-safe risk-adjusted metrics solely from immutable
+`PerformanceMetrics` and `DrawdownSummary` artifacts.
+
+### Scope
+
+- Immutable `RiskAdjustedMetrics` model and pure builder
+- `RiskMetricsAnalyzer` protocol and `BasicRiskMetricsAnalyzer`
+- Recovery factor and return-over-drawdown contract tests
+- Directly affected documentation
+
+### Metric Definitions
+
+- Recovery factor and return over drawdown are both
+  `net_profit / maximum_drawdown` in this milestone.
+- When `maximum_drawdown` is zero, both values are `None`; no infinity or
+  percentage is produced.
+- Native float arithmetic is preserved without rounding. Inputs remain
+  unchanged and no calculations upstream of these aggregate artifacts change.
+
+### Explicit Exclusions
+
+- Rolling statistics, benchmark-relative metrics, alpha, beta, optimization,
+  reports, charts, and all other portfolio analytics
+- Execution, strategy, PnL, equity, drawdown-calculation, persistence,
+  caching, and I/O changes
+
+### Acceptance Criteria
+
+M12.5 is complete when immutable aggregate performance and drawdown artifacts
+deterministically produce zero-safe, finite absolute-return-to-drawdown ratios.
+
 Implement:
 
 - Data Engine

@@ -10,6 +10,7 @@ from src.engines.performance.models import (
     PerformanceMetrics,
     PerformanceReport,
     PnLSummary,
+    RiskAdjustedMetrics,
 )
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "PerformanceAnalyzer",
     "PerformanceEngine",
     "PnLEngine",
+    "RiskMetricsAnalyzer",
 ]
 
 
@@ -54,3 +56,14 @@ class DrawdownAnalyzer(Protocol):
 
     def analyze(self, curve: EquityCurve) -> DrawdownSummary:
         """Return ordered running peaks and absolute drawdowns."""
+
+
+class RiskMetricsAnalyzer(Protocol):
+    """Defines pure absolute-return-to-drawdown metric analysis."""
+
+    def analyze(
+        self,
+        performance: PerformanceMetrics,
+        drawdown: DrawdownSummary,
+    ) -> RiskAdjustedMetrics:
+        """Return zero-safe metrics from existing aggregate artifacts only."""
