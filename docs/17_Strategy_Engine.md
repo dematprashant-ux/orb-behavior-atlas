@@ -395,6 +395,15 @@ order. It reads raw retained integers and floats with no rounding, percentages,
 recalculation, summary traversal, plain-text-renderer delegation, printing,
 file writing, persistence, or optimization re-execution.
 
+M24.6 adds `HtmlOptimizationRunSummaryReportRenderer`, an independent stateless
+adapter accepting one report and returning an
+`OptimizationRunSummaryRenderedReport[str]`. It emits a deterministic semantic
+`section` fragment with one heading and a two-column table in canonical metric
+order. Raw retained integers and floats are escaped using only the standard
+library at the value boundary; there is no full HTML document, CSS, JavaScript,
+recalculation, summary traversal, other-renderer delegation, printing, file
+writing, persistence, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
