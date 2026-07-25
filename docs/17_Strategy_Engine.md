@@ -368,6 +368,12 @@ remain available only through that retained analysis. This milestone adds no
 rendering, formatting, tables, charts, persistence, serialization, ranking,
 recommendations, or optimization re-execution.
 
+M24.2 adds `OptimizationRunSummaryReportRenderer`, a generic protocol boundary
+that accepts one `OptimizationRunSummaryReport` and leaves its rendered value
+type deliberately unspecified. The report model remains renderer-independent;
+no concrete renderer, formatting rule, template, output type, persistence, or
+optimization behavior is implemented.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
