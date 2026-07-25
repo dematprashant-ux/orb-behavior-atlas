@@ -7,6 +7,7 @@ from src.engines.performance.models import (
     DrawdownPoint,
     DrawdownSummary,
     EquityCurve,
+    EquityCurveMode,
     EquityPoint,
     PerformanceContext,
     PerformanceMetrics,
@@ -211,8 +212,9 @@ def build_equity_point(
 def build_equity_curve(
     equity_points: tuple[EquityPoint, ...],
     final_equity: float | None = None,
+    mode: EquityCurveMode = EquityCurveMode.GROSS,
 ) -> EquityCurve:
-    """Build an immutable ordered cumulative-realized-equity curve.
+    """Build an immutable ordered cumulative gross or net equity curve.
 
     When omitted, ``final_equity`` retains the last supplied cumulative point or
     zero for an empty curve. No additional financial calculation is performed.
@@ -225,7 +227,11 @@ def build_equity_curve(
         final_equity = (
             equity_points[-1].cumulative_realized_pnl if equity_points else 0.0
         )
-    return EquityCurve(equity_points=equity_points, final_equity=final_equity)
+    return EquityCurve(
+        equity_points=equity_points,
+        final_equity=final_equity,
+        mode=mode,
+    )
 
 
 def build_drawdown_point(

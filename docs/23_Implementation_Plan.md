@@ -1972,3 +1972,18 @@ summaries, equity, drawdown, metrics, reports, and rendering remain gross-only.
 **Out of scope:** Changes to completed trades, execution, equity, drawdown,
 metrics, reports, serialization, rendering, export, cost-model rules, rounding,
 or any brokerage-specific behavior.
+## M15.3 — Net Equity Curve Integration
+
+**Objective:** Extend immutable cumulative equity construction to select gross
+or net `TradePnL` input values without changing downstream analytics.
+
+**Scope:** `EquityCurveMode` with `GROSS` and `NET`; mode-aware immutable curve
+construction; default gross compatibility; focused contract tests and directly
+affected documentation.
+
+**Compatibility:** `GROSS` is the default. Existing curves remain numerically
+identical. `NET` uses only existing `TradePnL.net_pnl` values; no trade facts or
+cost-model calculations are repeated.
+
+**Out of scope:** Drawdown, metrics, reports, serialization, rendering, export,
+execution, transaction-cost models, brokerage logic, and rounding.

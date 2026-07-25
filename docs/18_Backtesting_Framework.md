@@ -242,6 +242,16 @@ This milestone intentionally leaves PnL summaries, equity curves, drawdown,
 metrics, reports, and all renderers on the existing gross-PnL behavior. It adds
 no brokerage-specific logic or monetary rounding.
 
+## 9.3 Gross and Net Equity Curves
+
+M15.3 adds `EquityCurveMode` to the Performance Analytics equity builder.
+`GROSS` remains the default and accumulates `TradePnL.gross_pnl`, preserving all
+existing results. `NET` accumulates only the already-calculated
+`TradePnL.net_pnl`. Each immutable `EquityCurve` records its selected mode.
+
+No drawdown, metrics, reporting, serialization, rendering, export, execution,
+or transaction-cost calculation changes in this milestone.
+
 The framework supports configurable costs, including:
 
 - Brokerage

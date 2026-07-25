@@ -18,6 +18,7 @@ __all__ = [
     "PerformanceReport",
     "PerformanceStatus",
     "EquityCurve",
+    "EquityCurveMode",
     "EquityPoint",
     "DrawdownPoint",
     "DrawdownSummary",
@@ -36,6 +37,13 @@ class PerformanceStatus(str, Enum):
     CREATED = "CREATED"
     ANALYZED = "ANALYZED"
     FAILED = "FAILED"
+
+
+class EquityCurveMode(str, Enum):
+    """Identifies whether cumulative equity uses gross or net trade PnL."""
+
+    GROSS = "GROSS"
+    NET = "NET"
 
 
 class TradeOutcomeType(str, Enum):
@@ -176,10 +184,11 @@ class EquityPoint:
 
 @dataclass(frozen=True, slots=True)
 class EquityCurve:
-    """Records an ordered immutable realized-equity series and its final value."""
+    """Records an ordered immutable gross or net equity series and final value."""
 
     equity_points: tuple[EquityPoint, ...]
     final_equity: float
+    mode: EquityCurveMode = EquityCurveMode.GROSS
 
     def __post_init__(self) -> None:
         """Require an immutable point collection with a consistent final value."""
@@ -188,6 +197,8 @@ class EquityCurve:
         if any(not isinstance(point, EquityPoint) for point in self.equity_points):
             raise TypeError("equity_points must contain only EquityPoint values.")
         _validate_finite_float(self.final_equity, "final_equity")
+        if not isinstance(self.mode, EquityCurveMode):
+            raise TypeError("mode must be an EquityCurveMode.")
         expected_final_equity = (
             self.equity_points[-1].cumulative_realized_pnl
             if self.equity_points
