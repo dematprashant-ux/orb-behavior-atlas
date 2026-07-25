@@ -116,6 +116,7 @@ class ExecutionFoundationTests(TestCase):
             "src/engines/execution/models.py": {
                 "dataclasses",
                 "enum",
+                "math",
                 "src.engines.strategy.models",
             },
         }

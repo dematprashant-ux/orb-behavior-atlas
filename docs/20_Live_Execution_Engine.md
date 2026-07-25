@@ -29,6 +29,17 @@ This foundation does not execute or simulate trades, calculate fills, slippage,
 commissions, or PnL, manage positions, analyze candles, backtest, communicate
 with brokers, or perform I/O.
 
+## 1.2 Completed Trade Execution Model
+
+M9.2 adds the immutable `ExecutionSide` and `CompletedTrade` artifacts. A
+completed trade explicitly retains an accepted `ExecutionResult` plus caller-
+supplied side, quantity, entry price, and exit price. `ACCEPTED` authorizes a
+completed-trade artifact but does not itself mean that execution is completed.
+
+No values are inferred from strategy decisions, prices, candles, or provider
+data. M9.2 does not calculate PnL, fees, commissions, slippage, or any other
+financial metric.
+
 ---
 
 # 2. Responsibilities

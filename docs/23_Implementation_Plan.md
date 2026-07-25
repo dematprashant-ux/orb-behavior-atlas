@@ -901,6 +901,33 @@ existing strategy decisions and immutable results from existing requests, while
 future execution engines have a stable pure protocol boundary without any
 execution implementation.
 
+## M9.2 — Completed Trade Execution Model
+
+### Objective
+
+Introduce immutable, explicit closed-trade execution facts without calculating
+financial performance or inferring execution values.
+
+### Scope
+
+- Immutable `ExecutionSide` and `CompletedTrade` models
+- Pure `build_completed_trade()` factory requiring explicit side, quantity,
+  entry price, and exit price
+- Accepted-source and intrinsic numeric validation
+- Contract tests and directly affected Live Execution Engine documentation
+
+### Explicit Exclusions
+
+- PnL, returns, fees, commissions, slippage, fills, candles, positions,
+  backtesting, strategy changes, simulation, persistence, and I/O
+- Any inference of side, quantity, entry price, exit price, or lifecycle facts
+
+### Acceptance Criteria
+
+M9.2 is complete when callers can construct immutable closed-trade artifacts
+only from accepted execution results and explicitly supplied finite prices,
+positive quantity, and side, without calculating profitability.
+
 ## M10.1 — Backtesting Engine Foundation
 
 ### Objective

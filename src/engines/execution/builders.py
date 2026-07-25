@@ -1,13 +1,19 @@
 """Pure construction of immutable Execution Domain request and result models."""
 
 from src.engines.execution.models import (
+    CompletedTrade,
     ExecutionRequest,
     ExecutionResult,
+    ExecutionSide,
     ExecutionStatus,
 )
 from src.engines.strategy.models import StrategyDecision
 
-__all__ = ["build_execution_request", "build_execution_result"]
+__all__ = [
+    "build_completed_trade",
+    "build_execution_request",
+    "build_execution_result",
+]
 
 
 def build_execution_request(decision: StrategyDecision) -> ExecutionRequest:
@@ -48,3 +54,37 @@ def build_execution_result(
     if not isinstance(status, ExecutionStatus):
         raise TypeError("status must be an ExecutionStatus.")
     return ExecutionResult(request=request, status=status)
+
+
+def build_completed_trade(
+    source_execution_result: ExecutionResult,
+    side: ExecutionSide,
+    quantity: int,
+    entry_price: float,
+    exit_price: float,
+) -> CompletedTrade:
+    """Build one explicit immutable closed-trade artifact from supplied facts.
+
+    The builder does not infer side, quantity, prices, fees, slippage, or PnL.
+
+    Args:
+        source_execution_result: Existing accepted execution result.
+        side: Explicit completed-trade side.
+        quantity: Explicit positive integer quantity.
+        entry_price: Explicit finite float entry price.
+        exit_price: Explicit finite float exit price.
+
+    Returns:
+        An immutable completed trade retaining the source result by reference.
+
+    Raises:
+        TypeError: If an input has an unsupported type.
+        ValueError: If supplied completed-trade facts are intrinsically invalid.
+    """
+    return CompletedTrade(
+        source_execution_result=source_execution_result,
+        side=side,
+        quantity=quantity,
+        entry_price=entry_price,
+        exit_price=exit_price,
+    )
