@@ -42,7 +42,9 @@ class ObjectiveRanking:
         if not isinstance(self.direction, ObjectiveDirection):
             raise TypeError("direction must be an ObjectiveDirection.")
         if not isinstance(self.ranked_scores, tuple):
-            raise TypeError("ranked_scores must be a tuple of RankedObjectiveScore values.")
+            raise TypeError(
+                "ranked_scores must be a tuple of RankedObjectiveScore values."
+            )
         if any(
             not isinstance(ranked_score, RankedObjectiveScore)
             for ranked_score in self.ranked_scores
