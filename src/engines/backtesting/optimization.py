@@ -13,6 +13,7 @@ from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategies import OptimizationStrategy
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
+from src.engines.backtesting.termination import OptimizationTerminationReason
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
 
@@ -35,6 +36,11 @@ class OptimizationRun:
     def progress(self) -> OptimizationProgress:
         """Expose the exact informational progress object from the search run."""
         return self.search_run.progress
+
+    @property
+    def termination_reason(self) -> OptimizationTerminationReason:
+        """Expose the exact successful termination reason from the search run."""
+        return self.search_run.termination_reason
 
     def __post_init__(self) -> None:
         """Require exact cross-stage references without recomputing any result."""

@@ -15,11 +15,13 @@ from src.engines.backtesting import (
     ObjectiveSelection,
     OptimizationConfiguration,
     OptimizationBudget,
+    OptimizationProgress,
     OptimizationRun,
     OptimizationRunner,
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategyMetadata,
+    OptimizationTerminationReason,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
 )
@@ -44,7 +46,7 @@ class OptimizationPipelineTests(TestCase):
         grid_search_run = _grid_search_run(parameter_space)
         runner: OptimizationRunner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
+                _search_run(grid_search_run.evaluations),
                 events,
             ),
             _Objective(events),
@@ -81,7 +83,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = ParameterSpace(())
         grid_search_run = GridSearchRun(parameter_space, ())
         runner = StandardOptimizationRunner(
-            _OptimizationStrategy(OptimizationSearchRun(_metadata()), []),
+            _OptimizationStrategy(_search_run(()), []),
             _Objective([]),
             _Ranker([]),
         )
@@ -106,10 +108,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         runner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(
-                    _metadata(),
-                    _grid_search_run(parameter_space).evaluations,
-                ),
+                _search_run(_grid_search_run(parameter_space).evaluations),
                 events,
             ),
             _FailingObjective(events),
@@ -126,10 +125,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         runner = StandardOptimizationRunner(
             _OptimizationStrategy(
-                OptimizationSearchRun(
-                    _metadata(),
-                    _grid_search_run(parameter_space).evaluations,
-                ),
+                _search_run(_grid_search_run(parameter_space).evaluations),
                 events,
             ),
             _MixedDirectionObjective(events),
@@ -149,7 +145,7 @@ class OptimizationPipelineTests(TestCase):
         with self.assertRaisesRegex(TypeError, "specification"):
             StandardOptimizationRunner(
                 _OptimizationStrategy(
-                    OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
+                    _search_run(grid_search_run.evaluations),
                     [],
                 ),
                 _Objective([]),
@@ -169,7 +165,7 @@ class OptimizationPipelineTests(TestCase):
             ).run(_specification(parameter_space, []))
         with self.assertRaisesRegex(ValueError, "in order"):
             OptimizationRun(
-                OptimizationSearchRun(_metadata(), grid_search_run.evaluations),
+                _search_run(grid_search_run.evaluations),
                 (
                     ObjectiveScore(
                         _evaluation("other"),
@@ -310,6 +306,18 @@ def _configuration(events: list[str]) -> OptimizationConfiguration:
 def _metadata() -> OptimizationStrategyMetadata:
     """Return one immutable strategy identity for generic search-run fixtures."""
     return OptimizationStrategyMetadata("test")
+
+
+def _search_run(
+    evaluations: tuple[CandidateEvaluation, ...],
+) -> OptimizationSearchRun:
+    """Create one complete generic search result for orchestration tests."""
+    return OptimizationSearchRun(
+        _metadata(),
+        evaluations,
+        OptimizationProgress(len(evaluations), len(evaluations)),
+        OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+    )
 
 
 def _specification(

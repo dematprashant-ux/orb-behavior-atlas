@@ -10,6 +10,8 @@ from src.engines.backtesting import (
     CandidateEvaluation,
     OptimizationSearchRun,
     OptimizationStrategyMetadata,
+    OptimizationProgress,
+    OptimizationTerminationReason,
 )
 from src.engines.execution import ExecutionRequest, ExecutionResult, ExecutionStatus
 from src.engines.research import ORBBehaviorAtlas
@@ -20,8 +22,8 @@ class OptimizationSearchRunTests(TestCase):
     """Verify generic ordered evaluations without algorithm-specific state."""
 
     def test_empty_run_is_immutable_and_deterministic(self) -> None:
-        first = OptimizationSearchRun(_metadata())
-        second = OptimizationSearchRun(_metadata())
+        first = _search_run(())
+        second = _search_run(())
 
         self.assertTrue(is_dataclass(first))
         self.assertFalse(hasattr(first, "__dict__"))
@@ -34,7 +36,12 @@ class OptimizationSearchRunTests(TestCase):
         first = _evaluation("first")
         second = _evaluation("second")
         metadata = _metadata()
-        run = OptimizationSearchRun(metadata, (first, second))
+        run = OptimizationSearchRun(
+            metadata,
+            (first, second),
+            OptimizationProgress(2, 2),
+            OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+        )
 
         self.assertIs(run.strategy_metadata, metadata)
         self.assertIs(run.evaluations[0], first)
@@ -42,16 +49,42 @@ class OptimizationSearchRunTests(TestCase):
 
     def test_run_rejects_non_tuple_or_non_evaluation_values(self) -> None:
         with self.assertRaisesRegex(TypeError, "tuple"):
-            OptimizationSearchRun(_metadata(), [])  # type: ignore[arg-type]
+            OptimizationSearchRun(
+                _metadata(),
+                [],
+                OptimizationProgress(0, 0),
+                OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+            )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "only"):
-            OptimizationSearchRun(_metadata(), (None,))  # type: ignore[arg-type]
+            OptimizationSearchRun(
+                _metadata(),
+                (None,),
+                OptimizationProgress(1, 1),
+                OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+            )  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "strategy_metadata"):
-            OptimizationSearchRun(None)  # type: ignore[arg-type]
+            OptimizationSearchRun(
+                None,
+                (),
+                OptimizationProgress(0, 0),
+                OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+            )  # type: ignore[arg-type]
 
     def test_public_export_is_intentional(self) -> None:
         from src.engines.backtesting import OptimizationSearchRun as PackageRun
+        from src.engines.backtesting import (
+            OptimizationTerminationReason as PackageReason,
+        )
 
         self.assertIs(PackageRun, OptimizationSearchRun)
+        self.assertIs(PackageReason, OptimizationTerminationReason)
+        self.assertEqual(
+            tuple(OptimizationTerminationReason),
+            (
+                OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+                OptimizationTerminationReason.EVALUATION_BUDGET_REACHED,
+            ),
+        )
 
 
 class _SkippedExecutionEngine:
@@ -78,3 +111,15 @@ def _evaluation(name: str) -> CandidateEvaluation:
 def _metadata() -> OptimizationStrategyMetadata:
     """Return one immutable algorithm identity for generic search-run tests."""
     return OptimizationStrategyMetadata("test")
+
+
+def _search_run(
+    evaluations: tuple[CandidateEvaluation, ...],
+) -> OptimizationSearchRun:
+    """Create an explicit complete generic successful search result."""
+    return OptimizationSearchRun(
+        _metadata(),
+        evaluations,
+        OptimizationProgress(len(evaluations), len(evaluations)),
+        OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
+    )

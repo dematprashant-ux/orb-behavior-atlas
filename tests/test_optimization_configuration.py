@@ -14,9 +14,11 @@ from src.engines.backtesting import (
     ObjectiveSelection,
     OptimizationConfiguration,
     OptimizationBudget,
+    OptimizationProgress,
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategyMetadata,
+    OptimizationTerminationReason,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
 )
@@ -191,6 +193,11 @@ class _GridRunner:
         return OptimizationSearchRun(
             OptimizationStrategyMetadata("test"),
             self.result.evaluations,
+            OptimizationProgress(
+                len(self.result.evaluations),
+                len(self.result.evaluations),
+            ),
+            OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED,
         )
 
 

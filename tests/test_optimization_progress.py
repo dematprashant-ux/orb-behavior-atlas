@@ -67,7 +67,7 @@ class OptimizationProgressTests(TestCase):
             _Evaluator(),
             RandomOptimizationConfiguration(17, 4),
         ).execute(_specification(random_space, OptimizationBudget(2)))
-        self.assertEqual(random_result.progress, OptimizationProgress(2, 6))
+        self.assertEqual(random_result.progress, OptimizationProgress(2, 4))
 
     def test_progress_public_export_is_intentional(self) -> None:
         from src.engines.backtesting import OptimizationProgress as PackageProgress

@@ -247,6 +247,15 @@ total, and `OptimizationRun` exposes the exact same object. Its deterministic
 completion ratio has no timestamps, execution control, or effect on scoring,
 ranking, selection, or strategy behavior.
 
+M20.6 adds `OptimizationTerminationReason` to each successful
+`OptimizationSearchRun`. `SEARCH_SPACE_EXHAUSTED` means all candidates in the
+strategy's searchable finite set were evaluated; `EVALUATION_BUDGET_REACHED`
+means the evaluation budget left candidates in that set unevaluated. Random
+`maximum_samples` defines its searchable set and is not itself a budget
+termination. Empty successful searches are exhausted. The reason is descriptive
+only, propagated unchanged by `OptimizationRun`; exceptions never become a
+termination reason.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

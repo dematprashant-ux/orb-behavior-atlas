@@ -56,6 +56,7 @@ from src.engines.backtesting.strategies import (
     OptimizationStrategy,
 )
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
+from src.engines.backtesting.termination import OptimizationTerminationReason
 from src.engines.backtesting.selection import (
     BestRankSelectionPolicy,
     ObjectiveSelection,
@@ -128,6 +129,7 @@ __all__ = [
     "OptimizationSpecification",
     "OptimizationStrategy",
     "OptimizationStrategyMetadata",
+    "OptimizationTerminationReason",
     "RankedObjectiveScore",
     "RandomOptimizationConfiguration",
     "RandomOptimizationStrategy",

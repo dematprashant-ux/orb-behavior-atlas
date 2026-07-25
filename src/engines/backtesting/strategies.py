@@ -8,6 +8,7 @@ from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
+from src.engines.backtesting.termination import OptimizationTerminationReason
 from src.engines.strategy.indexing import CartesianParameterSpaceIndexer
 
 __all__ = ["GridOptimizationStrategy", "OptimizationStrategy"]
@@ -61,8 +62,19 @@ class GridOptimizationStrategy:
             len(grid_search_run.evaluations),
             CartesianParameterSpaceIndexer().cardinality(specification.parameter_space),
         )
+        termination_reason = _termination_reason(progress)
         return OptimizationSearchRun(
             self.metadata,
             grid_search_run.evaluations,
             progress,
+            termination_reason,
         )
+
+
+def _termination_reason(
+    progress: OptimizationProgress,
+) -> OptimizationTerminationReason:
+    """Describe complete versus budget-truncated successful finite work."""
+    if progress.evaluated_candidates == progress.total_candidates:
+        return OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED
+    return OptimizationTerminationReason.EVALUATION_BUDGET_REACHED
