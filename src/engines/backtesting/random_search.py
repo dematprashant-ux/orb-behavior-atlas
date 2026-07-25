@@ -13,7 +13,6 @@ from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
-from src.engines.strategy.indexing import CartesianParameterSpaceIndexer
 
 __all__ = ["RandomOptimizationConfiguration", "RandomOptimizationStrategy"]
 
@@ -50,8 +49,13 @@ class RandomOptimizationStrategy:
             specification.parameter_space,
             self.configuration,
         )
+        eligible_candidates = tuple(
+            candidate
+            for candidate in candidates
+            if specification.constraints.is_eligible(candidate)
+        )
         evaluations: list[CandidateEvaluation] = []
-        for candidate in candidates[: specification.budget.maximum_evaluations]:
+        for candidate in eligible_candidates[: specification.budget.maximum_evaluations]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
                 raise TypeError(
@@ -60,10 +64,7 @@ class RandomOptimizationStrategy:
             if evaluation.candidate is not candidate:
                 raise ValueError("evaluation candidate must match sampled candidate.")
             evaluations.append(evaluation)
-        total_candidates = min(
-            self.configuration.maximum_samples,
-            CartesianParameterSpaceIndexer().cardinality(specification.parameter_space),
-        )
+        total_candidates = len(eligible_candidates)
         progress = OptimizationProgress(len(evaluations), total_candidates)
         termination_reason = (
             OptimizationTerminationReason.SEARCH_SPACE_EXHAUSTED

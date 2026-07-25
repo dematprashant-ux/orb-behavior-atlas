@@ -256,6 +256,14 @@ termination. Empty successful searches are exhausted. The reason is descriptive
 only, propagated unchanged by `OptimizationRun`; exceptions never become a
 termination reason.
 
+M21.1 adds immutable `OptimizationConstraints`, an ordered logical-AND
+collection of protocol-based candidate eligibility filters owned by
+`OptimizationSpecification`. Strategies apply them immediately before
+evaluation. Rejected candidates are neither evaluated nor reordered; budgets
+count only eligible evaluations, while progress and termination describe the
+filtered searchable set. Constraints do not score, rank, select, or control
+termination.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

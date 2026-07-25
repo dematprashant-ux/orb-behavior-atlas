@@ -9,7 +9,6 @@ from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
-from src.engines.strategy.indexing import CartesianParameterSpaceIndexer
 
 __all__ = ["GridOptimizationStrategy", "OptimizationStrategy"]
 
@@ -53,6 +52,7 @@ class GridOptimizationStrategy:
         grid_search_run = self.grid_search_runner.run(
             specification.parameter_space,
             specification.budget,
+            specification.constraints,
         )
         if not isinstance(grid_search_run, GridSearchRun):
             raise TypeError("grid_search_runner.run must return a GridSearchRun.")
@@ -60,7 +60,7 @@ class GridOptimizationStrategy:
             raise ValueError("grid_search_run must retain the source parameter_space.")
         progress = OptimizationProgress(
             len(grid_search_run.evaluations),
-            CartesianParameterSpaceIndexer().cardinality(specification.parameter_space),
+            grid_search_run.total_candidates,
         )
         termination_reason = _termination_reason(progress)
         return OptimizationSearchRun(

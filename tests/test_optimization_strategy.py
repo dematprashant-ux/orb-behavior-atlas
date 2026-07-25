@@ -11,6 +11,7 @@ from src.engines.backtesting import (
     ObjectiveSelection,
     OptimizationConfiguration,
     OptimizationBudget,
+    OptimizationConstraints,
     OptimizationSearchRun,
     OptimizationSpecification,
     OptimizationStrategy,
@@ -66,15 +67,18 @@ class _GridSearchRunner:
         self.result = result
         self.parameter_spaces: list[ParameterSpace] = []
         self.budgets: list[OptimizationBudget] = []
+        self.constraints: list[OptimizationConstraints] = []
 
     def run(
         self,
         parameter_space: ParameterSpace,
         budget: OptimizationBudget,
+        constraints: OptimizationConstraints,
     ) -> GridSearchRun:
         """Record the exact supplied space and return the configured result."""
         self.parameter_spaces.append(parameter_space)
         self.budgets.append(budget)
+        self.constraints.append(constraints)
         return self.result
 
 

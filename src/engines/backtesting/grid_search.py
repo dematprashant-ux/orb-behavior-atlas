@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from src.engines.backtesting.budget import OptimizationBudget
+from src.engines.backtesting.constraints import OptimizationConstraints
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.interfaces import CandidateEvaluator
 from src.engines.strategy.interfaces import CandidateGenerator
@@ -18,6 +19,7 @@ class GridSearchRun:
 
     parameter_space: ParameterSpace
     evaluations: tuple[CandidateEvaluation, ...] = ()
+    total_candidates: int | None = None
 
     def __post_init__(self) -> None:
         """Require immutable typed aggregate values without ranking them."""
@@ -32,6 +34,15 @@ class GridSearchRun:
             for evaluation in self.evaluations
         ):
             raise TypeError("evaluations must contain only CandidateEvaluation values.")
+        if self.total_candidates is None:
+            object.__setattr__(self, "total_candidates", len(self.evaluations))
+        if isinstance(self.total_candidates, bool) or not isinstance(
+            self.total_candidates,
+            int,
+        ):
+            raise TypeError("total_candidates must be an int.")
+        if self.total_candidates < len(self.evaluations):
+            raise ValueError("total_candidates must cover all evaluations.")
 
 
 class GridSearchRunner(Protocol):
@@ -41,6 +52,7 @@ class GridSearchRunner(Protocol):
         self,
         parameter_space: ParameterSpace,
         budget: OptimizationBudget,
+        constraints: OptimizationConstraints = OptimizationConstraints(),
     ) -> GridSearchRun:
         """Generate and evaluate source-order candidates within one budget."""
 
@@ -63,6 +75,7 @@ class StandardGridSearchRunner:
         self,
         parameter_space: ParameterSpace,
         budget: OptimizationBudget,
+        constraints: OptimizationConstraints = OptimizationConstraints(),
     ) -> GridSearchRun:
         """Evaluate every generated candidate once in generation order.
 
@@ -74,6 +87,8 @@ class StandardGridSearchRunner:
             raise TypeError("parameter_space must be a ParameterSpace.")
         if not isinstance(budget, OptimizationBudget):
             raise TypeError("budget must be an OptimizationBudget.")
+        if not isinstance(constraints, OptimizationConstraints):
+            raise TypeError("constraints must be an OptimizationConstraints.")
 
         candidates = self.candidate_generator.generate(parameter_space)
         if not isinstance(candidates, tuple):
@@ -91,7 +106,10 @@ class StandardGridSearchRunner:
             )
 
         evaluations: list[CandidateEvaluation] = []
-        for candidate in candidates[: budget.maximum_evaluations]:
+        eligible_candidates = tuple(
+            candidate for candidate in candidates if constraints.is_eligible(candidate)
+        )
+        for candidate in eligible_candidates[: budget.maximum_evaluations]:
             evaluation = self.candidate_evaluator.evaluate(candidate)
             if not isinstance(evaluation, CandidateEvaluation):
                 raise TypeError(
@@ -102,4 +120,8 @@ class StandardGridSearchRunner:
                 raise ValueError("evaluation candidate must match generated candidate.")
             evaluations.append(evaluation)
 
-        return GridSearchRun(parameter_space, tuple(evaluations))
+        return GridSearchRun(
+            parameter_space,
+            tuple(evaluations),
+            len(eligible_candidates),
+        )
