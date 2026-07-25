@@ -24,6 +24,10 @@ from src.engines.backtesting.walk_forward import (
     WalkForwardConfiguration,
     WalkForwardDatasetSplit,
     WalkForwardPlan,
+    WalkForwardSelection,
+    WalkForwardTrainer,
+    WalkForwardValidationExecutor,
+    WalkForwardValidationResult,
     WalkForwardWindow,
 )
 
@@ -48,6 +52,10 @@ __all__ = [
     "WalkForwardDatasetSplit",
     "ZeroTransactionCostModel",
     "WalkForwardPlan",
+    "WalkForwardSelection",
+    "WalkForwardTrainer",
+    "WalkForwardValidationExecutor",
+    "WalkForwardValidationResult",
     "WalkForwardWindow",
     "build_backtest_context",
     "build_backtest_run",

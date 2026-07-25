@@ -78,6 +78,20 @@ ranges; a final partial validation range is excluded. Steps may create
 overlapping or gapped validation ranges. The generator does not inspect data,
 infer trading days, slice datasets, execute strategies, or perform I/O.
 
+## 1.7 Walk-Forward Execution Contracts
+
+M17.5 defines the typed hand-off after a training dataset window is prepared:
+an injected `WalkForwardTrainer` returns an immutable `WalkForwardSelection`,
+and an injected `WalkForwardValidationExecutor` receives that selection with
+an existing validation `DatasetWindow`. Its immutable
+`WalkForwardValidationResult` records the selection and window only. These
+protocols preserve dependency direction and make later execution composition
+constructor-injection friendly without adding a runner, strategy abstraction,
+optimization, analytics, reporting, serialization, dataset slicing, or
+backtest orchestration. Selection contents remain deliberately opaque to avoid
+prematurely imposing parameter-search mathematics or provider-specific data
+formats.
+
 ---
 
 # 2. Responsibilities
