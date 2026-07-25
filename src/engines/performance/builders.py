@@ -1,13 +1,21 @@
 """Pure construction of immutable Performance Analytics contexts and reports."""
 
 from src.engines.backtesting.models import BacktestRun
+from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
     PerformanceContext,
     PerformanceReport,
     PerformanceStatus,
+    PnLSummary,
+    TradePnL,
 )
 
-__all__ = ["build_performance_context", "build_performance_report"]
+__all__ = [
+    "build_performance_context",
+    "build_performance_report",
+    "build_pnl_summary",
+    "build_trade_pnl",
+]
 
 
 def build_performance_context(backtest_run: BacktestRun) -> PerformanceContext:
@@ -64,4 +72,62 @@ def build_performance_report(
         accepted_count=accepted_count,
         rejected_count=rejected_count,
         skipped_count=skipped_count,
+    )
+
+
+def build_trade_pnl(
+    source_completed_trade: CompletedTrade,
+    realized_pnl: float,
+) -> TradePnL:
+    """Build one realized-PnL item from an existing completed trade and value.
+
+    Args:
+        source_completed_trade: Existing immutable explicit completed trade.
+        realized_pnl: Finite PnL value derived only from the completed trade facts.
+
+    Returns:
+        An immutable item retaining ``source_completed_trade`` by reference.
+
+    Raises:
+        TypeError: If an input has an unsupported type.
+        ValueError: If the PnL is non-finite or inconsistent with the trade.
+    """
+    return TradePnL(
+        source_completed_trade=source_completed_trade,
+        realized_pnl=realized_pnl,
+    )
+
+
+def build_pnl_summary(
+    trade_pnls: tuple[TradePnL, ...],
+    total_realized_pnl: float | None = None,
+) -> PnLSummary:
+    """Build an immutable ordered realized-PnL summary.
+
+    When no total is supplied, the builder sums existing PnL items using native
+    float arithmetic and applies no rounding.
+
+    Args:
+        trade_pnls: Ordered immutable realized-PnL items.
+        total_realized_pnl: Optional explicit total to validate against the items.
+
+    Returns:
+        An immutable summary retaining the supplied PnL item references.
+
+    Raises:
+        TypeError: If an input has an unsupported type.
+        ValueError: If an explicit total is invalid or inconsistent.
+    """
+    if not isinstance(trade_pnls, tuple):
+        raise TypeError("trade_pnls must be a tuple of TradePnL values.")
+    if any(not isinstance(trade_pnl, TradePnL) for trade_pnl in trade_pnls):
+        raise TypeError("trade_pnls must contain only TradePnL values.")
+    if total_realized_pnl is None:
+        total_realized_pnl = sum(
+            (trade_pnl.realized_pnl for trade_pnl in trade_pnls),
+            start=0.0,
+        )
+    return PnLSummary(
+        trade_pnls=trade_pnls,
+        total_realized_pnl=total_realized_pnl,
     )

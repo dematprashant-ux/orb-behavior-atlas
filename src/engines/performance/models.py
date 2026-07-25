@@ -2,14 +2,22 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from math import isfinite
 
 from src.engines.backtesting.models import BacktestRun
-from src.engines.execution.models import ExecutionResult, ExecutionStatus
+from src.engines.execution.models import (
+    CompletedTrade,
+    ExecutionResult,
+    ExecutionSide,
+    ExecutionStatus,
+)
 
 __all__ = [
     "PerformanceContext",
     "PerformanceReport",
     "PerformanceStatus",
+    "PnLSummary",
+    "TradePnL",
     "TradeOutcome",
     "TradeOutcomeType",
 ]
@@ -29,6 +37,43 @@ class TradeOutcomeType(str, Enum):
     EXECUTED = "EXECUTED"
     REJECTED = "REJECTED"
     SKIPPED = "SKIPPED"
+
+
+@dataclass(frozen=True, slots=True)
+class TradePnL:
+    """Records the realized PnL from one explicit immutable completed trade."""
+
+    source_completed_trade: CompletedTrade
+    realized_pnl: float
+
+    def __post_init__(self) -> None:
+        """Require a finite PnL value consistent with supplied trade facts."""
+        if not isinstance(self.source_completed_trade, CompletedTrade):
+            raise TypeError("source_completed_trade must be a CompletedTrade.")
+        _validate_finite_float(self.realized_pnl, "realized_pnl")
+        if self.realized_pnl != _calculate_realized_pnl(self.source_completed_trade):
+            raise ValueError("realized_pnl must match the completed trade facts.")
+
+
+@dataclass(frozen=True, slots=True)
+class PnLSummary:
+    """Records ordered immutable realized-PnL items and their exact total."""
+
+    trade_pnls: tuple[TradePnL, ...]
+    total_realized_pnl: float
+
+    def __post_init__(self) -> None:
+        """Require finite totals consistent with the supplied immutable items."""
+        if not isinstance(self.trade_pnls, tuple):
+            raise TypeError("trade_pnls must be a tuple of TradePnL values.")
+        if any(not isinstance(trade_pnl, TradePnL) for trade_pnl in self.trade_pnls):
+            raise TypeError("trade_pnls must contain only TradePnL values.")
+        _validate_finite_float(self.total_realized_pnl, "total_realized_pnl")
+        if self.total_realized_pnl != sum(
+            (trade_pnl.realized_pnl for trade_pnl in self.trade_pnls),
+            start=0.0,
+        ):
+            raise ValueError("total_realized_pnl must equal the supplied trade PnLs.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +141,22 @@ def _validate_count(value: int, field_name: str) -> None:
         raise TypeError(f"{field_name} must be an int.")
     if value < 0:
         raise ValueError(f"{field_name} must be non-negative.")
+
+
+def _validate_finite_float(value: float, field_name: str) -> None:
+    """Require one finite float without accepting booleans or integer substitutes."""
+    if isinstance(value, bool) or not isinstance(value, float):
+        raise TypeError(f"{field_name} must be a float.")
+    if not isfinite(value):
+        raise ValueError(f"{field_name} must be finite.")
+
+
+def _calculate_realized_pnl(completed_trade: CompletedTrade) -> float:
+    """Calculate realized PnL from explicit completed-trade facts only."""
+    price_difference = completed_trade.exit_price - completed_trade.entry_price
+    if completed_trade.side is ExecutionSide.SHORT:
+        price_difference = -price_difference
+    return price_difference * completed_trade.quantity
 
 
 def _outcome_type_for(execution_status: ExecutionStatus) -> TradeOutcomeType:

@@ -1068,6 +1068,43 @@ trade outcomes without calculating trading performance.
 M11.3 is complete when every execution result in a backtest run deterministically
 maps to one immutable executed, rejected, or skipped outcome in unchanged order.
 
+## M12.1 — Realized PnL Foundation
+
+### Objective
+
+Calculate deterministic realized PnL solely from explicit immutable
+`CompletedTrade` facts in the Performance Analytics domain.
+
+### Scope
+
+- Immutable `TradePnL` and `PnLSummary` models
+- Pure PnL builders and `PnLEngine` protocol
+- `RealizedPnLEngine` using `(exit - entry) * quantity` for long trades and
+  `(entry - exit) * quantity` for short trades
+- Contract tests and directly affected documentation
+
+### Calculation Constraints
+
+- `CompletedTrade` is the sole calculation input; supplied quantity is used
+  exactly as given.
+- Native float arithmetic is preserved without rounding, multipliers, or lot-
+  size inference.
+- Fees, commissions, taxes, slippage, and all non-realized-PnL metrics are
+  excluded.
+
+### Explicit Exclusions
+
+- Win rate, expectancy, profit factor, drawdown, Sharpe ratio, Sortino ratio,
+  equity curves, optimization, charts, and reports
+- Candle inspection, fill simulation, price/quantity inference, strategy or
+  execution changes, persistence, caching, and I/O
+
+### Acceptance Criteria
+
+M12.1 is complete when ordered explicit completed trades deterministically
+produce immutable per-trade and aggregate realized PnL without costs, rounding,
+or assumptions beyond the supplied facts.
+
 Implement:
 
 - Data Engine

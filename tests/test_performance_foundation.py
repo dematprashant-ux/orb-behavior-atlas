@@ -101,15 +101,18 @@ class PerformanceFoundationTests(TestCase):
         expected_imports = {
             "src/engines/performance/builders.py": {
                 "src.engines.backtesting.models",
+                "src.engines.execution.models",
                 "src.engines.performance.models",
             },
             "src/engines/performance/interfaces.py": {
                 "typing",
+                "src.engines.execution.models",
                 "src.engines.performance.models",
             },
             "src/engines/performance/models.py": {
                 "dataclasses",
                 "enum",
+                "math",
                 "src.engines.backtesting.models",
                 "src.engines.execution.models",
             },
