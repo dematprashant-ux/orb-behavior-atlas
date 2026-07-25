@@ -412,6 +412,13 @@ once. The renderer's exact result is returned unchanged; the pipeline performs
 no optimization re-execution, calculation duplication, payload inspection,
 renderer selection, printing, file writing, persistence, or global registration.
 
+M25.2 adds `OptimizationResultReport`, an immutable report-domain boundary for
+one exact completed `OptimizationRun` and its canonical `ObjectiveSelection`.
+It retains both references by identity and accepts only a selection whose exact
+ranking is owned by that run. It neither reruns nor recalculates ranking,
+selection, candidate evaluation, or scoring; it copies no candidate parameters
+or score values and introduces no rendering, persistence, timestamps, or IDs.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

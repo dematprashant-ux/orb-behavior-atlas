@@ -3,6 +3,7 @@
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 
+from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
 
@@ -15,6 +16,7 @@ __all__ = [
     "OptimizationRunSummaryComparison",
     "OptimizationRunSummaryDelta",
     "OptimizationRunSummaryReport",
+    "OptimizationResultReport",
     "OptimizationRunSummaryRates",
 ]
 
@@ -470,6 +472,34 @@ class OptimizationRunSummaryReport:
         if not isinstance(analysis, OptimizationRunSummaryAnalysis):
             raise TypeError("analysis must be an OptimizationRunSummaryAnalysis.")
         return cls(analysis)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationResultReport:
+    """Retain one completed run and its canonical selection by identity."""
+
+    run: "OptimizationRun"
+    selection: ObjectiveSelection
+
+    def __post_init__(self) -> None:
+        """Require the selection to retain the exact ranking owned by the run."""
+        from src.engines.backtesting.optimization import OptimizationRun
+
+        if not isinstance(self.run, OptimizationRun):
+            raise TypeError("run must be an OptimizationRun.")
+        if not isinstance(self.selection, ObjectiveSelection):
+            raise TypeError("selection must be an ObjectiveSelection.")
+        if self.selection.ranking is not self.run.ranking:
+            raise ValueError("selection must reference the run's exact ranking.")
+
+    @classmethod
+    def from_run_and_selection(
+        cls,
+        run: "OptimizationRun",
+        selection: ObjectiveSelection,
+    ) -> "OptimizationResultReport":
+        """Construct a read-only result report without rerunning any stage."""
+        return cls(run, selection)
 
 
 def _rate(numerator: int, denominator: int) -> float:
