@@ -286,6 +286,18 @@ The caller remains responsible for pairing performance metrics with drawdown
 from the same upstream gross or net basis. Risk analysis does not inspect trade
 PnL, recalculate costs or drawdown, or alter reports and downstream rendering.
 
+## 9.7 Gross and Net Report Identity
+
+M15.7 records a report-wide mode using the existing `PerformanceMetricMode`.
+`BacktestReport` defaults to gross for compatibility and requires its
+performance, equity, and risk artifacts to use the same represented mode.
+Drawdown stays curve-derived and does not acquire duplicate mode metadata.
+
+`DictionaryReportSerializer` emits a stable top-level `report_mode` as lowercase
+`"gross"` or `"net"`. Markdown, HTML, and PDF renderers display the corresponding
+`Gross` or `Net` report identity once near the top. Reporting preserves existing
+analytics; it never recalculates or independently selects a basis.
+
 The framework supports configurable costs, including:
 
 - Brokerage

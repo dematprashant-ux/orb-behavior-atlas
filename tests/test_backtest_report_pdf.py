@@ -23,6 +23,7 @@ class StandardPdfReportRendererTests(TestCase):
         self.assertTrue(pdf_bytes.startswith(b"%PDF-"))
         self.assertGreaterEqual(len(reader.pages), 1)
         self.assertIn("Backtest Report", text)
+        self.assertIn("Report Mode: Gross", text)
         self.assertIn("Performance Metrics", text)
         self.assertIn("Risk-Adjusted Metrics", text)
         self.assertIn("Equity Curve", text)
@@ -40,6 +41,7 @@ class StandardPdfReportRendererTests(TestCase):
 
         headings = (
             "Backtest Report",
+            "Report Mode: Gross",
             "Performance Metrics",
             "Risk-Adjusted Metrics",
             "Equity Curve",
@@ -50,6 +52,16 @@ class StandardPdfReportRendererTests(TestCase):
         self.assertIn("Recovery Factor", text)
         self.assertLess(text.index("10.0"), text.index("-5.0"))
         self.assertIn("Maximum Drawdown", text)
+
+    def test_net_mode_is_rendered_once_near_the_report_top(self) -> None:
+        """Render a supplied net report identity without analytics recalculation."""
+        report = _empty_report()
+        report["report_mode"] = "net"
+        text = _extract_text(
+            PdfReader(BytesIO(StandardPdfReportRenderer().render(report)))
+        )
+
+        self.assertEqual(text.count("Report Mode: Net"), 1)
 
     def test_rendering_is_deterministic_in_content_and_metadata(self) -> None:
         """Verify repeatable extracted content and stable intentional metadata."""
@@ -63,7 +75,9 @@ class StandardPdfReportRendererTests(TestCase):
         self.assertNotIn("/CreationDate", first.metadata)
         self.assertNotIn("/ModDate", first.metadata)
 
-    def test_renderer_rejects_invalid_plain_data_and_has_no_report_dependencies(self) -> None:
+    def test_renderer_rejects_invalid_plain_data_and_has_no_report_dependencies(
+        self,
+    ) -> None:
         """Require serializer-shaped structures while keeping no domain imports."""
         with self.assertRaises(TypeError):
             StandardPdfReportRenderer().render([])

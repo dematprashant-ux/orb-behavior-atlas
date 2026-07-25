@@ -1,8 +1,9 @@
 """Contract tests for immutable canonical backtest-report composition."""
 
-from dataclasses import FrozenInstanceError, is_dataclass
+from dataclasses import FrozenInstanceError, is_dataclass, replace
 from unittest import TestCase
 
+from src.engines.backtesting import FixedRateTransactionCostModel
 from src.engines.execution import ExecutionSide
 from src.engines.performance import (
     BacktestReport,
@@ -10,7 +11,10 @@ from src.engines.performance import (
     BasicPerformanceAnalyzer,
     BasicRiskMetricsAnalyzer,
     CumulativeEquityCurveBuilder,
+    EquityCurveMode,
+    PerformanceMetricMode,
     RealizedPnLEngine,
+    RiskAdjustedMetricMode,
     build_backtest_report,
 )
 
@@ -35,6 +39,24 @@ class BacktestReportTests(TestCase):
         self.assertIs(report.performance_metrics, performance)
         self.assertIs(report.equity_curve, curve)
         self.assertIs(report.drawdown_summary, drawdown)
+        self.assertIs(report.risk_adjusted_metrics, risk_metrics)
+        self.assertIs(report.mode, PerformanceMetricMode.GROSS)
+
+    def test_net_report_requires_matching_upstream_modes(self) -> None:
+        """Retain net artifact references while recording explicit report identity."""
+        performance, curve, drawdown, risk_metrics = _net_artifacts()
+
+        report = build_backtest_report(
+            performance,
+            curve,
+            drawdown,
+            risk_metrics,
+            mode=PerformanceMetricMode.NET,
+        )
+
+        self.assertIs(report.mode, PerformanceMetricMode.NET)
+        self.assertIs(report.performance_metrics, performance)
+        self.assertIs(report.equity_curve, curve)
         self.assertIs(report.risk_adjusted_metrics, risk_metrics)
 
     def test_construction_is_deterministic_and_report_is_immutable(self) -> None:
@@ -62,6 +84,28 @@ class BacktestReportTests(TestCase):
             build_backtest_report(performance, curve, object(), risk_metrics)
         with self.assertRaises(TypeError):
             build_backtest_report(performance, curve, drawdown, object())
+        with self.assertRaises(ValueError):
+            build_backtest_report(
+                performance,
+                curve,
+                drawdown,
+                risk_metrics,
+                mode=PerformanceMetricMode.NET,
+            )
+        with self.assertRaises(ValueError):
+            build_backtest_report(
+                performance,
+                replace(curve, mode=EquityCurveMode.NET),
+                drawdown,
+                risk_metrics,
+            )
+        with self.assertRaises(ValueError):
+            build_backtest_report(
+                performance,
+                curve,
+                drawdown,
+                replace(risk_metrics, mode=RiskAdjustedMetricMode.NET),
+            )
 
 
 def _artifacts():
@@ -73,6 +117,24 @@ def _artifacts():
     summary = RealizedPnLEngine().calculate(trades)
     performance = BasicPerformanceAnalyzer().analyze(summary)
     curve = CumulativeEquityCurveBuilder().build(summary)
+    drawdown = BasicDrawdownAnalyzer().analyze(curve)
+    risk_metrics = BasicRiskMetricsAnalyzer().analyze(performance, drawdown)
+    return performance, curve, drawdown, risk_metrics
+
+
+def _net_artifacts():
+    """Build matching net analytics through existing public upstream selectors."""
+    trades = (
+        _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+        _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+    )
+    summary = RealizedPnLEngine(
+        FixedRateTransactionCostModel(0.1, 0.0, 0.0, 0.0, 0.0)
+    ).calculate(trades)
+    performance = BasicPerformanceAnalyzer(PerformanceMetricMode.NET).analyze(
+        summary
+    )
+    curve = CumulativeEquityCurveBuilder(EquityCurveMode.NET).build(summary)
     drawdown = BasicDrawdownAnalyzer().analyze(curve)
     risk_metrics = BasicRiskMetricsAnalyzer().analyze(performance, drawdown)
     return performance, curve, drawdown, risk_metrics

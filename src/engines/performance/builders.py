@@ -300,6 +300,7 @@ def build_backtest_report(
     equity_curve: EquityCurve,
     drawdown_summary: DrawdownSummary,
     risk_adjusted_metrics: RiskAdjustedMetrics,
+    mode: PerformanceMetricMode = PerformanceMetricMode.GROSS,
 ) -> BacktestReport:
     """Compose existing immutable analytics artifacts into one report object.
 
@@ -311,4 +312,5 @@ def build_backtest_report(
         equity_curve=equity_curve,
         drawdown_summary=drawdown_summary,
         risk_adjusted_metrics=risk_adjusted_metrics,
+        mode=mode,
     )

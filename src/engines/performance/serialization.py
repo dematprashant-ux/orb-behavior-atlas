@@ -35,6 +35,7 @@ class DictionaryReportSerializer:
         drawdown = report.drawdown_summary
         risk = report.risk_adjusted_metrics
         return {
+            "report_mode": report.mode.value.lower(),
             "performance_metrics": {
                 "total_trades": performance.total_trades,
                 "winning_trades": performance.winning_trades,

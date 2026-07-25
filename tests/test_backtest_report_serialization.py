@@ -10,12 +10,14 @@ from src.engines.performance import (
     BasicRiskMetricsAnalyzer,
     CumulativeEquityCurveBuilder,
     DictionaryReportSerializer,
+    PerformanceMetricMode,
     RealizedPnLEngine,
     ReportSerializer,
     build_backtest_report,
 )
 
 from tests.test_realized_pnl import _trade
+from tests.test_backtest_report import _net_artifacts
 
 
 class DictionaryReportSerializerTests(TestCase):
@@ -28,13 +30,18 @@ class DictionaryReportSerializerTests(TestCase):
         self.assertEqual(
             tuple(serialized),
             (
+                "report_mode",
                 "performance_metrics",
                 "equity_curve",
                 "drawdown_summary",
                 "risk_adjusted_metrics",
             ),
         )
-        self.assertEqual(serialized["equity_curve"], {"points": [], "final_equity": 0.0})
+        self.assertEqual(serialized["report_mode"], "gross")
+        self.assertEqual(
+            serialized["equity_curve"],
+            {"points": [], "final_equity": 0.0},
+        )
         self.assertEqual(
             serialized["drawdown_summary"],
             {"points": [], "maximum_drawdown": 0.0},
@@ -83,7 +90,10 @@ class DictionaryReportSerializerTests(TestCase):
                 },
             ],
         )
-        self.assertEqual(serialized["drawdown_summary"]["maximum_drawdown"], 5.0)
+        self.assertEqual(
+            serialized["drawdown_summary"]["maximum_drawdown"],
+            5.0,
+        )
         self.assertEqual(
             serialized["drawdown_summary"]["points"][1],
             {
@@ -100,8 +110,10 @@ class DictionaryReportSerializerTests(TestCase):
             {"recovery_factor": 1.0, "return_over_drawdown": 1.0},
         )
 
-    def test_serialization_is_deterministic_plain_data_and_non_mutating(self) -> None:
-        """Produce equivalent plain data without returning domain objects or mutation."""
+    def test_serialization_is_deterministic_plain_data_and_non_mutating(
+        self,
+    ) -> None:
+        """Produce equivalent plain data without domain objects or mutation."""
         report = _report((10.0, -5.0))
         serializer: ReportSerializer = DictionaryReportSerializer()
 
@@ -111,6 +123,21 @@ class DictionaryReportSerializerTests(TestCase):
         self.assertEqual(first, second)
         self.assertEqual(report, _report((10.0, -5.0)))
         _assert_plain_data(self, first)
+
+    def test_net_report_serializes_a_stable_lowercase_mode(self) -> None:
+        """Preserve existing upstream net identity without selecting analytics."""
+        performance, curve, drawdown, risk_metrics = _net_artifacts()
+        report = build_backtest_report(
+            performance,
+            curve,
+            drawdown,
+            risk_metrics,
+            mode=PerformanceMetricMode.NET,
+        )
+
+        serialized = DictionaryReportSerializer().serialize(report)
+
+        self.assertEqual(serialized["report_mode"], "net")
 
     def test_serializer_rejects_invalid_report_input(self) -> None:
         """Require the canonical immutable report model at the public boundary."""

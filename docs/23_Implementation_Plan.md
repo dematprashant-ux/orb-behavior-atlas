@@ -2033,3 +2033,19 @@ formulas and zero-drawdown behavior remain unchanged.
 
 **Out of scope:** Transaction costs, TradePnL, equity, drawdown, performance
 metrics, reports, serialization, rendering, export, execution, and rounding.
+## M15.7 — Gross/Net Report Support
+
+**Objective:** Preserve the gross or net identity already chosen upstream across
+immutable reports, serialization, and deterministic presentation formats.
+
+**Scope:** Report-wide reuse of `PerformanceMetricMode`; consistency validation
+against performance, equity, and risk modes; stable top-level serialized mode;
+Markdown, HTML, and PDF mode display; focused contract tests and directly
+affected documentation.
+
+**Compatibility:** Reports default to gross. Existing analytics and formulas are
+unchanged. Reporting does not infer, calculate, or select gross/net values.
+
+**Out of scope:** Transaction costs, TradePnL, analytics, equity, drawdown,
+metrics, risk formulas, execution, report export orchestration, charts,
+timestamps, networking, and rounding.

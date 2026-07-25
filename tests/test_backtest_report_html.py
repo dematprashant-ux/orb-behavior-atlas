@@ -27,6 +27,8 @@ class StandardHtmlReportRendererTests(TestCase):
         self.assertIn("<style>", rendered)
         self.assertIn("@media print", rendered)
         self.assertIn("<body>", rendered)
+        self.assertEqual(rendered.count(">Report Mode<"), 1)
+        self.assertEqual(rendered.count(">Gross<"), 1)
         self.assertEqual(rendered.count(">N/A<"), 3)
         self.assertNotIn("<script", rendered)
         self.assertNotIn("src=", rendered)
@@ -34,12 +36,15 @@ class StandardHtmlReportRendererTests(TestCase):
         self.assertNotIn("http", rendered)
         self.assertNotIn("<!--", rendered)
 
-    def test_populated_report_preserves_stable_sections_fields_and_point_order(self) -> None:
+    def test_populated_report_preserves_stable_sections_fields_and_point_order(
+        self,
+    ) -> None:
         """Render every supplied fact once without calculations or reordered rows."""
         rendered = StandardHtmlReportRenderer().render(_populated_report())
 
         headings = (
             "<h1>Backtest Report</h1>",
+            "<h2 id=\"report-mode\">Report Mode</h2>",
             "<h2 id=\"performance-metrics\">Performance Metrics</h2>",
             "<h2 id=\"risk-adjusted-metrics\">Risk-Adjusted Metrics</h2>",
             "<h2 id=\"equity-curve\">Equity Curve</h2>",
@@ -50,11 +55,24 @@ class StandardHtmlReportRendererTests(TestCase):
             self.assertEqual(rendered.count(f">{label}<"), 1)
         self.assertEqual(rendered.count(">Recovery Factor<"), 1)
         self.assertEqual(rendered.count(">Return Over Drawdown<"), 1)
-        self.assertLess(rendered.index(">10.0</td><td>10.0<"), rendered.index(">-5.0</td><td>5.0<"))
+        self.assertLess(
+            rendered.index(">10.0</td><td>10.0<"),
+            rendered.index(">-5.0</td><td>5.0<"),
+        )
         self.assertIn(
             ">-5.0</td><td>5.0</td><td>10.0</td><td>5.0</td>",
             rendered,
         )
+
+    def test_net_mode_is_rendered_once_near_the_report_top(self) -> None:
+        """Render only the supplied serialized net identity in semantic markup."""
+        report = _empty_report()
+        report["report_mode"] = "net"
+
+        rendered = StandardHtmlReportRenderer().render(report)
+
+        self.assertEqual(rendered.count(">Report Mode<"), 1)
+        self.assertEqual(rendered.count(">Net<"), 1)
 
     def test_dynamic_text_is_escaped_and_output_is_deterministic(self) -> None:
         """Escape serialized string content and retain stable standalone output."""
@@ -87,7 +105,9 @@ class StandardHtmlReportRendererTests(TestCase):
         with self.assertRaises((FrozenInstanceError, TypeError)):
             renderer.unused = None
 
-    def test_renderer_rejects_invalid_plain_data_and_has_no_domain_dependencies(self) -> None:
+    def test_renderer_rejects_invalid_plain_data_and_has_no_domain_dependencies(
+        self,
+    ) -> None:
         """Require serializer-shaped data while retaining no analytics dependencies."""
         with self.assertRaises(TypeError):
             StandardHtmlReportRenderer().render([])
@@ -100,14 +120,20 @@ class StandardHtmlReportRendererTests(TestCase):
         with self.assertRaises(TypeError):
             StandardHtmlReportRenderer().render(malformed)
 
-        with open("src/engines/performance/html.py", encoding="utf-8") as source_file:
+        with open(
+            "src/engines/performance/html.py",
+            encoding="utf-8",
+        ) as source_file:
             tree = ast.parse(source_file.read())
         imported_modules = {
             node.module
             for node in ast.walk(tree)
             if isinstance(node, ast.ImportFrom) and node.module is not None
         }
-        self.assertEqual(imported_modules, {"collections.abc", "dataclasses", "html"})
+        self.assertEqual(
+            imported_modules,
+            {"collections.abc", "dataclasses", "html"},
+        )
 
 
 def _performance_labels() -> tuple[str, ...]:

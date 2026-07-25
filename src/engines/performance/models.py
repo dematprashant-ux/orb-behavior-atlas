@@ -313,12 +313,13 @@ class RiskAdjustedMetrics:
 
 @dataclass(frozen=True, slots=True)
 class BacktestReport:
-    """Composes existing immutable performance artifacts into one report object."""
+    """Composes existing immutable gross or net analytics into one report."""
 
     performance_metrics: PerformanceMetrics
     equity_curve: EquityCurve
     drawdown_summary: DrawdownSummary
     risk_adjusted_metrics: RiskAdjustedMetrics
+    mode: PerformanceMetricMode = PerformanceMetricMode.GROSS
 
     def __post_init__(self) -> None:
         """Require only the immutable artifact types intrinsic to composition."""
@@ -332,6 +333,14 @@ class BacktestReport:
             raise TypeError(
                 "risk_adjusted_metrics must be a RiskAdjustedMetrics."
             )
+        if not isinstance(self.mode, PerformanceMetricMode):
+            raise TypeError("mode must be a PerformanceMetricMode.")
+        if self.performance_metrics.mode is not self.mode:
+            raise ValueError("performance_metrics mode must match report mode.")
+        if self.equity_curve.mode.value != self.mode.value:
+            raise ValueError("equity_curve mode must match report mode.")
+        if self.risk_adjusted_metrics.mode.value != self.mode.value:
+            raise ValueError("risk_adjusted_metrics mode must match report mode.")
 
 
 @dataclass(frozen=True, slots=True)

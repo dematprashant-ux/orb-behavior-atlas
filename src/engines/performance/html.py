@@ -87,6 +87,7 @@ class StandardHtmlReportRenderer:
             ValueError: If a required section or field is missing.
         """
         report = _require_mapping(serialized_report, "serialized_report")
+        report_mode = _require_report_mode(report)
         performance = _require_section(report, "performance_metrics")
         risk = _require_section(report, "risk_adjusted_metrics")
         equity_curve = _require_section(report, "equity_curve")
@@ -109,6 +110,10 @@ class StandardHtmlReportRenderer:
                 "<body>",
                 "  <main>",
                 "    <h1>Backtest Report</h1>",
+                '    <section aria-labelledby="report-mode">',
+                '      <h2 id="report-mode">Report Mode</h2>',
+                f"      <p>{_format_value(report_mode)}</p>",
+                "    </section>",
             ]
         )
         lines.extend(
@@ -295,6 +300,16 @@ def _require_section(
 ) -> Mapping[str, object]:
     """Return one required top-level plain-data mapping section."""
     return _require_mapping(_require_field(report, section_name), section_name)
+
+
+def _require_report_mode(report: Mapping[str, object]) -> str:
+    """Return one required serialized gross or net report-mode display value."""
+    report_mode = _require_field(report, "report_mode")
+    if report_mode == "gross":
+        return "Gross"
+    if report_mode == "net":
+        return "Net"
+    raise ValueError("report_mode must be 'gross' or 'net'.")
 
 
 def _require_field(values: Mapping[str, object], field_name: str) -> object:

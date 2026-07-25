@@ -43,6 +43,7 @@ class StandardJsonReportExporterTests(TestCase):
         decoded = json.loads(exported)
 
         self.assertEqual(decoded["performance_metrics"]["net_profit"], 5.0)
+        self.assertEqual(decoded["report_mode"], "gross")
         self.assertEqual(decoded["equity_curve"]["final_equity"], 5.0)
         self.assertEqual(
             [
@@ -69,6 +70,7 @@ class StandardJsonReportExporterTests(TestCase):
                 "drawdown_summary",
                 "equity_curve",
                 "performance_metrics",
+                "report_mode",
                 "risk_adjusted_metrics",
             ),
         )
@@ -87,7 +89,9 @@ class StandardJsonReportExporterTests(TestCase):
         with self.assertRaises((FrozenInstanceError, TypeError)):
             exporter.unused = None
 
-    def test_exporter_rejects_invalid_input_and_has_no_domain_dependencies(self) -> None:
+    def test_exporter_rejects_invalid_input_and_has_no_domain_dependencies(
+        self,
+    ) -> None:
         """Require plain mapping input and retain no analytics-domain imports."""
         with self.assertRaises(TypeError):
             StandardJsonReportExporter().export([])

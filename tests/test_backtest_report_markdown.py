@@ -21,6 +21,9 @@ class StandardMarkdownReportRendererTests(TestCase):
         self.assertEqual(
             rendered,
             "# Backtest Report\n\n"
+            "| Report Mode |\n"
+            "| --- |\n"
+            "| Gross |\n\n"
             "## Performance Metrics\n\n"
             "| Metric | Value |\n"
             "| --- | --- |\n"
@@ -64,8 +67,14 @@ class StandardMarkdownReportRendererTests(TestCase):
 
         self.assertLess(
             rendered.index("# Backtest Report"),
+            rendered.index("| Report Mode |"),
+        )
+        self.assertLess(
+            rendered.index("| Report Mode |"),
             rendered.index("## Performance Metrics"),
         )
+        self.assertEqual(rendered.count("Report Mode"), 1)
+        self.assertEqual(rendered.count("| Gross |"), 1)
         self.assertLess(
             rendered.index("## Performance Metrics"),
             rendered.index("## Risk-Adjusted Metrics"),
@@ -84,10 +93,15 @@ class StandardMarkdownReportRendererTests(TestCase):
         self.assertEqual(rendered.count("| Return Over Drawdown |"), 1)
         self.assertIn("| 10.0 | 10.0 |", rendered)
         self.assertIn("| -5.0 | 5.0 |", rendered)
-        self.assertLess(rendered.index("| 10.0 | 10.0 |"), rendered.index("| -5.0 | 5.0 |"))
+        self.assertLess(
+            rendered.index("| 10.0 | 10.0 |"),
+            rendered.index("| -5.0 | 5.0 |"),
+        )
         self.assertIn("| -5.0 | 5.0 | 10.0 | 5.0 |", rendered)
 
-    def test_rendering_is_deterministic_newline_terminated_and_non_mutating(self) -> None:
+    def test_rendering_is_deterministic_newline_terminated_and_non_mutating(
+        self,
+    ) -> None:
         """Return stable output without changing the supplied nested plain data."""
         report = _populated_report()
         expected = deepcopy(report)
@@ -105,7 +119,9 @@ class StandardMarkdownReportRendererTests(TestCase):
         with self.assertRaises((FrozenInstanceError, TypeError)):
             renderer.unused = None
 
-    def test_renderer_rejects_invalid_required_sections_and_point_collections(self) -> None:
+    def test_renderer_rejects_invalid_required_sections_and_point_collections(
+        self,
+    ) -> None:
         """Require serializer-shaped mappings and ordered point lists only."""
         with self.assertRaises(TypeError):
             StandardMarkdownReportRenderer().render([])
@@ -117,6 +133,20 @@ class StandardMarkdownReportRendererTests(TestCase):
         malformed["equity_curve"]["points"] = ()
         with self.assertRaises(TypeError):
             StandardMarkdownReportRenderer().render(malformed)
+        malformed = _empty_report()
+        malformed["report_mode"] = "invalid"
+        with self.assertRaises(ValueError):
+            StandardMarkdownReportRenderer().render(malformed)
+
+    def test_net_mode_is_displayed_once_near_the_report_top(self) -> None:
+        """Render an existing serialized net identity without interpretation."""
+        report = _empty_report()
+        report["report_mode"] = "net"
+
+        rendered = StandardMarkdownReportRenderer().render(report)
+
+        self.assertEqual(rendered.count("Report Mode"), 1)
+        self.assertEqual(rendered.count("| Net |"), 1)
 
     def test_renderer_has_only_plain_data_dependencies(self) -> None:
         """Keep Markdown presentation independent from analytics and I/O layers."""
@@ -136,6 +166,7 @@ class StandardMarkdownReportRendererTests(TestCase):
 def _empty_report() -> dict[str, object]:
     """Return one minimal plain serializer-shaped report with no point rows."""
     return {
+        "report_mode": "gross",
         "performance_metrics": {
             "total_trades": 0,
             "winning_trades": 0,
