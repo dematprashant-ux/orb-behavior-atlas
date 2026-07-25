@@ -102,6 +102,7 @@ class StrategyFoundationTests(TestCase):
             "src/engines/strategy/interfaces.py": {
                 "typing",
                 "src.engines.strategy.models",
+                "src.engines.strategy.parameters",
             },
             "src/engines/strategy/models.py": {
                 "dataclasses",

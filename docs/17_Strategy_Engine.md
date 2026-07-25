@@ -48,6 +48,16 @@ the domain rejects blank names, mutable collections, duplicate values, and
 mixed parameter value types. It defines no strategy configuration, search,
 optimization, training, scoring, ranking, execution, serialization, or I/O.
 
+## 1.4 Deterministic Grid Candidate Generation
+
+M18.2 adds the pure `CandidateGenerator` protocol and
+`GridCandidateGenerator`. It enumerates the finite Cartesian product of an
+existing `ParameterSpace` into ordered immutable `CandidateParameterSet`
+values. Parameter declaration order and each parameter's candidate-value order
+are retained; the final parameter changes fastest. The generator does not
+evaluate, score, rank, train, execute, optimize, report, serialize, or perform
+I/O.
+
 ---
 
 # 2. Responsibilities
