@@ -1431,6 +1431,41 @@ in-memory HTML without external assets, analytics changes, or file output.
 M13.5 is complete when equivalent serialized reports produce equivalent,
 escaped, self-contained HTML documents with embedded styling and no mutation.
 
+## M14.1 — Report File Writers
+
+### Objective
+
+Persist already-rendered report text to disk through a dedicated writer boundary
+that remains independent from domain models, serialization, and rendering.
+
+### Scope
+
+- `ReportWriter` protocol and `TextReportWriter`
+- UTF-8 exact-text persistence with parent-directory creation and atomic
+  replacement where supported by the local filesystem
+- Contract tests and directly affected documentation
+
+### Writer Contract
+
+- Writers accept only rendered string content and a `Path` destination.
+- Text is written in UTF-8 with newline translation disabled, preserving the
+  supplied content and trailing newline exactly.
+- Existing files are replaced through a temporary sibling file and
+  `os.replace`; parent directories are created when needed.
+- Writers perform no report generation, rendering, serialization, calculation,
+  mutation, network access, or report-content validation.
+
+### Explicit Exclusions
+
+- Domain-model access, JSON/Markdown/HTML rendering, PDF generation, charts,
+  calculations, report-data changes, networking, persistence beyond the target
+  text file, and I/O other than the requested write operation
+
+### Acceptance Criteria
+
+M14.1 is complete when supplied rendered text is deterministically persisted as
+UTF-8 to an explicit path, with exact content preservation and clear failures.
+
 Implement:
 
 - Data Engine

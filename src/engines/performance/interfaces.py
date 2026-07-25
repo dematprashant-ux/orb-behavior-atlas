@@ -1,6 +1,7 @@
 """Pure Performance Analytics protocol boundary without an implementation."""
 
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Protocol
 
 from src.engines.execution.models import CompletedTrade
@@ -26,6 +27,7 @@ __all__ = [
     "JsonReportExporter",
     "MarkdownReportRenderer",
     "HtmlReportRenderer",
+    "ReportWriter",
 ]
 
 
@@ -101,3 +103,10 @@ class HtmlReportRenderer(Protocol):
 
     def render(self, serialized_report: Mapping[str, object]) -> str:
         """Return deterministic HTML without external resources or file I/O."""
+
+
+class ReportWriter(Protocol):
+    """Defines persistence of already-rendered text without report knowledge."""
+
+    def write(self, content: str, destination: Path) -> None:
+        """Persist exact UTF-8 text content to one destination path."""

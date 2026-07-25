@@ -127,6 +127,7 @@ class RealizedPnLEngineTests(TestCase):
             },
             "src/engines/performance/interfaces.py": {
                 "collections.abc",
+                "pathlib",
                 "typing",
                 "src.engines.execution.models",
                 "src.engines.performance.models",
