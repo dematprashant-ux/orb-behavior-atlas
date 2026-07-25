@@ -1540,6 +1540,41 @@ held entirely in memory, without calculations or persistence.
 M14.3 is complete when equivalent serialized reports produce equivalent
 timestamp-free in-memory PDF content with stable ordered sections and tables.
 
+## M14.4 — Multi-Format Report Bundle
+
+### Objective
+
+Build deterministic in-memory ZIP bundles from already-produced report
+artifacts without accepting domain models or performing report processing.
+
+### Scope
+
+- `ReportBundleBuilder` protocol and `StandardReportBundleBuilder`
+- Safe filename validation, UTF-8 text encoding, exact binary preservation,
+  fixed ZIP metadata, and deterministic entry ordering
+- Contract tests and directly affected documentation
+
+### Bundle Contract
+
+- Builders accept only mappings of safe relative artifact names to `str` or
+  `bytes` content, returning complete ZIP bytes without file I/O.
+- Text is UTF-8 encoded; bytes are preserved exactly. Entries are sorted by
+  normalized slash-separated filename.
+- ZIP entries use a fixed timestamp, fixed file attributes, and stored
+  compression to guarantee identical archive bytes for equivalent input.
+- Empty, absolute, traversal, directory-only, duplicate-normalized, and
+  unsupported artifact entries are rejected deterministically.
+
+### Explicit Exclusions
+
+- Domain-model access, serialization, JSON/Markdown/HTML/PDF rendering, file
+  writing, calculations, report-data changes, network access, and I/O
+
+### Acceptance Criteria
+
+M14.4 is complete when equivalent safe artifact mappings produce byte-identical
+in-memory ZIP archives with stable metadata and entry order.
+
 Implement:
 
 - Data Engine

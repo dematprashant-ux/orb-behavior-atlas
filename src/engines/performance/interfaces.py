@@ -30,6 +30,7 @@ __all__ = [
     "ReportWriter",
     "ReportExportService",
     "PdfReportRenderer",
+    "ReportBundleBuilder",
 ]
 
 
@@ -132,3 +133,10 @@ class PdfReportRenderer(Protocol):
 
     def render(self, serialized_report: Mapping[str, object]) -> bytes:
         """Return a complete deterministic PDF without file I/O."""
+
+
+class ReportBundleBuilder(Protocol):
+    """Defines deterministic in-memory ZIP creation from report artifacts."""
+
+    def build(self, artifacts: Mapping[str, str | bytes]) -> bytes:
+        """Return a complete ZIP archive without report processing or file I/O."""
