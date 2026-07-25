@@ -1355,6 +1355,44 @@ M13.3 is complete when equivalent plain report mappings produce equivalent
 compact JSON with stable object keys, preserved collection order, UTF-8
 compatibility, and no mutation.
 
+## M13.4 — Markdown Report Rendering
+
+### Objective
+
+Render serialized backtest-report plain data deterministically as human-readable
+in-memory Markdown without changing analytics or writing external output.
+
+### Scope
+
+- `MarkdownReportRenderer` protocol and immutable
+  `StandardMarkdownReportRenderer`
+- Stable Markdown headings and tables for performance metrics, risk metrics,
+  equity curves, and drawdown summaries
+- Contract tests and directly affected documentation
+
+### Rendering Contract
+
+- Sections appear in this order: Backtest Report, Performance Metrics,
+  Risk-Adjusted Metrics, Equity Curve, Drawdown Summary.
+- Each serialized metric appears once with a stable human-readable label;
+  unavailable values render as `N/A`.
+- Existing numeric values use their native `str()` representation without
+  rounding, percentage conversion, interpretation, or calculation.
+- Output is UTF-8-compatible plain Markdown with stable table columns and
+  exactly one trailing newline. Rendering is in memory only.
+
+### Explicit Exclusions
+
+- File writing; HTML, PDF, or CSV output; charts; network calls; optimization;
+  persistence; and I/O
+- Recalculation or changes to analytics, serialization, JSON export, execution,
+  strategy, PnL, equity, drawdown, or risk metrics
+
+### Acceptance Criteria
+
+M13.4 is complete when equivalent serialized reports produce equivalent,
+ordered, newline-terminated Markdown with no mutation or mathematical analysis.
+
 Implement:
 
 - Data Engine

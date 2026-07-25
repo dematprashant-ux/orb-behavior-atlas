@@ -24,6 +24,7 @@ __all__ = [
     "RiskMetricsAnalyzer",
     "ReportSerializer",
     "JsonReportExporter",
+    "MarkdownReportRenderer",
 ]
 
 
@@ -85,3 +86,10 @@ class JsonReportExporter(Protocol):
 
     def export(self, serialized_report: Mapping[str, object]) -> str:
         """Return compact stable-key JSON without rendering or file I/O."""
+
+
+class MarkdownReportRenderer(Protocol):
+    """Defines pure in-memory Markdown rendering from plain report data."""
+
+    def render(self, serialized_report: Mapping[str, object]) -> str:
+        """Return deterministic Markdown without file I/O or calculations."""

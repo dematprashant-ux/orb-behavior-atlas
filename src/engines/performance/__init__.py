@@ -23,6 +23,7 @@ from src.engines.performance.interfaces import (
     RiskMetricsAnalyzer,
     ReportSerializer,
     JsonReportExporter,
+    MarkdownReportRenderer,
 )
 from src.engines.performance.models import (
     BacktestReport,
@@ -48,6 +49,7 @@ from src.engines.performance.drawdown import BasicDrawdownAnalyzer
 from src.engines.performance.risk import BasicRiskMetricsAnalyzer
 from src.engines.performance.serialization import DictionaryReportSerializer
 from src.engines.performance.json_export import StandardJsonReportExporter
+from src.engines.performance.markdown import StandardMarkdownReportRenderer
 
 __all__ = [
     "BasicPerformanceAnalyzer",
@@ -75,8 +77,10 @@ __all__ = [
     "RiskMetricsAnalyzer",
     "ReportSerializer",
     "JsonReportExporter",
+    "MarkdownReportRenderer",
     "RealizedPnLEngine",
     "StandardJsonReportExporter",
+    "StandardMarkdownReportRenderer",
     "TradePnL",
     "TradeOutcome",
     "TradeOutcomeEngine",
