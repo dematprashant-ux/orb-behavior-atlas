@@ -20,6 +20,7 @@ __all__ = [
     "OptimizationResultReportingPipeline",
     "OptimizationSelectionOutcomeReportRenderer",
     "OptimizationSelectionOutcomeReportingPipeline",
+    "OptimizationSelectionOutcomeReportingWorkflow",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
@@ -126,6 +127,45 @@ class OptimizationSelectionOutcomeReportingPipeline(
             result_report
         )
         return self.renderer.render(outcome_report)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationSelectionOutcomeReportingWorkflow(
+    Generic[_RenderedOptimizationResultPayload],
+):
+    """Connect completed optimization artifacts to outcome reporting once."""
+
+    reporting_pipeline: OptimizationSelectionOutcomeReportingPipeline[
+        _RenderedOptimizationResultPayload
+    ]
+
+    def __post_init__(self) -> None:
+        """Require one injected reporting pipeline without invoking it."""
+        if self.reporting_pipeline is None:
+            raise TypeError("reporting_pipeline must not be None.")
+        if not callable(getattr(self.reporting_pipeline, "render_report", None)):
+            raise TypeError(
+                "reporting_pipeline must define a callable render_report method."
+            )
+
+    def run(
+        self,
+        optimization_run: "OptimizationRun",
+        selection: "ObjectiveSelection",
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Create one canonical result report and delegate it unchanged."""
+        from src.engines.backtesting.optimization import OptimizationRun
+        from src.engines.backtesting.selection import ObjectiveSelection
+
+        if not isinstance(optimization_run, OptimizationRun):
+            raise TypeError("optimization_run must be an OptimizationRun.")
+        if not isinstance(selection, ObjectiveSelection):
+            raise TypeError("selection must be an ObjectiveSelection.")
+        result_report = OptimizationResultReport.from_run_and_selection(
+            optimization_run,
+            selection,
+        )
+        return self.reporting_pipeline.render_report(result_report)
 
 
 @dataclass(frozen=True, slots=True)

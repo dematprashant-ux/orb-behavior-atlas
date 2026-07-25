@@ -457,6 +457,15 @@ the pipeline performs no winner selection, tie breaking, ranking, selection,
 scoring, optimization execution, payload inspection, printing, file writing,
 or persistence.
 
+M25.7 adds `OptimizationSelectionOutcomeReportingWorkflow`, the smallest
+application boundary for one completed `OptimizationRun` and its existing
+`ObjectiveSelection`. It creates exactly one canonical `OptimizationResultReport`
+and delegates that exact report once to an injected outcome-reporting pipeline.
+Run/selection consistency remains owned by the result report; outcome
+cardinality remains downstream. The workflow neither inspects selections or
+rendered payloads nor executes ranking, selection, scoring, optimization, I/O,
+or persistence.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
