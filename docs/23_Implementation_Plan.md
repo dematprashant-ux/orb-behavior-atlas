@@ -2003,3 +2003,18 @@ recalculation or second cost subtraction.
 **Out of scope:** Transaction costs, TradePnL, equity calculation, metrics,
 risk metrics, reports, serialization, rendering, export, execution, and
 rounding.
+## M15.5 — Net Performance Metrics
+
+**Objective:** Extend aggregate performance metrics to select gross or net
+immutable `TradePnL` facts without changing any metric formula.
+
+**Scope:** `PerformanceMetricMode` with `GROSS` and `NET`; mode-aware immutable
+metric analysis; default gross compatibility; focused contract tests and
+directly affected documentation.
+
+**Compatibility:** `GROSS` remains the default and produces historical metric
+results. `NET` uses existing `TradePnL.net_pnl`; it does not recalculate costs,
+equity, or trade PnL.
+
+**Out of scope:** Transaction costs, TradePnL, equity, drawdown, risk metrics,
+reports, serialization, rendering, export, execution, and rounding.

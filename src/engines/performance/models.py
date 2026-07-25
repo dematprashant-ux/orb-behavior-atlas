@@ -15,6 +15,7 @@ from src.engines.execution.models import (
 __all__ = [
     "PerformanceContext",
     "PerformanceMetrics",
+    "PerformanceMetricMode",
     "PerformanceReport",
     "PerformanceStatus",
     "EquityCurve",
@@ -46,6 +47,13 @@ class EquityCurveMode(str, Enum):
     NET = "NET"
 
 
+class PerformanceMetricMode(str, Enum):
+    """Identifies whether aggregate metrics use gross or net trade PnL."""
+
+    GROSS = "GROSS"
+    NET = "NET"
+
+
 class TradeOutcomeType(str, Enum):
     """Identifies the non-financial result of one execution outcome."""
 
@@ -56,7 +64,7 @@ class TradeOutcomeType(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class PerformanceMetrics:
-    """Records deterministic non-portfolio metrics over realized trade PnL."""
+    """Records deterministic metrics over selected gross or net trade PnL."""
 
     total_trades: int
     winning_trades: int
@@ -73,6 +81,7 @@ class PerformanceMetrics:
     average_losing_trade: float
     profit_factor: float | None
     expectancy: float
+    mode: PerformanceMetricMode = PerformanceMetricMode.GROSS
 
     def __post_init__(self) -> None:
         """Require internally consistent counts and metrics without rounding."""
@@ -104,6 +113,8 @@ class PerformanceMetrics:
         )
         for value, field_name in metrics:
             _validate_finite_float(value, field_name)
+        if not isinstance(self.mode, PerformanceMetricMode):
+            raise TypeError("mode must be a PerformanceMetricMode.")
         if self.gross_profit < 0 or self.gross_loss < 0:
             raise ValueError("gross_profit and gross_loss must be non-negative.")
         _validate_metric_relationships(self)

@@ -261,6 +261,18 @@ the equity-construction boundary. Drawdown never inspects trade PnL, subtracts
 costs, or reconstructs equity. Existing gross behavior remains the default
 through the default gross equity-curve builder.
 
+## 9.5 Gross and Net Performance Metrics
+
+M15.5 adds `PerformanceMetricMode` to `BasicPerformanceAnalyzer`. `GROSS` is
+the default and uses `TradePnL.gross_pnl`, preserving historical metrics. `NET`
+uses existing `TradePnL.net_pnl`. Counts, rates, averages, profit factor, and
+expectancy use their existing formulas over the selected PnL values, without
+rounding or recalculation of trade or transaction-cost facts.
+
+Metrics retain the selected immutable mode. This milestone does not alter
+equity, drawdown, risk metrics, reports, serialization, rendering, export, or
+execution behavior.
+
 The framework supports configurable costs, including:
 
 - Brokerage

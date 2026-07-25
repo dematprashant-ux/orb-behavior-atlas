@@ -1,16 +1,31 @@
 """Deterministic aggregate trading metrics over immutable realized PnL."""
 
+from dataclasses import dataclass
+
 from src.engines.performance.builders import build_performance_metrics
-from src.engines.performance.models import PerformanceMetrics, PnLSummary
+from src.engines.performance.models import (
+    PerformanceMetrics,
+    PerformanceMetricMode,
+    PnLSummary,
+    TradePnL,
+)
 
 __all__ = ["BasicPerformanceAnalyzer"]
 
 
+@dataclass(frozen=True, slots=True)
 class BasicPerformanceAnalyzer:
-    """Calculate deterministic aggregate metrics without portfolio analytics."""
+    """Calculate deterministic gross or net metrics without portfolio analytics."""
+
+    mode: PerformanceMetricMode = PerformanceMetricMode.GROSS
+
+    def __post_init__(self) -> None:
+        """Require a supported selected-PnL mode without inspecting summaries."""
+        if not isinstance(self.mode, PerformanceMetricMode):
+            raise TypeError("mode must be a PerformanceMetricMode.")
 
     def analyze(self, summary: PnLSummary) -> PerformanceMetrics:
-        """Return unrounded counts, rates, averages, and profit factor.
+        """Return unrounded metrics using the configured gross or net PnL facts.
 
         Args:
             summary: Existing immutable realized-PnL items and total.
@@ -29,14 +44,16 @@ class BasicPerformanceAnalyzer:
         flat_trades = 0
         gross_profit = 0.0
         gross_loss = 0.0
+        selected_total = 0.0
         for trade_pnl in summary.trade_pnls:
-            realized_pnl = trade_pnl.realized_pnl
-            if realized_pnl > 0:
+            selected_pnl = _pnl_value_for_mode(trade_pnl, self.mode)
+            selected_total += selected_pnl
+            if selected_pnl > 0:
                 winning_trades += 1
-                gross_profit += realized_pnl
-            elif realized_pnl < 0:
+                gross_profit += selected_pnl
+            elif selected_pnl < 0:
                 losing_trades += 1
-                gross_loss -= realized_pnl
+                gross_loss -= selected_pnl
             else:
                 flat_trades += 1
 
@@ -51,7 +68,7 @@ class BasicPerformanceAnalyzer:
             win_rate = winning_trades / total_trades
             loss_rate = losing_trades / total_trades
             flat_rate = flat_trades / total_trades
-            average_trade_pnl = summary.total_realized_pnl / total_trades
+            average_trade_pnl = selected_total / total_trades
             expectancy = average_trade_pnl
 
         average_winning_trade = (
@@ -66,7 +83,7 @@ class BasicPerformanceAnalyzer:
             flat_trades=flat_trades,
             gross_profit=gross_profit,
             gross_loss=gross_loss,
-            net_profit=summary.total_realized_pnl,
+            net_profit=selected_total,
             win_rate=win_rate,
             loss_rate=loss_rate,
             flat_rate=flat_rate,
@@ -75,4 +92,15 @@ class BasicPerformanceAnalyzer:
             average_losing_trade=average_losing_trade,
             profit_factor=profit_factor,
             expectancy=expectancy,
+            mode=self.mode,
         )
+
+
+def _pnl_value_for_mode(
+    trade_pnl: TradePnL,
+    mode: PerformanceMetricMode,
+) -> float:
+    """Select one existing PnL fact without recalculating any trade value."""
+    if mode is PerformanceMetricMode.GROSS:
+        return trade_pnl.gross_pnl
+    return trade_pnl.net_pnl

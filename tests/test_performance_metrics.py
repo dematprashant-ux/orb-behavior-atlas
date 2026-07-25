@@ -5,10 +5,12 @@ from dataclasses import FrozenInstanceError, replace
 from unittest import TestCase
 
 from src.engines.execution import ExecutionSide
+from src.engines.backtesting import FixedRateTransactionCostModel
 from src.engines.performance import (
     BasicPerformanceAnalyzer,
     PerformanceAnalyzer,
     PerformanceMetrics,
+    PerformanceMetricMode,
     RealizedPnLEngine,
     build_performance_metrics,
 )
@@ -55,7 +57,53 @@ class PerformanceMetricsTests(TestCase):
         self.assertEqual(loser.average_losing_trade, -10.0)
         self.assertEqual((flat.flat_trades, flat.net_profit), (1, 0.0))
 
-    def test_mixed_summary_calculates_counts_rates_averages_and_profit_factor(self) -> None:
+    def test_net_mode_uses_existing_net_pnl_with_unchanged_formulas(self) -> None:
+        """Classify and aggregate only supplied net facts without cost recomputation."""
+        trades = (
+            _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+            _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+        )
+        summary = RealizedPnLEngine(
+            FixedRateTransactionCostModel(0.1, 0.0, 0.0, 0.0, 0.0)
+        ).calculate(trades)
+
+        gross = BasicPerformanceAnalyzer().analyze(summary)
+        net = BasicPerformanceAnalyzer(PerformanceMetricMode.NET).analyze(summary)
+
+        self.assertIs(gross.mode, PerformanceMetricMode.GROSS)
+        self.assertIs(net.mode, PerformanceMetricMode.NET)
+        self.assertEqual(
+            (gross.net_profit, gross.gross_profit, gross.gross_loss),
+            (5.0, 10.0, 5.0),
+        )
+        self.assertEqual(
+            (net.winning_trades, net.losing_trades, net.flat_trades),
+            (0, 2, 0),
+        )
+        self.assertEqual(
+            (net.net_profit, net.gross_profit, net.gross_loss),
+            (-35.5, 0.0, 35.5),
+        )
+        self.assertEqual(net.profit_factor, 0.0)
+        self.assertEqual(net.average_losing_trade, -17.75)
+
+    def test_zero_cost_gross_and_net_metrics_are_equal(self) -> None:
+        """Preserve equal aggregate results when net facts equal gross facts."""
+        summary = RealizedPnLEngine().calculate(
+            (
+                _trade(ExecutionSide.LONG, 1, 100.0, 110.0),
+                _trade(ExecutionSide.LONG, 1, 100.0, 95.0),
+            )
+        )
+
+        gross = BasicPerformanceAnalyzer().analyze(summary)
+        net = BasicPerformanceAnalyzer(PerformanceMetricMode.NET).analyze(summary)
+
+        self.assertEqual(gross, replace(net, mode=PerformanceMetricMode.GROSS))
+
+    def test_mixed_summary_calculates_counts_rates_averages_and_profit_factor(
+        self,
+    ) -> None:
         """Use only realized PnL values for all required aggregate metrics."""
         metrics = _analyze(
             (
@@ -73,7 +121,10 @@ class PerformanceMetricsTests(TestCase):
         )
         self.assertEqual((metrics.gross_profit, metrics.gross_loss), (30.0, 5.0))
         self.assertEqual(metrics.net_profit, 25.0)
-        self.assertEqual((metrics.win_rate, metrics.loss_rate, metrics.flat_rate), (0.5, 0.25, 0.25))
+        self.assertEqual(
+            (metrics.win_rate, metrics.loss_rate, metrics.flat_rate),
+            (0.5, 0.25, 0.25),
+        )
         self.assertEqual(metrics.average_trade_pnl, 6.25)
         self.assertEqual(metrics.average_winning_trade, 15.0)
         self.assertEqual(metrics.average_losing_trade, -5.0)
@@ -127,6 +178,8 @@ class PerformanceMetricsTests(TestCase):
 
         with self.assertRaises(TypeError):
             BasicPerformanceAnalyzer().analyze(object())
+        with self.assertRaises(TypeError):
+            BasicPerformanceAnalyzer("NET")
         with self.assertRaises(ValueError):
             replace(metrics, total_trades=-1)
         with self.assertRaises(ValueError):
@@ -168,6 +221,7 @@ class PerformanceMetricsTests(TestCase):
         self.assertEqual(
             imported_modules,
             {
+                "dataclasses",
                 "src.engines.performance.builders",
                 "src.engines.performance.models",
             },

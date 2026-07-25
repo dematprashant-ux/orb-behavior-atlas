@@ -11,6 +11,7 @@ from src.engines.performance.models import (
     EquityPoint,
     PerformanceContext,
     PerformanceMetrics,
+    PerformanceMetricMode,
     PerformanceReport,
     PerformanceStatus,
     PnLSummary,
@@ -170,6 +171,7 @@ def build_performance_metrics(
     average_losing_trade: float,
     profit_factor: float | None,
     expectancy: float,
+    mode: PerformanceMetricMode = PerformanceMetricMode.GROSS,
 ) -> PerformanceMetrics:
     """Build immutable metrics after enforcing their aggregate invariants.
 
@@ -191,6 +193,7 @@ def build_performance_metrics(
         average_losing_trade=average_losing_trade,
         profit_factor=profit_factor,
         expectancy=expectancy,
+        mode=mode,
     )
 
 
