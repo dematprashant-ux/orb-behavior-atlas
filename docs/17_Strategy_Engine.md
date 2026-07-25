@@ -121,6 +121,21 @@ search, integrate walk-forward execution, render, serialize, perform I/O, or
 use concurrency. Future selection policies may consume the complete immutable
 ranking explicitly.
 
+## 1.9 Deterministic Selection Policies
+
+M18.7 adds immutable `ObjectiveSelection` with protocol-only `SelectionPolicy`
+abstractions. `BestRankSelectionPolicy` selects every entry tied at the leading
+score of an existing `ObjectiveRanking`; `TopRankedSelectionPolicy` selects a
+supplied positive count of leading entries without expanding a cutoff tie. Both
+return source-owned entries in their existing ranking order. Empty rankings
+produce valid empty selections.
+
+Selection is deliberately separate from ranking: it performs no score
+calculation, comparison, reranking, winner metadata, threshold filter,
+multi-objective rule, or search orchestration. It does not add random or
+Bayesian search, walk-forward execution, reporting, serialization, I/O, or
+concurrency.
+
 ---
 
 # 2. Responsibilities

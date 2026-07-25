@@ -33,6 +33,12 @@ from src.engines.backtesting.ranking import (
     RankedObjectiveScore,
     StandardObjectiveRanker,
 )
+from src.engines.backtesting.selection import (
+    BestRankSelectionPolicy,
+    ObjectiveSelection,
+    SelectionPolicy,
+    TopRankedSelectionPolicy,
+)
 from src.engines.backtesting.walk_forward import (
     DatasetWindow,
     DatasetWindowBuilder,
@@ -72,6 +78,7 @@ __all__ = [
     "BacktestEngine",
     "BacktestRun",
     "BacktestStatus",
+    "BestRankSelectionPolicy",
     "CandidateEvaluation",
     "CandidateEvaluator",
     "CandidateObjective",
@@ -86,6 +93,7 @@ __all__ = [
     "ObjectiveRanker",
     "ObjectiveRanking",
     "ObjectiveScore",
+    "ObjectiveSelection",
     "RankedObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",
@@ -95,12 +103,14 @@ __all__ = [
     "StandardTrainingValidationSplitEngine",
     "StandardRollingWindowGenerator",
     "StandardWalkForwardRunner",
+    "SelectionPolicy",
     "StandardWalkForwardAnalyticsPipeline",
     "StandardWalkForwardHtmlRenderer",
     "StandardWalkForwardMarkdownRenderer",
     "StandardWalkForwardPdfRenderer",
     "StandardWalkForwardReportBuilder",
     "TrainingValidationSplitEngine",
+    "TopRankedSelectionPolicy",
     "RollingWindowGenerator",
     "WalkForwardConfiguration",
     "WalkForwardDatasetSplit",
