@@ -40,7 +40,9 @@ class OptimizationConstraint(Protocol):
     def is_eligible(self, candidate: CandidateParameterSet) -> bool:
         """Return deterministic candidate eligibility without evaluation or scoring."""
 
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
+    def diagnostic(
+        self, candidate: CandidateParameterSet
+    ) -> ConstraintDiagnostic | None:
         """Return a deterministic rejection description or None when eligible."""
 
 
@@ -59,7 +61,9 @@ class AllOfConstraint:
         _validate_candidate(candidate)
         return all(constraint.is_eligible(candidate) for constraint in self.constraints)
 
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
+    def diagnostic(
+        self, candidate: CandidateParameterSet
+    ) -> ConstraintDiagnostic | None:
         """Return the first failing child diagnostic in deterministic order."""
         _validate_candidate(candidate)
         for constraint in self.constraints:
@@ -83,7 +87,9 @@ class AnyOfConstraint:
         _validate_candidate(candidate)
         return any(constraint.is_eligible(candidate) for constraint in self.constraints)
 
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
+    def diagnostic(
+        self, candidate: CandidateParameterSet
+    ) -> ConstraintDiagnostic | None:
         """Describe all-child rejection only after deterministic child evaluation."""
         _validate_candidate(candidate)
         if any(constraint.is_eligible(candidate) for constraint in self.constraints):
@@ -107,7 +113,9 @@ class NotConstraint:
         _validate_candidate(candidate)
         return not self.constraint.is_eligible(candidate)
 
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
+    def diagnostic(
+        self, candidate: CandidateParameterSet
+    ) -> ConstraintDiagnostic | None:
         """Describe rejection when the wrapped constraint accepts the candidate."""
         _validate_candidate(candidate)
         if not self.constraint.is_eligible(candidate):
@@ -130,7 +138,9 @@ class OptimizationConstraints:
         _validate_candidate(candidate)
         return all(constraint.is_eligible(candidate) for constraint in self.constraints)
 
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
+    def diagnostic(
+        self, candidate: CandidateParameterSet
+    ) -> ConstraintDiagnostic | None:
         """Return the first top-level failing diagnostic in declared order."""
         return AllOfConstraint(self.constraints).diagnostic(candidate)
 
