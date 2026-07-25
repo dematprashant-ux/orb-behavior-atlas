@@ -8,9 +8,11 @@ from src.engines.backtesting.random_sampling import (
     RandomCandidateSampler,
     RandomOptimizationConfiguration,
 )
+from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
+from src.engines.strategy.indexing import CartesianParameterSpaceIndexer
 
 __all__ = ["RandomOptimizationConfiguration", "RandomOptimizationStrategy"]
 
@@ -57,4 +59,8 @@ class RandomOptimizationStrategy:
             if evaluation.candidate is not candidate:
                 raise ValueError("evaluation candidate must match sampled candidate.")
             evaluations.append(evaluation)
-        return OptimizationSearchRun(self.metadata, tuple(evaluations))
+        progress = OptimizationProgress(
+            len(evaluations),
+            CartesianParameterSpaceIndexer().cardinality(specification.parameter_space),
+        )
+        return OptimizationSearchRun(self.metadata, tuple(evaluations), progress)

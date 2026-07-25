@@ -73,6 +73,7 @@ class OptimizationPipelineTests(TestCase):
         )
         self.assertIs(result.selection.ranking, result.ranking)
         self.assertIs(result.strategy_metadata, runner.optimization_strategy.metadata)
+        self.assertIs(result.progress, result.search_run.progress)
 
     def test_run_is_immutable_deterministic_and_accepts_empty_search_results(
         self,

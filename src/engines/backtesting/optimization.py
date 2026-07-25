@@ -6,6 +6,7 @@ from typing import Protocol
 from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
+from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.ranking import ObjectiveRanker, ObjectiveRanking
 from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.specification import OptimizationSpecification
@@ -29,6 +30,11 @@ class OptimizationRun:
     def strategy_metadata(self) -> OptimizationStrategyMetadata:
         """Expose the exact search-strategy metadata retained by the search run."""
         return self.search_run.strategy_metadata
+
+    @property
+    def progress(self) -> OptimizationProgress:
+        """Expose the exact informational progress object from the search run."""
+        return self.search_run.progress
 
     def __post_init__(self) -> None:
         """Require exact cross-stage references without recomputing any result."""

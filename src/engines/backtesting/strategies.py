@@ -4,9 +4,11 @@ from dataclasses import dataclass, field
 from typing import Protocol
 
 from src.engines.backtesting.grid_search import GridSearchRun, GridSearchRunner
+from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
+from src.engines.strategy.indexing import CartesianParameterSpaceIndexer
 
 __all__ = ["GridOptimizationStrategy", "OptimizationStrategy"]
 
@@ -55,4 +57,12 @@ class GridOptimizationStrategy:
             raise TypeError("grid_search_runner.run must return a GridSearchRun.")
         if grid_search_run.parameter_space is not specification.parameter_space:
             raise ValueError("grid_search_run must retain the source parameter_space.")
-        return OptimizationSearchRun(self.metadata, grid_search_run.evaluations)
+        progress = OptimizationProgress(
+            len(grid_search_run.evaluations),
+            CartesianParameterSpaceIndexer().cardinality(specification.parameter_space),
+        )
+        return OptimizationSearchRun(
+            self.metadata,
+            grid_search_run.evaluations,
+            progress,
+        )

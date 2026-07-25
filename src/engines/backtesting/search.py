@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 from src.engines.backtesting.evaluation import CandidateEvaluation
+from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 
 __all__ = ["OptimizationSearchRun"]
@@ -14,6 +15,7 @@ class OptimizationSearchRun:
 
     strategy_metadata: OptimizationStrategyMetadata
     evaluations: tuple[CandidateEvaluation, ...] = ()
+    progress: OptimizationProgress | None = None
 
     def __post_init__(self) -> None:
         """Require immutable typed evaluations without sorting or filtering them."""
@@ -30,3 +32,13 @@ class OptimizationSearchRun:
             for evaluation in self.evaluations
         ):
             raise TypeError("evaluations must contain only CandidateEvaluation values.")
+        if self.progress is None:
+            object.__setattr__(
+                self,
+                "progress",
+                OptimizationProgress(len(self.evaluations), len(self.evaluations)),
+            )
+        if not isinstance(self.progress, OptimizationProgress):
+            raise TypeError("progress must be an OptimizationProgress.")
+        if self.progress.evaluated_candidates != len(self.evaluations):
+            raise ValueError("progress must match the evaluation count.")

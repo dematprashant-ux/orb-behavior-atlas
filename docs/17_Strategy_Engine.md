@@ -240,6 +240,13 @@ most the specification budget; a larger budget simply permits every available
 candidate. The budget provides no time limit, adaptive stopping, execution
 state, scoring, ranking, or selection behavior.
 
+M20.5 adds immutable `OptimizationProgress(evaluated_candidates,
+total_candidates)` to `OptimizationSearchRun`. Progress is informational only:
+strategies report completed evaluation count alongside the finite searchable
+total, and `OptimizationRun` exposes the exact same object. Its deterministic
+completion ratio has no timestamps, execution control, or effect on scoring,
+ranking, selection, or strategy behavior.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
