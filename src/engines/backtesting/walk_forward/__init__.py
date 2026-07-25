@@ -15,6 +15,11 @@ from src.engines.backtesting.walk_forward.split import (
     TrainingValidationSplitEngine,
     WalkForwardDatasetSplit,
 )
+from src.engines.backtesting.walk_forward.rolling import (
+    RollingWindowGenerator,
+    StandardRollingWindowGenerator,
+    WalkForwardConfiguration,
+)
 
 __all__ = [
     "DatasetWindow",
@@ -22,7 +27,10 @@ __all__ = [
     "DateTimeRange",
     "StandardDatasetWindowBuilder",
     "StandardTrainingValidationSplitEngine",
+    "StandardRollingWindowGenerator",
     "TrainingValidationSplitEngine",
+    "RollingWindowGenerator",
+    "WalkForwardConfiguration",
     "WalkForwardDatasetSplit",
     "WalkForwardPlan",
     "WalkForwardWindow",

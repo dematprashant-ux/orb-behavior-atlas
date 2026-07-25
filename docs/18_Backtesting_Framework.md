@@ -70,6 +70,14 @@ Empty selections are valid. The engine does not generate schedules, shift
 boundaries, infer availability, execute a backtest, optimize, or catch builder
 failures.
 
+## 1.6 Rolling Window Generator
+
+M17.4 generates complete fixed-duration rolling schedules from explicit
+calendar-time durations. Each window uses half-open training and validation
+ranges; a final partial validation range is excluded. Steps may create
+overlapping or gapped validation ranges. The generator does not inspect data,
+infer trading days, slice datasets, execute strategies, or perform I/O.
+
 ---
 
 # 2. Responsibilities
