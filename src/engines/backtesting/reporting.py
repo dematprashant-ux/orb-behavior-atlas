@@ -5,6 +5,7 @@ from html import escape
 from typing import Generic, Protocol, TypeVar
 
 from src.engines.backtesting.ranking import RankedObjectiveScore
+from src.engines.backtesting.selection import ObjectiveSelection, SelectionPolicy
 from src.engines.backtesting.summary import (
     OptimizationResultReport,
     OptimizationSelectionOutcomeReport,
@@ -21,6 +22,7 @@ __all__ = [
     "OptimizationSelectionOutcomeReportRenderer",
     "OptimizationSelectionOutcomeReportingPipeline",
     "OptimizationSelectionOutcomeReportingWorkflow",
+    "OptimizationSelectionOutcomeReportingService",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
@@ -166,6 +168,45 @@ class OptimizationSelectionOutcomeReportingWorkflow(
             selection,
         )
         return self.reporting_pipeline.render_report(result_report)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationSelectionOutcomeReportingService(
+    Generic[_RenderedOptimizationResultPayload],
+):
+    """Select once from one completed run before delegating outcome reporting."""
+
+    selection_policy: SelectionPolicy
+    reporting_workflow: OptimizationSelectionOutcomeReportingWorkflow[
+        _RenderedOptimizationResultPayload
+    ]
+
+    def __post_init__(self) -> None:
+        """Require explicit selection and reporting collaborators only."""
+        if self.selection_policy is None:
+            raise TypeError("selection_policy must not be None.")
+        if not callable(getattr(self.selection_policy, "select", None)):
+            raise TypeError("selection_policy must define a callable select method.")
+        if self.reporting_workflow is None:
+            raise TypeError("reporting_workflow must not be None.")
+        if not callable(getattr(self.reporting_workflow, "run", None)):
+            raise TypeError("reporting_workflow must define a callable run method.")
+
+    def run(
+        self,
+        optimization_run: "OptimizationRun",
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Select once from the exact run ranking and delegate unchanged."""
+        from src.engines.backtesting.optimization import OptimizationRun
+
+        if not isinstance(optimization_run, OptimizationRun):
+            raise TypeError("optimization_run must be an OptimizationRun.")
+        selection = self.selection_policy.select(optimization_run.ranking)
+        if not isinstance(selection, ObjectiveSelection):
+            raise TypeError(
+                "selection_policy.select must return an ObjectiveSelection."
+            )
+        return self.reporting_workflow.run(optimization_run, selection)
 
 
 @dataclass(frozen=True, slots=True)

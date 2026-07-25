@@ -466,6 +466,15 @@ cardinality remains downstream. The workflow neither inspects selections or
 rendered payloads nor executes ranking, selection, scoring, optimization, I/O,
 or persistence.
 
+M26.1 adds `OptimizationSelectionOutcomeReportingService`, the narrow
+application service from a completed `OptimizationRun` to its rendered outcome.
+It invokes an injected canonical `SelectionPolicy` exactly once with the run's
+exact ranking and passes that exact `ObjectiveSelection`, with the original run,
+to an injected outcome-reporting workflow. Empty, unique, and tied semantics
+remain wholly owned by the policy and downstream reporting layers. The service
+does not rerank, inspect selections or output, score, evaluate, execute an
+optimizer, choose a winner, tie-break, print, write files, or persist data.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
