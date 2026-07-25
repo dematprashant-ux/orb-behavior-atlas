@@ -75,7 +75,7 @@ class PortfolioEquityTests(TestCase):
         with self.assertRaises(FrozenInstanceError):
             first.final_equity = 0.0
 
-    def test_boundary_rejects_intrinsic_misuse_and_propagates_policy_failure(self) -> None:
+    def test_boundary_rejects_misuse_and_propagates_policy_failure(self) -> None:
         """Reject malformed values but do not suppress valuation failures."""
         point = build_portfolio_equity_point(_timestamp(), 1_000.0, 0.0)
         with self.assertRaises(TypeError):

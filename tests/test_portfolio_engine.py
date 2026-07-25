@@ -65,7 +65,7 @@ class PortfolioEngineTests(TestCase):
             ("two", "three"),
         )
 
-    def test_rejects_insufficient_cash_zero_allocation_and_invalid_lifecycle(self) -> None:
+    def test_rejects_insufficient_cash_and_invalid_lifecycle(self) -> None:
         """Reject events that cannot create or close a coherent active position."""
         initial = _initial()
         with self.assertRaises(ValueError):
@@ -80,7 +80,7 @@ class PortfolioEngineTests(TestCase):
                 (_open("one", 100.0, 1), _open("one", 100.0, 2)),
             )
 
-    def test_processing_preserves_event_order_and_propagates_collaborator_failure(self) -> None:
+    def test_processing_preserves_event_order_and_propagates_failure(self) -> None:
         """Never reorder equal timestamps or suppress allocation-policy failures."""
         initial = _initial()
         same_time = _timestamp(1)
@@ -108,7 +108,7 @@ class PortfolioEngineTests(TestCase):
                 (_open("one", 100.0, 1),),
             )
 
-    def test_engine_is_protocol_compatible_immutable_and_rejects_boundary_misuse(self) -> None:
+    def test_engine_is_immutable_and_rejects_boundary_misuse(self) -> None:
         """Expose an immutable injected service with deterministic input failures."""
         engine: PortfolioEngine = _engine(100.0)
 

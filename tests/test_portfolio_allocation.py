@@ -19,9 +19,18 @@ class PortfolioAllocationTests(TestCase):
         """Allocate fixed capital below, at, and above explicit available cash."""
         policy = FixedCapitalAllocationPolicy(100.0)
 
-        self.assertEqual(policy.allocate(AllocationRequest(250.0)).allocated_capital, 100.0)
-        self.assertEqual(policy.allocate(AllocationRequest(100.0)).allocated_capital, 100.0)
-        self.assertEqual(policy.allocate(AllocationRequest(50.0)).allocated_capital, 50.0)
+        self.assertEqual(
+            policy.allocate(AllocationRequest(250.0)).allocated_capital,
+            100.0,
+        )
+        self.assertEqual(
+            policy.allocate(AllocationRequest(100.0)).allocated_capital,
+            100.0,
+        )
+        self.assertEqual(
+            policy.allocate(AllocationRequest(50.0)).allocated_capital,
+            50.0,
+        )
 
     def test_zero_cash_and_zero_percentage_produce_zero_allocation(self) -> None:
         """Represent no requested capital deterministically without rejection state."""
@@ -42,7 +51,10 @@ class PortfolioAllocationTests(TestCase):
         """Allocate configured decimal fractions without valuation or rounding."""
         policy: CapitalAllocationPolicy = PercentageCapitalAllocationPolicy(0.25)
 
-        self.assertEqual(policy.allocate(AllocationRequest(200.0)).allocated_capital, 50.0)
+        self.assertEqual(
+            policy.allocate(AllocationRequest(200.0)).allocated_capital,
+            50.0,
+        )
         self.assertEqual(
             PercentageCapitalAllocationPolicy(1.0)
             .allocate(AllocationRequest(200.0))
