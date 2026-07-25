@@ -39,8 +39,12 @@ from src.engines.backtesting.ranking import (
     RankedObjectiveScore,
     StandardObjectiveRanker,
 )
-from src.engines.backtesting.random_search import (
+from src.engines.backtesting.random_sampling import (
+    DeterministicRandomCandidateSampler,
+    RandomCandidateSampler,
     RandomOptimizationConfiguration,
+)
+from src.engines.backtesting.random_search import (
     RandomOptimizationStrategy,
 )
 from src.engines.backtesting.specification import OptimizationSpecification
@@ -101,6 +105,7 @@ __all__ = [
     "CandidateObjective",
     "DeterministicBacktestEngine",
     "DateTimeRange",
+    "DeterministicRandomCandidateSampler",
     "DatasetWindow",
     "DatasetWindowBuilder",
     "FixedRateTransactionCostModel",
@@ -122,6 +127,7 @@ __all__ = [
     "RankedObjectiveScore",
     "RandomOptimizationConfiguration",
     "RandomOptimizationStrategy",
+    "RandomCandidateSampler",
     "TransactionCostBreakdown",
     "TransactionCostModel",
     "StandardDatasetWindowBuilder",

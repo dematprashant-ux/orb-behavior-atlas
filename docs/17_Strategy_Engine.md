@@ -229,19 +229,24 @@ evaluation, scoring, ranking, selection, or optimization orchestration. Future
 strategies can provide their own metadata without claiming an implementation
 exists today.
 
-## 1.16 Deterministic Random Optimization Strategy
+## 1.16 Deterministic Random Candidate Sampling
 
-M20.1 adds `RandomOptimizationStrategy` with immutable
-`RandomOptimizationConfiguration(seed, maximum_samples)`. It samples unique
-candidate combinations in deterministic seeded order, never exceeds the sample
-limit, and stops naturally when the finite parameter space is exhausted. It
-uses existing standard candidate evaluation and returns the same immutable
-`OptimizationSearchRun` shape as `GridOptimizationStrategy` with `random`
-strategy metadata.
+M20.2 separates finite deterministic sampling from evaluation.
+`RandomOptimizationConfiguration(seed, maximum_samples)` is immutable explicit
+sampling input. `RandomCandidateSampler` only returns an ordered immutable tuple
+of unique `CandidateParameterSet` values. The stateless
+`DeterministicRandomCandidateSampler` uses the supplied seed without mutating
+global random state, respects the maximum sample count, and naturally exhausts
+the finite parameter space without materializing the full Cartesian product.
 
-The random strategy adds no scoring, ranking, selection, adaptive sampling, or
-pipeline behavior. Reusing the supplied seed reproduces its sampled candidate
-sequence; it is an alternative search strategy, not a change to orchestration.
+`RandomOptimizationStrategy` injects exactly one sampler and one
+`CandidateEvaluator`. It invokes the sampler once, evaluates its exact
+candidates once in sampled order, and retains the resulting exact evaluation
+objects with immutable `random` strategy metadata in `OptimizationSearchRun`.
+Sampling performs no evaluation, scoring, ranking, or selection; the strategy
+does not own random-number generation. This contract permits future sampler
+implementations without claiming they exist. `GridOptimizationStrategy` is
+unchanged.
 
 ---
 

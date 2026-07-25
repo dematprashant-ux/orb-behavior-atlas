@@ -7,6 +7,7 @@ from src.engines.backtesting import (
     BacktestRun,
     BacktestStatus,
     CandidateEvaluation,
+    DeterministicRandomCandidateSampler,
     ObjectiveDirection,
     ObjectiveRanking,
     ObjectiveScore,
@@ -34,10 +35,12 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_identical_seed_produces_identical_sampled_candidates(self) -> None:
         specification = _specification()
         first = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(17, 4),
         ).execute(specification)
         second = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(17, 4),
         ).execute(specification)
@@ -50,10 +53,12 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_different_seed_samples_unique_candidates_within_the_limit(self) -> None:
         specification = _specification()
         first = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(1, 4),
         ).execute(specification)
         second = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(2, 4),
         ).execute(specification)
@@ -66,10 +71,12 @@ class RandomOptimizationStrategyTests(TestCase):
 
     def test_exhaustion_empty_space_and_metadata_are_deterministic(self) -> None:
         exhausted = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(5, 20),
         ).execute(_specification())
         empty_space = RandomOptimizationStrategy(
+            DeterministicRandomCandidateSampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(5, 1),
         ).execute(_specification(ParameterSpace(())))
@@ -82,6 +89,7 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_random_strategy_plugs_into_the_unchanged_optimization_runner(self) -> None:
         result = StandardOptimizationRunner(
             RandomOptimizationStrategy(
+                DeterministicRandomCandidateSampler(),
                 _RecordingEvaluator(),
                 RandomOptimizationConfiguration(7, 2),
             ),
@@ -101,7 +109,15 @@ class RandomOptimizationStrategyTests(TestCase):
             RandomOptimizationConfiguration(1, -1)
         with self.assertRaisesRegex(TypeError, "candidate_evaluator"):
             RandomOptimizationStrategy(
-                None, RandomOptimizationConfiguration(1, 1)
+                DeterministicRandomCandidateSampler(),
+                None,
+                RandomOptimizationConfiguration(1, 1),
+            )  # type: ignore[arg-type]
+        with self.assertRaisesRegex(TypeError, "random_candidate_sampler"):
+            RandomOptimizationStrategy(
+                None,
+                _RecordingEvaluator(),
+                RandomOptimizationConfiguration(1, 1),
             )  # type: ignore[arg-type]
 
     def test_public_exports_are_intentional(self) -> None:
