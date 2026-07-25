@@ -43,6 +43,15 @@ The orchestrator does not inspect candles, replay market data, simulate fills,
 calculate performance or costs, generate reports, perform I/O, or replace any
 upstream research, strategy, or execution responsibility.
 
+## 1.3 Walk-Forward Domain Foundation
+
+M17.1 adds immutable `DateTimeRange`, `WalkForwardWindow`, and
+`WalkForwardPlan` values. Ranges use aware half-open intervals `[start, end)`.
+Training must end no later than validation begins; contiguous and gapped
+ranges are both valid. Plans retain unique deterministic indices in increasing
+training chronology. This foundation does not inspect datasets, infer sessions,
+slice observations, generate schedules, execute backtests, or optimize.
+
 ---
 
 # 2. Responsibilities
