@@ -1,11 +1,12 @@
-"""Read-only immutable projections of completed optimization run state."""
+"""Read-only immutable projections and collections of optimization run state."""
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 
 from src.engines.backtesting.strategy_metadata import OptimizationStrategyMetadata
 from src.engines.backtesting.termination import OptimizationTerminationReason
 
-__all__ = ["OptimizationRunSummary"]
+__all__ = ["OptimizationRunSummaries", "OptimizationRunSummary"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,3 +62,38 @@ class OptimizationRunSummary:
             termination_reason=run.termination_reason,
             rejection_count=len(run.constraint_diagnostics.rejections),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaries:
+    """Retain ordered existing optimization summaries without aggregation."""
+
+    summaries: tuple[OptimizationRunSummary, ...]
+
+    def __post_init__(self) -> None:
+        """Normalize one supplied iterable into immutable ordered summary storage."""
+        try:
+            summaries = tuple(self.summaries)
+        except TypeError as error:
+            raise TypeError(
+                "summaries must be an iterable of OptimizationRunSummary values."
+            ) from error
+        if any(
+            not isinstance(summary, OptimizationRunSummary) for summary in summaries
+        ):
+            raise TypeError(
+                "summaries must contain only OptimizationRunSummary values."
+            )
+        object.__setattr__(self, "summaries", summaries)
+
+    def __iter__(self) -> Iterator[OptimizationRunSummary]:
+        """Iterate over supplied summaries in their exact insertion order."""
+        return iter(self.summaries)
+
+    def __len__(self) -> int:
+        """Return the number of retained summaries without aggregation."""
+        return len(self.summaries)
+
+    def __getitem__(self, index: int) -> OptimizationRunSummary:
+        """Return one supplied summary by its zero-based insertion position."""
+        return self.summaries[index]

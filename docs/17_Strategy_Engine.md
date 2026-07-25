@@ -305,6 +305,13 @@ exposed because `ObjectiveSelection` deliberately permits multiple selected
 scores. Summary creation does not rerun constraints, evaluations, ranking, or
 selection; it introduces no reporting, persistence, or serialization behavior.
 
+M22.2 adds `OptimizationRunSummaries`, an immutable ordered value collection
+for existing `OptimizationRunSummary` objects. Construction normalizes supplied
+iterables once into tuple storage, preserves exact summary object identities and
+insertion order, and permits empty and duplicate observations. It performs no
+sorting, deduplication, comparison, ranking, aggregation, optimization
+re-execution, reporting, persistence, or serialization.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

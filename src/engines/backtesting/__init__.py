@@ -63,7 +63,10 @@ from src.engines.backtesting.random_search import (
     RandomOptimizationStrategy,
 )
 from src.engines.backtesting.specification import OptimizationSpecification
-from src.engines.backtesting.summary import OptimizationRunSummary
+from src.engines.backtesting.summary import (
+    OptimizationRunSummaries,
+    OptimizationRunSummary,
+)
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.strategies import (
     GridOptimizationStrategy,
@@ -146,6 +149,7 @@ __all__ = [
     "ConstraintRejection",
     "NotConstraint",
     "OptimizationRun",
+    "OptimizationRunSummaries",
     "OptimizationRunSummary",
     "OptimizationProgress",
     "OptimizationRunner",
