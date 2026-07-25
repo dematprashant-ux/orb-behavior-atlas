@@ -61,7 +61,8 @@ class PortfolioReportingTests(TestCase):
         points = serialized["equity_curve"]["points"]
         self.assertEqual([point["total_equity"] for point in points], [100.0, 125.0])
         self.assertIsInstance(points[0]["timestamp"], str)
-        self.assertEqual(StandardJsonReportExporter().export(serialized), StandardJsonReportExporter().export(serialized))
+        exporter = StandardJsonReportExporter()
+        self.assertEqual(exporter.export(serialized), exporter.export(serialized))
 
     def test_existing_text_and_pdf_renderers_render_portfolio_plain_data(self) -> None:
         """Reuse generic presentation boundaries without a second renderer engine."""
@@ -83,7 +84,9 @@ class PortfolioReportingTests(TestCase):
         self.assertIn("Initial Equity", text)
         self.assertIn("Maximum Drawdown", text)
 
-    def test_reporting_rejects_intrinsic_misuse_without_consistency_analysis(self) -> None:
+    def test_reporting_rejects_intrinsic_misuse_without_consistency_analysis(
+        self,
+    ) -> None:
         """Require only report model types and serializer input type at this layer."""
         with self.assertRaises(TypeError):
             build_portfolio_report(object(), _curve(), _drawdown())

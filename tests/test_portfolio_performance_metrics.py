@@ -72,9 +72,14 @@ class PortfolioPerformanceMetricsTests(TestCase):
             (0.0, 0.0, 15.0, 0.0),
         )
         self.assertEqual(drawdown.maximum_drawdown, 15.0)
-        self.assertIs(drawdown.drawdown_points[2].source_equity_point, curve.equity_points[2])
+        self.assertIs(
+            drawdown.drawdown_points[2].source_equity_point,
+            curve.equity_points[2],
+        )
 
-    def test_results_are_immutable_deterministic_and_protocol_compatible(self) -> None:
+    def test_results_are_immutable_deterministic_and_protocol_compatible(
+        self,
+    ) -> None:
         """Expose stable output without inspecting positions or mutating the curve."""
         curve = _curve((100.0, 110.0))
         analyzer: PortfolioPerformanceAnalyzer = StandardPortfolioPerformanceAnalyzer()
@@ -87,7 +92,9 @@ class PortfolioPerformanceMetricsTests(TestCase):
         with self.assertRaises(FrozenInstanceError):
             first.final_equity = 0.0
 
-    def test_boundary_rejects_intrinsic_misuse_without_lower_layer_revalidation(self) -> None:
+    def test_boundary_rejects_intrinsic_misuse_without_lower_layer_revalidation(
+        self,
+    ) -> None:
         """Require curve types and metric relationships while accepting zero equity."""
         with self.assertRaises(TypeError):
             StandardPortfolioPerformanceAnalyzer().analyze(object())

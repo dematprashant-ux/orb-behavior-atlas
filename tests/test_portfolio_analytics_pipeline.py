@@ -35,12 +35,17 @@ class PortfolioAnalyticsPipelineTests(TestCase):
             ),
         )
 
-        self.assertEqual(calls, ["engine", "equity", "performance", "drawdown", "report"])
+        self.assertEqual(
+            calls,
+            ["engine", "equity", "performance", "drawdown", "report"],
+        )
         self.assertEqual(report.equity_curve.final_equity, 1_020.0)
         self.assertEqual(report.performance_metrics.total_return, 0.02)
         self.assertEqual(report.drawdown_summary.maximum_drawdown, 0.0)
 
-    def test_pipeline_handles_empty_and_cash_only_portfolios_without_partial_results(self) -> None:
+    def test_pipeline_handles_empty_cash_only_portfolios_without_partial_results(
+        self,
+    ) -> None:
         """Compose the same boundaries for no events and no active positions."""
         calls: list[str] = []
         report = _pipeline(calls).run(
@@ -50,10 +55,13 @@ class PortfolioAnalyticsPipelineTests(TestCase):
 
         self.assertEqual(report.equity_curve.final_equity, 500.0)
         self.assertEqual(report.performance_metrics.total_return, 0.0)
-        self.assertEqual(calls, ["engine", "equity", "performance", "drawdown", "report"])
+        self.assertEqual(
+            calls,
+            ["engine", "equity", "performance", "drawdown", "report"],
+        )
 
     def test_pipeline_preserves_explicit_open_position_valuation(self) -> None:
-        """Pass the exact engine snapshot collection to the injected valuation boundary."""
+        """Pass exact engine snapshots to the injected valuation boundary."""
         calls: list[str] = []
         pipeline = StandardPortfolioAnalyticsPipeline(
             _RecordingEngine(calls),
@@ -67,11 +75,17 @@ class PortfolioAnalyticsPipelineTests(TestCase):
             (_open("one", 100.0, 1),),
         )
 
-        self.assertEqual(report.equity_curve.equity_points[-1].position_value, 350.0)
-        self.assertEqual(calls, ["engine", "equity", "performance", "drawdown", "report"])
+        self.assertEqual(
+            report.equity_curve.equity_points[-1].position_value,
+            350.0,
+        )
+        self.assertEqual(
+            calls,
+            ["engine", "equity", "performance", "drawdown", "report"],
+        )
 
     def test_pipeline_propagates_each_collaborator_failure(self) -> None:
-        """Do not retry, catch, or return a partial report after collaborator failure."""
+        """Do not retry, catch, or return a partial report after failure."""
         initial = build_portfolio_snapshot(_timestamp(), 1_000.0)
         for failing in ("engine", "equity", "performance", "drawdown", "report"):
             with self.subTest(failing=failing):
@@ -121,7 +135,9 @@ class _RecordingEquityBuilder:
         self._calls.append("equity")
         if self._position_value is None:
             return StandardPortfolioEquityCurveBuilder().build(snapshots)
-        return StandardPortfolioEquityCurveBuilder(_FixedValuation(self._position_value)).build(snapshots)
+        return StandardPortfolioEquityCurveBuilder(
+            _FixedValuation(self._position_value)
+        ).build(snapshots)
 
 
 class _RecordingPerformance:
@@ -162,7 +178,9 @@ def _failing_pipeline(failing: str) -> StandardPortfolioAnalyticsPipeline:
     return StandardPortfolioAnalyticsPipeline(
         _Failing("engine") if failing == "engine" else _RecordingEngine([]),
         _Failing("equity") if failing == "equity" else _RecordingEquityBuilder([]),
-        _Failing("performance") if failing == "performance" else _RecordingPerformance([]),
+        _Failing("performance")
+        if failing == "performance"
+        else _RecordingPerformance([]),
         _Failing("drawdown") if failing == "drawdown" else _RecordingDrawdown([]),
         _Failing("report") if failing == "report" else _recording_report_builder([]),
     )
