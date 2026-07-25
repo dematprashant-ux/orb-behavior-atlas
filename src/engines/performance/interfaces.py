@@ -1,10 +1,12 @@
 """Pure Performance Analytics protocol boundary without an implementation."""
 
+from collections.abc import Mapping
 from typing import Protocol
 
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
     DrawdownSummary,
+    BacktestReport,
     EquityCurve,
     PerformanceContext,
     PerformanceMetrics,
@@ -20,6 +22,7 @@ __all__ = [
     "PerformanceEngine",
     "PnLEngine",
     "RiskMetricsAnalyzer",
+    "ReportSerializer",
 ]
 
 
@@ -67,3 +70,10 @@ class RiskMetricsAnalyzer(Protocol):
         drawdown: DrawdownSummary,
     ) -> RiskAdjustedMetrics:
         """Return zero-safe metrics from existing aggregate artifacts only."""
+
+
+class ReportSerializer(Protocol):
+    """Defines pure plain-data serialization of an immutable backtest report."""
+
+    def serialize(self, report: BacktestReport) -> Mapping[str, object]:
+        """Return deterministic in-memory data without rendering or I/O."""

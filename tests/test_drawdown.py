@@ -141,6 +141,7 @@ class DrawdownTests(TestCase):
                 "src.engines.performance.models",
             },
             "src/engines/performance/interfaces.py": {
+                "collections.abc",
                 "typing",
                 "src.engines.execution.models",
                 "src.engines.performance.models",

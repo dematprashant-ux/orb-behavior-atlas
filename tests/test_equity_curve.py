@@ -54,7 +54,11 @@ class EquityCurveTests(TestCase):
             (10.0, 5.0, 5.0, 15.0),
         )
         self.assertEqual(curve.final_equity, 15.0)
-        for trade_pnl, point in zip(summary.trade_pnls, curve.equity_points, strict=True):
+        for trade_pnl, point in zip(
+            summary.trade_pnls,
+            curve.equity_points,
+            strict=True,
+        ):
             self.assertIs(point.source_trade_pnl, trade_pnl)
 
     def test_curve_construction_is_deterministic_and_models_are_immutable(self) -> None:
@@ -106,6 +110,7 @@ class EquityCurveTests(TestCase):
                 "src.engines.performance.models",
             },
             "src/engines/performance/interfaces.py": {
+                "collections.abc",
                 "typing",
                 "src.engines.execution.models",
                 "src.engines.performance.models",

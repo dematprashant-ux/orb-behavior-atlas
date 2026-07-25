@@ -21,6 +21,7 @@ from src.engines.performance.interfaces import (
     PerformanceEngine,
     PnLEngine,
     RiskMetricsAnalyzer,
+    ReportSerializer,
 )
 from src.engines.performance.models import (
     BacktestReport,
@@ -44,6 +45,7 @@ from src.engines.performance.metrics import BasicPerformanceAnalyzer
 from src.engines.performance.equity import CumulativeEquityCurveBuilder
 from src.engines.performance.drawdown import BasicDrawdownAnalyzer
 from src.engines.performance.risk import BasicRiskMetricsAnalyzer
+from src.engines.performance.serialization import DictionaryReportSerializer
 
 __all__ = [
     "BasicPerformanceAnalyzer",
@@ -52,6 +54,7 @@ __all__ = [
     "BasicRiskMetricsAnalyzer",
     "BacktestReport",
     "CumulativeEquityCurveBuilder",
+    "DictionaryReportSerializer",
     "EquityCurve",
     "EquityCurveBuilder",
     "EquityPoint",
@@ -68,6 +71,7 @@ __all__ = [
     "PnLSummary",
     "RiskAdjustedMetrics",
     "RiskMetricsAnalyzer",
+    "ReportSerializer",
     "RealizedPnLEngine",
     "TradePnL",
     "TradeOutcome",

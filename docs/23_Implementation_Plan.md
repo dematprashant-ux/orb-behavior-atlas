@@ -1282,6 +1282,44 @@ M13.1 is complete when any four existing immutable analytics artifacts compose
 deterministically into one immutable canonical report retaining every child
 reference.
 
+## M13.2 — Backtest Report Serialization
+
+### Objective
+
+Serialize immutable `BacktestReport` artifacts deterministically into nested
+plain in-memory dictionary and list data for future presentation or transport.
+
+### Scope
+
+- `ReportSerializer` protocol and `DictionaryReportSerializer`
+- Stable nested representations of performance metrics, equity curves,
+  drawdown summaries, and risk-adjusted metrics
+- Contract tests and directly affected documentation
+
+### Serialization Contract
+
+- Every `PerformanceMetrics` and `RiskAdjustedMetrics` field is represented
+  exactly once under its explicit field name; `None` values are preserved.
+- Equity and drawdown points become ordered lists. Each source reference is
+  represented by its existing realized-PnL and cumulative-equity facts rather
+  than a Python object representation.
+- Native finite floats are emitted unchanged without rounding, and all output
+  values are plain dictionaries, lists, strings, booleans, `None`, or native
+  numeric values suitable for later JSON encoding.
+
+### Explicit Exclusions
+
+- HTML, PDF, Markdown, CSV, or JSON rendering; file writing; persistence;
+  network calls; charts; optimization; and I/O
+- Any analytics recalculation or changes to execution, strategy, PnL, equity,
+  drawdown, or risk metrics
+
+### Acceptance Criteria
+
+M13.2 is complete when equivalent immutable reports produce equivalent ordered
+plain data without mutation, rendering, serialization to an external format,
+or numeric conversion.
+
 Implement:
 
 - Data Engine
