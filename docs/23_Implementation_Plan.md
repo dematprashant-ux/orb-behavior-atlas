@@ -1610,6 +1610,45 @@ writer boundary that remains independent from renderers and bundle builders.
 M14.5 is complete when supplied binary bytes are persisted exactly through an
 atomic replacement boundary with validated destinations and safe failure cleanup.
 
+## M14.6 — Binary Report Export Service
+
+### Objective
+
+Coordinate injected components for PDF export and complete multi-format ZIP
+bundle export without implementing production, persistence, or analytics logic.
+
+### Scope
+
+- `BinaryReportExportService` protocol and immutable
+  `StandardBinaryReportExportService`
+- Dependency-injected PDF and complete bundle orchestration operations
+- Contract tests and directly affected documentation
+
+### PDF Export Pipeline
+
+`export_pdf(report, destination)` serializes the report once, passes the exact
+plain result to the injected PDF renderer, then passes the returned bytes
+unchanged to the injected binary writer.
+
+### Bundle Export Pipeline
+
+`export_bundle(report, destination)` serializes once, then invokes JSON,
+Markdown, HTML, and PDF producers in that order with the same serialized
+object. It bundles fixed names `report.json`, `report.md`, `report.html`, and
+`report.pdf`, then sends the returned ZIP bytes unchanged to the binary writer.
+No intermediate artifact is written to disk.
+
+### Explicit Exclusions
+
+- Implementing serialization, JSON/Markdown/HTML/PDF production, ZIP building,
+  binary writing, analytics calculations, report-data changes, optimization,
+  network access, retries, or partial output handling
+
+### Acceptance Criteria
+
+M14.6 is complete when each binary operation deterministically invokes all
+required injected collaborators in the prescribed order without mutation.
+
 Implement:
 
 - Data Engine

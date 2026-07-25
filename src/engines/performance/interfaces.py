@@ -32,6 +32,7 @@ __all__ = [
     "PdfReportRenderer",
     "ReportBundleBuilder",
     "BinaryReportWriter",
+    "BinaryReportExportService",
 ]
 
 
@@ -148,3 +149,13 @@ class BinaryReportWriter(Protocol):
 
     def write(self, content: bytes, destination: Path) -> None:
         """Persist exact binary bytes to one destination without format inspection."""
+
+
+class BinaryReportExportService(Protocol):
+    """Defines orchestration of PDF and multi-format binary report exports."""
+
+    def export_pdf(self, report: BacktestReport, destination: Path) -> None:
+        """Serialize, render PDF bytes, and persist through injected collaborators."""
+
+    def export_bundle(self, report: BacktestReport, destination: Path) -> None:
+        """Produce fixed artifacts, build ZIP bytes, and persist them by injection."""
