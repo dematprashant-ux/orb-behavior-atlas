@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from html import escape
 from typing import Generic, Protocol, TypeVar
 
+from src.engines.backtesting.ranking import RankedObjectiveScore
 from src.engines.backtesting.summary import (
     OptimizationResultReport,
+    OptimizationSelectionOutcomeReport,
     OptimizationRunSummaries,
     OptimizationRunSummary,
     OptimizationRunSummaryAnalysis,
@@ -16,6 +18,8 @@ __all__ = [
     "OptimizationResultRenderedReport",
     "OptimizationResultReportRenderer",
     "OptimizationResultReportingPipeline",
+    "OptimizationSelectionOutcomeReportRenderer",
+    "MarkdownOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
     "OptimizationRunSummaryReportingPipeline",
@@ -79,6 +83,78 @@ class OptimizationResultReportingPipeline(Generic[_RenderedOptimizationResultPay
         if not isinstance(report, OptimizationResultReport):
             raise TypeError("report must be an OptimizationResultReport.")
         return self.renderer.render(report)
+
+
+class OptimizationSelectionOutcomeReportRenderer(
+    Protocol[_RenderedOptimizationResultPayload],
+):
+    """Define presentation of complete canonical optimization selection outcomes."""
+
+    def render(
+        self,
+        report: OptimizationSelectionOutcomeReport,
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Return one renderer-defined value without changing the outcome."""
+
+
+@dataclass(frozen=True, slots=True)
+class MarkdownOptimizationSelectionOutcomeRenderer:
+    """Render complete selected outcomes as deterministic Markdown tables."""
+
+    def render(
+        self,
+        report: OptimizationSelectionOutcomeReport,
+    ) -> OptimizationResultRenderedReport[str]:
+        """Return canonical selected facts without reranking or tie breaking."""
+        if not isinstance(report, OptimizationSelectionOutcomeReport):
+            raise TypeError("report must be an OptimizationSelectionOutcomeReport.")
+        rows = tuple(
+            _render_selected_outcome_row(selected_outcome)
+            for selected_outcome in report.selected_outcomes
+        )
+        return OptimizationResultRenderedReport(
+            "\n".join(
+                (
+                    "# Optimization Selection Outcome",
+                    "",
+                    "## Summary",
+                    "",
+                    f"Selection Count: {report.selection_count}",
+                    "",
+                    "## Selected Outcomes",
+                    "",
+                    "| Rank | Parameters | Objective Score | Direction |",
+                    "| --- | --- | --- | --- |",
+                    *rows,
+                )
+            )
+        )
+
+
+def _render_selected_outcome_row(selected_outcome: RankedObjectiveScore) -> str:
+    """Render one existing selected outcome without calculating a new value."""
+    source_score = selected_outcome.source_score
+    parameters = "; ".join(
+        f"{_escape_markdown_cell(name)}={_escape_markdown_cell(value)}"
+        for name, value in source_score.evaluation.candidate.assignments
+    )
+    return (
+        "| "
+        f"{selected_outcome.rank} | {parameters} | {source_score.score} | "
+        f"{source_score.direction.value} |"
+    )
+
+
+def _escape_markdown_cell(value: object) -> str:
+    """Keep canonical text in one deterministic Markdown table cell."""
+    return (
+        str(value)
+        .replace("\\", "\\\\")
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .replace("\n", "\\n")
+        .replace("|", "\\|")
+    )
 
 
 @dataclass(frozen=True, slots=True)

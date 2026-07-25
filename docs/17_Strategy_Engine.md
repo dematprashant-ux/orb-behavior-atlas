@@ -437,6 +437,16 @@ recommendation, interpretation, or optimization execution. Concrete result
 rendering is deferred until the zero, unique, and tied presentation semantics
 are explicitly defined.
 
+M25.5 defines those presentation semantics through the stateless
+`MarkdownOptimizationSelectionOutcomeRenderer`. It accepts one complete outcome
+report and returns `OptimizationResultRenderedReport[str]` with a fixed heading,
+selection count, and a canonical-order table of every selected rank, parameter
+assignment, raw objective score, and direction. Empty, unique, and tied
+selections remain distinct; no winner is chosen. Table-cell text is minimally
+escaped for pipes and line breaks. The renderer performs no calculation,
+ranking, selection, tie breaking, optimization, recommendation, interpretation,
+printing, file writing, or persistence; no other result format is provided.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
