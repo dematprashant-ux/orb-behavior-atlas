@@ -1956,3 +1956,19 @@ breakdown total equals the exact sum of finite non-negative components.
 **Out of scope:** PnL integration, trade-model changes, NSE or asymmetric fees,
 rounding, taxes by side, tiering, minimum brokerage, contract multipliers,
 currency conversion, storage, I/O, and network access.
+## M15.2 — Net Trade PnL Integration
+
+**Objective:** Integrate injected transaction-cost models into immutable
+per-trade PnL while retaining current gross-PnL behavior downstream.
+
+**Scope:** Extend `TradePnL` with transaction cost and net PnL facts; inject a
+`TransactionCostModel` into `RealizedPnLEngine`; default to explicit zero cost;
+add focused contract tests and directly affected documentation.
+
+**Compatibility:** `realized_pnl` remains the backwards-compatible gross-PnL
+field. With the default zero-cost model, gross and net PnL are identical; PnL
+summaries, equity, drawdown, metrics, reports, and rendering remain gross-only.
+
+**Out of scope:** Changes to completed trades, execution, equity, drawdown,
+metrics, reports, serialization, rendering, export, cost-model rules, rounding,
+or any brokerage-specific behavior.

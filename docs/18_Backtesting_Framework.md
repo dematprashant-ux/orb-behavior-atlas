@@ -229,6 +229,19 @@ completed trades, gross or net PnL, equity, analytics, reports, execution, or
 backtesting orchestration. It also does not model NSE-specific, asymmetric,
 tiered, minimum, or instrument-specific charges.
 
+## 9.2 Gross and Net Trade PnL Integration
+
+M15.2 injects a `TransactionCostModel` into `RealizedPnLEngine`. For every
+completed trade, the engine calculates gross PnL, obtains an immutable cost
+breakdown, and records its `total_cost` as `TradePnL.transaction_cost`.
+`TradePnL.net_pnl` is exactly gross PnL minus this cost. The existing
+`realized_pnl` field remains a backwards-compatible alias of gross PnL, and
+the default `ZeroTransactionCostModel` preserves historical behavior.
+
+This milestone intentionally leaves PnL summaries, equity curves, drawdown,
+metrics, reports, and all renderers on the existing gross-PnL behavior. It adds
+no brokerage-specific logic or monetary rounding.
+
 The framework supports configurable costs, including:
 
 - Brokerage

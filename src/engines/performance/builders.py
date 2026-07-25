@@ -92,23 +92,29 @@ def build_performance_report(
 def build_trade_pnl(
     source_completed_trade: CompletedTrade,
     realized_pnl: float,
+    transaction_cost: float = 0.0,
+    net_pnl: float | None = None,
 ) -> TradePnL:
-    """Build one realized-PnL item from an existing completed trade and value.
+    """Build one gross/net PnL item from an existing completed trade and values.
 
     Args:
         source_completed_trade: Existing immutable explicit completed trade.
-        realized_pnl: Finite PnL value derived only from the completed trade facts.
+        realized_pnl: Backwards-compatible finite gross PnL derived from trade facts.
+        transaction_cost: Finite non-negative transaction cost supplied by a model.
+        net_pnl: Optional explicit net PnL to validate against gross less cost.
 
     Returns:
         An immutable item retaining ``source_completed_trade`` by reference.
 
     Raises:
         TypeError: If an input has an unsupported type.
-        ValueError: If the PnL is non-finite or inconsistent with the trade.
+        ValueError: If the supplied PnL facts are non-finite or inconsistent.
     """
     return TradePnL(
         source_completed_trade=source_completed_trade,
         realized_pnl=realized_pnl,
+        transaction_cost=transaction_cost,
+        net_pnl=net_pnl,
     )
 
 

@@ -117,10 +117,12 @@ class RealizedPnLEngineTests(TestCase):
         with self.assertRaises(TypeError):
             PnLSummary(trade_pnls=(trade_pnl,), total_realized_pnl=10)
 
-    def test_pnl_modules_depend_only_on_completed_trade_contracts(self) -> None:
+    def test_pnl_modules_depend_only_on_trade_and_cost_contracts(self) -> None:
         """Keep calculations independent from candles, fills, and infrastructure."""
         expected_imports = {
             "src/engines/performance/pnl.py": {
+                "dataclasses",
+                "src.engines.backtesting",
                 "src.engines.execution.models",
                 "src.engines.performance.builders",
                 "src.engines.performance.models",

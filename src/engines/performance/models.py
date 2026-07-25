@@ -103,18 +103,40 @@ class PerformanceMetrics:
 
 @dataclass(frozen=True, slots=True)
 class TradePnL:
-    """Records the realized PnL from one explicit immutable completed trade."""
+    """Records gross and net PnL from one explicit immutable completed trade.
+
+    ``realized_pnl`` remains the backwards-compatible gross-PnL field used by
+    existing summaries and downstream analytics. ``gross_pnl`` exposes the
+    same fact explicitly; net-PnL integration remains local to this model.
+    """
 
     source_completed_trade: CompletedTrade
     realized_pnl: float
+    transaction_cost: float = 0.0
+    net_pnl: float | None = None
 
     def __post_init__(self) -> None:
-        """Require a finite PnL value consistent with supplied trade facts."""
+        """Require finite gross/net facts consistent with a supplied trade."""
         if not isinstance(self.source_completed_trade, CompletedTrade):
             raise TypeError("source_completed_trade must be a CompletedTrade.")
         _validate_finite_float(self.realized_pnl, "realized_pnl")
+        _validate_finite_float(self.transaction_cost, "transaction_cost")
+        if self.transaction_cost < 0:
+            raise ValueError("transaction_cost must be non-negative.")
         if self.realized_pnl != _calculate_realized_pnl(self.source_completed_trade):
             raise ValueError("realized_pnl must match the completed trade facts.")
+        expected_net_pnl = self.realized_pnl - self.transaction_cost
+        if self.net_pnl is None:
+            object.__setattr__(self, "net_pnl", expected_net_pnl)
+        else:
+            _validate_finite_float(self.net_pnl, "net_pnl")
+            if self.net_pnl != expected_net_pnl:
+                raise ValueError("net_pnl must equal gross_pnl minus transaction_cost.")
+
+    @property
+    def gross_pnl(self) -> float:
+        """Return explicit gross PnL while preserving ``realized_pnl`` compatibility."""
+        return self.realized_pnl
 
 
 @dataclass(frozen=True, slots=True)
