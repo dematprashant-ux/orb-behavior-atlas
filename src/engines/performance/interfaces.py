@@ -29,6 +29,7 @@ __all__ = [
     "HtmlReportRenderer",
     "ReportWriter",
     "ReportExportService",
+    "PdfReportRenderer",
 ]
 
 
@@ -124,3 +125,10 @@ class ReportExportService(Protocol):
 
     def export_html(self, report: BacktestReport, destination: Path) -> None:
         """Serialize, HTML-render, and write one report through injection."""
+
+
+class PdfReportRenderer(Protocol):
+    """Defines pure in-memory PDF rendering from plain report data."""
+
+    def render(self, serialized_report: Mapping[str, object]) -> bytes:
+        """Return a complete deterministic PDF without file I/O."""

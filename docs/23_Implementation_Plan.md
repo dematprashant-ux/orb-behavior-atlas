@@ -1504,6 +1504,42 @@ components without implementing or altering any of their responsibilities.
 M14.2 is complete when each export format deterministically invokes its
 injected serializer, text producer, and writer in that order without mutation.
 
+## M14.3 — PDF Report Rendering
+
+### Objective
+
+Render serialized backtest-report plain data as a deterministic standalone PDF
+held entirely in memory, without calculations or persistence.
+
+### Scope
+
+- `PdfReportRenderer` protocol and immutable `StandardPdfReportRenderer`
+- Ordered PDF headings and tables for performance, risk, equity, and drawdown
+  data using embedded fonts and no external assets
+- Contract tests and directly affected documentation
+
+### Rendering Contract
+
+- The renderer accepts only serializer-shaped plain mappings and returns a
+  complete PDF byte sequence without writing a file.
+- Sections appear in this order: Backtest Report, Performance Metrics,
+  Risk-Adjusted Metrics, Equity Curve, Drawdown Summary.
+- Existing values retain their native `str()` representation without rounding,
+  calculations, or interpretation; unavailable values render as `N/A`.
+- ReportLab invariant mode and a metadata rewrite remove creation and
+  modification timestamps while preserving deterministic document content.
+
+### Explicit Exclusions
+
+- File writing, serialization changes, JSON/Markdown/HTML changes, report
+  writing changes, calculations, optimization, networking, charts, and all
+  external document assets
+
+### Acceptance Criteria
+
+M14.3 is complete when equivalent serialized reports produce equivalent
+timestamp-free in-memory PDF content with stable ordered sections and tables.
+
 Implement:
 
 - Data Engine
