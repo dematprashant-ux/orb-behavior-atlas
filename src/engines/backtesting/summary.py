@@ -10,6 +10,7 @@ __all__ = [
     "OptimizationRunSummaries",
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
+    "OptimizationRunSummaryAnalysis",
     "OptimizationRunSummaryRates",
 ]
 
@@ -236,6 +237,36 @@ class OptimizationRunSummaryRates:
                 aggregate.run_count,
             ),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryAnalysis:
+    """Retain canonical summary collection, aggregate, and rates by identity."""
+
+    summaries: OptimizationRunSummaries
+    aggregate: OptimizationRunSummaryAggregate
+    rates: OptimizationRunSummaryRates
+
+    def __post_init__(self) -> None:
+        """Require existing immutable analytical components without recalculation."""
+        if not isinstance(self.summaries, OptimizationRunSummaries):
+            raise TypeError("summaries must be an OptimizationRunSummaries.")
+        if not isinstance(self.aggregate, OptimizationRunSummaryAggregate):
+            raise TypeError("aggregate must be an OptimizationRunSummaryAggregate.")
+        if not isinstance(self.rates, OptimizationRunSummaryRates):
+            raise TypeError("rates must be an OptimizationRunSummaryRates.")
+
+    @classmethod
+    def from_summaries(
+        cls,
+        summaries: OptimizationRunSummaries,
+    ) -> "OptimizationRunSummaryAnalysis":
+        """Compose canonical aggregate and rates values from existing summaries."""
+        if not isinstance(summaries, OptimizationRunSummaries):
+            raise TypeError("summaries must be an OptimizationRunSummaries.")
+        aggregate = OptimizationRunSummaryAggregate.from_summaries(summaries)
+        rates = OptimizationRunSummaryRates.from_aggregate(aggregate)
+        return cls(summaries, aggregate, rates)
 
 
 def _rate(numerator: int, denominator: int) -> float:

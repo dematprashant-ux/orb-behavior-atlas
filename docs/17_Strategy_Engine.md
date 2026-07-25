@@ -330,6 +330,15 @@ stop. Rates are numeric and unformatted; construction performs no run or
 summary traversal, optimization re-execution, reporting, persistence, or
 serialization.
 
+M22.5 adds `OptimizationRunSummaryAnalysis`, an eager immutable composition of
+one exact `OptimizationRunSummaries` object with the aggregate and rates created
+through their existing canonical factories. It preserves nested object identity,
+including rates derived from the retained aggregate, without copying or
+recalculating scalar values. Empty and duplicate summaries retain their existing
+semantics. The composition adds no sorting, filtering, grouping, comparison,
+ranking, selection, reporting, formatting, persistence, serialization, or
+optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
