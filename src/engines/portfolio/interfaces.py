@@ -10,6 +10,7 @@ __all__ = [
     "PortfolioEquityCurveBuilder",
     "PortfolioPerformanceAnalyzer",
     "PortfolioDrawdownAnalyzer",
+    "PortfolioAnalyticsPipeline",
     "PortfolioValuationPolicy",
 ]
 
@@ -51,3 +52,14 @@ class PortfolioDrawdownAnalyzer(Protocol):
 
     def analyze(self, curve: "PortfolioEquityCurve") -> "PortfolioDrawdownSummary":
         """Return drawdown facts from the supplied portfolio equity curve."""
+
+
+class PortfolioAnalyticsPipeline(Protocol):
+    """Defines deterministic composition from initial state and portfolio events."""
+
+    def run(
+        self,
+        initial_snapshot: PortfolioSnapshot,
+        events: tuple[PortfolioEvent, ...],
+    ) -> "PortfolioReport":
+        """Return one complete report without rendering, I/O, or new formulas."""

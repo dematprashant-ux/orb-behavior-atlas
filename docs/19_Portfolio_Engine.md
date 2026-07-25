@@ -107,6 +107,19 @@ export services, and bundles remain the only persistence and packaging
 boundaries. Portfolio reporting introduces no charts, I/O, timestamps beyond
 domain values, valuation, analytics recalculation, or mode inference.
 
+## 1.7 Portfolio Analytics Pipeline
+
+M16.7 adds `StandardPortfolioAnalyticsPipeline`, an in-memory orchestration
+boundary. Constructor-injected collaborators execute in one fixed order:
+portfolio engine, portfolio equity builder, portfolio performance analyzer,
+portfolio drawdown analyzer, then portfolio report builder. The resulting
+report composes metrics and drawdown from the same portfolio equity curve.
+
+The pipeline has no accounting, valuation, metric, or drawdown formulas. It
+does not render, serialize, export, write files, retry, access market data, or
+catch collaborator failures. It preserves caller event ordering through the
+portfolio engine and returns no partial report if any collaborator fails.
+
 ---
 
 # 2. Responsibilities

@@ -20,11 +20,13 @@ from src.engines.portfolio.events import (
 )
 from src.engines.portfolio.interfaces import PortfolioEngine
 from src.engines.portfolio.interfaces import (
+    PortfolioAnalyticsPipeline,
     PortfolioDrawdownAnalyzer,
     PortfolioEquityCurveBuilder,
     PortfolioPerformanceAnalyzer,
     PortfolioValuationPolicy,
 )
+from src.engines.portfolio.pipeline import StandardPortfolioAnalyticsPipeline
 from src.engines.portfolio.equity import (
     CostBasisPortfolioValuation,
     PortfolioEquityCurve,
@@ -58,6 +60,7 @@ __all__ = [
     "FixedCapitalAllocationPolicy",
     "PercentageCapitalAllocationPolicy",
     "PortfolioCloseEvent",
+    "PortfolioAnalyticsPipeline",
     "PortfolioEngine",
     "PortfolioEquityCurve",
     "PortfolioEquityCurveBuilder",
@@ -75,6 +78,7 @@ __all__ = [
     "PortfolioReport",
     "PortfolioReportBuilder",
     "StandardPortfolioDrawdownAnalyzer",
+    "StandardPortfolioAnalyticsPipeline",
     "StandardPortfolioEquityCurveBuilder",
     "StandardPortfolioPerformanceAnalyzer",
     "StandardPortfolioEngine",
