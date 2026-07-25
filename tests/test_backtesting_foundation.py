@@ -127,7 +127,9 @@ class BacktestingFoundationTests(TestCase):
             "src/engines/backtesting/interfaces.py": {
                 "typing",
                 "src.engines.backtesting.costs",
+                "src.engines.backtesting.evaluation",
                 "src.engines.backtesting.models",
+                "src.engines.strategy.parameters",
             },
             "src/engines/backtesting/models.py": {
                 "dataclasses",

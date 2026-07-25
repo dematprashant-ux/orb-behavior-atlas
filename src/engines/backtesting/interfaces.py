@@ -3,9 +3,11 @@
 from typing import Protocol
 
 from src.engines.backtesting.costs import TransactionCostBreakdown
+from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.models import BacktestContext, BacktestRun
+from src.engines.strategy.parameters import CandidateParameterSet
 
-__all__ = ["BacktestEngine", "TransactionCostModel"]
+__all__ = ["BacktestEngine", "CandidateEvaluator", "TransactionCostModel"]
 
 
 class BacktestEngine(Protocol):
@@ -13,6 +15,13 @@ class BacktestEngine(Protocol):
 
     def run(self, context: BacktestContext) -> BacktestRun:
         """Return a structural run without implying replay or simulation behavior."""
+
+
+class CandidateEvaluator(Protocol):
+    """Define one injected candidate evaluation without optimizer behavior."""
+
+    def evaluate(self, candidate: CandidateParameterSet) -> CandidateEvaluation:
+        """Return one typed outcome without ranking, scoring, or mutation."""
 
 
 class TransactionCostModel(Protocol):

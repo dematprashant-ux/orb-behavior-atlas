@@ -9,7 +9,12 @@ from src.engines.backtesting.costs import (
     TransactionCostBreakdown,
     ZeroTransactionCostModel,
 )
-from src.engines.backtesting.interfaces import BacktestEngine, TransactionCostModel
+from src.engines.backtesting.evaluation import CandidateEvaluation
+from src.engines.backtesting.interfaces import (
+    BacktestEngine,
+    CandidateEvaluator,
+    TransactionCostModel,
+)
 from src.engines.backtesting.models import BacktestContext, BacktestRun, BacktestStatus
 from src.engines.backtesting.orchestrator import DeterministicBacktestEngine
 from src.engines.backtesting.walk_forward import (
@@ -51,6 +56,8 @@ __all__ = [
     "BacktestEngine",
     "BacktestRun",
     "BacktestStatus",
+    "CandidateEvaluation",
+    "CandidateEvaluator",
     "DeterministicBacktestEngine",
     "DateTimeRange",
     "DatasetWindow",

@@ -58,6 +58,20 @@ are retained; the final parameter changes fastest. The generator does not
 evaluate, score, rank, train, execute, optimize, report, serialize, or perform
 I/O.
 
+## 1.5 Candidate Evaluation Contracts
+
+M18.3 adds the protocol-only `CandidateEvaluator` contract and immutable
+`CandidateEvaluation` hand-off. An evaluator receives one existing
+`CandidateParameterSet` and returns an existing immutable `BacktestRun` by
+reference as its outcome. This keeps candidate generation independent from
+evaluation while avoiding duplicate backtest or performance result models.
+
+The contract defines no evaluator implementation, grid-search runner, random
+search, Bayesian search, optimization loop, ranking, scoring algorithm,
+walk-forward integration, reporting, serialization, or I/O. Future search
+approaches can reuse the same candidate-evaluation boundary without changing
+candidate generation.
+
 ---
 
 # 2. Responsibilities
