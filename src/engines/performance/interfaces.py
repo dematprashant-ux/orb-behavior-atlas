@@ -4,13 +4,19 @@ from typing import Protocol
 
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
+    EquityCurve,
     PerformanceContext,
     PerformanceMetrics,
     PerformanceReport,
     PnLSummary,
 )
 
-__all__ = ["PerformanceAnalyzer", "PerformanceEngine", "PnLEngine"]
+__all__ = [
+    "EquityCurveBuilder",
+    "PerformanceAnalyzer",
+    "PerformanceEngine",
+    "PnLEngine",
+]
 
 
 class PerformanceEngine(Protocol):
@@ -32,3 +38,10 @@ class PerformanceAnalyzer(Protocol):
 
     def analyze(self, summary: PnLSummary) -> PerformanceMetrics:
         """Return deterministic non-portfolio performance metrics."""
+
+
+class EquityCurveBuilder(Protocol):
+    """Defines pure cumulative-equity construction from immutable realized PnL."""
+
+    def build(self, summary: PnLSummary) -> EquityCurve:
+        """Return an ordered immutable cumulative-realized-equity curve."""

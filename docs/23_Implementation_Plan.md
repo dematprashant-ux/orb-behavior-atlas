@@ -1143,6 +1143,40 @@ M12.2 is complete when any immutable PnL summary deterministically produces
 internally consistent trading counts, aggregates, rates, averages, profit
 factor, and expectancy without portfolio analytics or rounding.
 
+## M12.3 — Equity Curve Foundation
+
+### Objective
+
+Build immutable cumulative realized-equity artifacts from ordered `PnLSummary`
+items without introducing drawdown, portfolio, or risk analytics.
+
+### Scope
+
+- Immutable `EquityPoint` and `EquityCurve` models
+- Pure equity-point and equity-curve builders
+- `EquityCurveBuilder` protocol and `CumulativeEquityCurveBuilder`
+- Contract tests and directly affected documentation
+
+### Calculation Constraints
+
+- Starting equity is `0.0`; every ordered trade PnL is added once to the
+  running cumulative realized PnL.
+- Empty summaries produce no points and final equity `0.0`.
+- Native float arithmetic is preserved without rounding; no rolling statistics,
+  drawdown, or portfolio analytics are calculated.
+
+### Explicit Exclusions
+
+- Drawdown, maximum drawdown, recovery factor, Sharpe, Sortino, Calmar,
+  volatility, CAGR, optimization, charts, and reports
+- Execution, strategy, PnL-calculation, persistence, caching, and I/O changes
+
+### Acceptance Criteria
+
+M12.3 is complete when every ordered immutable PnL summary deterministically
+produces one immutable cumulative point per trade and a final equity matching
+the final cumulative value.
+
 Implement:
 
 - Data Engine

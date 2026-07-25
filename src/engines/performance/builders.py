@@ -3,6 +3,8 @@
 from src.engines.backtesting.models import BacktestRun
 from src.engines.execution.models import CompletedTrade
 from src.engines.performance.models import (
+    EquityCurve,
+    EquityPoint,
     PerformanceContext,
     PerformanceMetrics,
     PerformanceReport,
@@ -15,6 +17,8 @@ __all__ = [
     "build_performance_context",
     "build_performance_metrics",
     "build_performance_report",
+    "build_equity_curve",
+    "build_equity_point",
     "build_pnl_summary",
     "build_trade_pnl",
 ]
@@ -173,3 +177,38 @@ def build_performance_metrics(
         profit_factor=profit_factor,
         expectancy=expectancy,
     )
+
+
+def build_equity_point(
+    source_trade_pnl: TradePnL,
+    cumulative_realized_pnl: float,
+) -> EquityPoint:
+    """Build one immutable cumulative realized-equity point.
+
+    The builder retains the source PnL item by reference and performs no
+    drawdown, rolling-statistic, or portfolio analysis.
+    """
+    return EquityPoint(
+        source_trade_pnl=source_trade_pnl,
+        cumulative_realized_pnl=cumulative_realized_pnl,
+    )
+
+
+def build_equity_curve(
+    equity_points: tuple[EquityPoint, ...],
+    final_equity: float | None = None,
+) -> EquityCurve:
+    """Build an immutable ordered cumulative-realized-equity curve.
+
+    When omitted, ``final_equity`` retains the last supplied cumulative point or
+    zero for an empty curve. No additional financial calculation is performed.
+    """
+    if not isinstance(equity_points, tuple):
+        raise TypeError("equity_points must be a tuple of EquityPoint values.")
+    if any(not isinstance(point, EquityPoint) for point in equity_points):
+        raise TypeError("equity_points must contain only EquityPoint values.")
+    if final_equity is None:
+        final_equity = (
+            equity_points[-1].cumulative_realized_pnl if equity_points else 0.0
+        )
+    return EquityCurve(equity_points=equity_points, final_equity=final_equity)

@@ -17,6 +17,8 @@ __all__ = [
     "PerformanceMetrics",
     "PerformanceReport",
     "PerformanceStatus",
+    "EquityCurve",
+    "EquityPoint",
     "PnLSummary",
     "TradePnL",
     "TradeOutcome",
@@ -130,6 +132,43 @@ class PnLSummary:
             start=0.0,
         ):
             raise ValueError("total_realized_pnl must equal the supplied trade PnLs.")
+
+
+@dataclass(frozen=True, slots=True)
+class EquityPoint:
+    """Records one trade PnL item and its cumulative realized-equity value."""
+
+    source_trade_pnl: TradePnL
+    cumulative_realized_pnl: float
+
+    def __post_init__(self) -> None:
+        """Require one existing PnL item and a finite cumulative value."""
+        if not isinstance(self.source_trade_pnl, TradePnL):
+            raise TypeError("source_trade_pnl must be a TradePnL.")
+        _validate_finite_float(self.cumulative_realized_pnl, "cumulative_realized_pnl")
+
+
+@dataclass(frozen=True, slots=True)
+class EquityCurve:
+    """Records an ordered immutable realized-equity series and its final value."""
+
+    equity_points: tuple[EquityPoint, ...]
+    final_equity: float
+
+    def __post_init__(self) -> None:
+        """Require an immutable point collection with a consistent final value."""
+        if not isinstance(self.equity_points, tuple):
+            raise TypeError("equity_points must be a tuple of EquityPoint values.")
+        if any(not isinstance(point, EquityPoint) for point in self.equity_points):
+            raise TypeError("equity_points must contain only EquityPoint values.")
+        _validate_finite_float(self.final_equity, "final_equity")
+        expected_final_equity = (
+            self.equity_points[-1].cumulative_realized_pnl
+            if self.equity_points
+            else 0.0
+        )
+        if self.final_equity != expected_final_equity:
+            raise ValueError("final_equity must match the last cumulative value.")
 
 
 @dataclass(frozen=True, slots=True)
