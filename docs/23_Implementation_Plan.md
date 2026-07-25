@@ -1939,3 +1939,20 @@ Enhancements must remain compatible with the core architecture.
 The Implementation Plan provides the execution blueprint for building the ORB Behavior Atlas.
 
 By following a disciplined sequence of implementation, testing, validation, documentation, and release, the platform can evolve into a reliable, maintainable, and production-grade quantitative research and trading system.
+## M15.1 — Transaction Cost Model Foundation
+
+**Objective:** Establish a pure Backtesting-domain transaction-cost boundary
+without integrating costs into execution, PnL, analytics, reports, or replay.
+
+**Scope:** Immutable `TransactionCostBreakdown`; `TransactionCostModel`;
+explicit zero-cost and fixed decimal-rate models; turnover-based calculation;
+public exports; focused contract tests; directly affected Backtesting
+documentation.
+
+**Cost basis:** Each component applies independently to `(entry_price *
+quantity) + (exit_price * quantity)`. Rates are decimal fractions. The
+breakdown total equals the exact sum of finite non-negative components.
+
+**Out of scope:** PnL integration, trade-model changes, NSE or asymmetric fees,
+rounding, taxes by side, tiering, minimum brokerage, contract multipliers,
+currency conversion, storage, I/O, and network access.

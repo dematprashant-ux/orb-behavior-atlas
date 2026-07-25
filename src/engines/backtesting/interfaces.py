@@ -2,9 +2,10 @@
 
 from typing import Protocol
 
+from src.engines.backtesting.costs import TransactionCostBreakdown
 from src.engines.backtesting.models import BacktestContext, BacktestRun
 
-__all__ = ["BacktestEngine"]
+__all__ = ["BacktestEngine", "TransactionCostModel"]
 
 
 class BacktestEngine(Protocol):
@@ -12,3 +13,16 @@ class BacktestEngine(Protocol):
 
     def run(self, context: BacktestContext) -> BacktestRun:
         """Return a structural run without implying replay or simulation behavior."""
+
+
+class TransactionCostModel(Protocol):
+    """Defines a pure cost calculation over explicit completed-trade facts."""
+
+    def calculate(
+        self,
+        *,
+        entry_price: float,
+        exit_price: float,
+        quantity: int,
+    ) -> TransactionCostBreakdown:
+        """Return a finite immutable cost breakdown without PnL integration."""

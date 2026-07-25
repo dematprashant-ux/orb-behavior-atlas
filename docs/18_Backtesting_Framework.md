@@ -211,6 +211,24 @@ Portfolio accounting must remain internally consistent after every simulated eve
 
 # 9. Transaction Costs
 
+## 9.1 Transaction Cost Model Foundation
+
+M15.1 provides a pure, immutable transaction-cost boundary in the Backtesting
+Framework. `TransactionCostBreakdown` records absolute brokerage, exchange,
+regulatory, tax, and slippage costs plus their exact total. The
+`TransactionCostModel` protocol supports a deterministic explicit zero-cost
+model and a fixed-rate model.
+
+The fixed-rate model uses gross turnover: `(entry_price * quantity) +
+(exit_price * quantity)`. Each configured rate is a non-negative decimal
+fraction, so `0.001` represents `0.1%`; every component applies independently
+to total turnover. Calculations retain native float precision without rounding.
+
+This foundation is pure and performs no I/O. It deliberately does not alter
+completed trades, gross or net PnL, equity, analytics, reports, execution, or
+backtesting orchestration. It also does not model NSE-specific, asymmetric,
+tiered, minimum, or instrument-specific charges.
+
 The framework supports configurable costs, including:
 
 - Brokerage
