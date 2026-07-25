@@ -1466,6 +1466,44 @@ that remains independent from domain models, serialization, and rendering.
 M14.1 is complete when supplied rendered text is deterministically persisted as
 UTF-8 to an explicit path, with exact content preservation and clear failures.
 
+## M14.2 — Report Export Service
+
+### Objective
+
+Coordinate existing report serialization, text production, and persistence
+components without implementing or altering any of their responsibilities.
+
+### Scope
+
+- `ReportExportService` protocol and immutable `StandardReportExportService`
+- Dependency-injected JSON, Markdown, and HTML export operations
+- Contract tests and directly affected documentation
+
+### Orchestration Contract
+
+- Each export operation serializes a `BacktestReport`, sends the plain result
+  to its corresponding injected exporter or renderer, then passes the produced
+  text unchanged to the injected `ReportWriter`.
+- The service constructs no collaborators internally and performs no report
+  inspection, calculation, transformation, rendering, encoding, or file I/O.
+
+### Supported Operations
+
+- `export_json(report, destination)`
+- `export_markdown(report, destination)`
+- `export_html(report, destination)`
+
+### Explicit Exclusions
+
+- Implementing serialization, JSON encoding, Markdown/HTML rendering, file
+  writing, analytics calculations, report-data changes, optimization, and
+  network access
+
+### Acceptance Criteria
+
+M14.2 is complete when each export format deterministically invokes its
+injected serializer, text producer, and writer in that order without mutation.
+
 Implement:
 
 - Data Engine

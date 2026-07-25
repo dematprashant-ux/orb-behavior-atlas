@@ -26,6 +26,7 @@ from src.engines.performance.interfaces import (
     MarkdownReportRenderer,
     HtmlReportRenderer,
     ReportWriter,
+    ReportExportService,
 )
 from src.engines.performance.models import (
     BacktestReport,
@@ -54,6 +55,7 @@ from src.engines.performance.json_export import StandardJsonReportExporter
 from src.engines.performance.markdown import StandardMarkdownReportRenderer
 from src.engines.performance.html import StandardHtmlReportRenderer
 from src.engines.performance.writers import TextReportWriter
+from src.engines.performance.export_service import StandardReportExportService
 
 __all__ = [
     "BasicPerformanceAnalyzer",
@@ -80,6 +82,7 @@ __all__ = [
     "RiskAdjustedMetrics",
     "RiskMetricsAnalyzer",
     "ReportSerializer",
+    "ReportExportService",
     "ReportWriter",
     "JsonReportExporter",
     "HtmlReportRenderer",
@@ -88,6 +91,7 @@ __all__ = [
     "StandardJsonReportExporter",
     "StandardMarkdownReportRenderer",
     "StandardHtmlReportRenderer",
+    "StandardReportExportService",
     "TradePnL",
     "TextReportWriter",
     "TradeOutcome",

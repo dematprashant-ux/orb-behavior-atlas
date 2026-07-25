@@ -28,6 +28,7 @@ __all__ = [
     "MarkdownReportRenderer",
     "HtmlReportRenderer",
     "ReportWriter",
+    "ReportExportService",
 ]
 
 
@@ -110,3 +111,16 @@ class ReportWriter(Protocol):
 
     def write(self, content: str, destination: Path) -> None:
         """Persist exact UTF-8 text content to one destination path."""
+
+
+class ReportExportService(Protocol):
+    """Defines orchestration of existing report export collaborators only."""
+
+    def export_json(self, report: BacktestReport, destination: Path) -> None:
+        """Serialize, JSON-export, and write one report through injected objects."""
+
+    def export_markdown(self, report: BacktestReport, destination: Path) -> None:
+        """Serialize, Markdown-render, and write one report through injection."""
+
+    def export_html(self, report: BacktestReport, destination: Path) -> None:
+        """Serialize, HTML-render, and write one report through injection."""
