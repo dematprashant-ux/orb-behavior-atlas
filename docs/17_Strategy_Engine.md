@@ -229,9 +229,27 @@ evaluation, scoring, ranking, selection, or optimization orchestration. Future
 strategies can provide their own metadata without claiming an implementation
 exists today.
 
-## 1.16 Deterministic Random Candidate Sampling
+## 1.16 Finite Parameter-Space Indexing and Random Sampling
 
-M20.2 separates finite deterministic sampling from evaluation.
+M20.3 adds `ParameterSpaceIndexer` and its stateless
+`CartesianParameterSpaceIndexer` implementation. It provides exact finite
+Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
+the canonical order established by `GridCandidateGenerator`: declared parameter
+and value order are preserved and the final parameter varies fastest. Indexing
+uses memory proportional only to the number of parameters; it does not
+materialize a full Cartesian collection, evaluate candidates, or score, rank,
+or select them.
+
+`DeterministicRandomCandidateSampler` receives exactly one explicit indexer.
+It samples deterministic unique positions from the immutable
+`RandomOptimizationConfiguration(seed, maximum_samples)` and resolves those
+positions through the indexer, preserving the existing seeded candidate order
+without global random-state mutation. Sequential grid generation remains a
+separate responsibility. The sampler and indexer provide finite-space reuse for
+future strategies without claiming unsupported algorithms exist.
+
+The M20.2 boundary remains: finite deterministic sampling is separate from
+evaluation.
 `RandomOptimizationConfiguration(seed, maximum_samples)` is immutable explicit
 sampling input. `RandomCandidateSampler` only returns an ordered immutable tuple
 of unique `CandidateParameterSet` values. The stateless

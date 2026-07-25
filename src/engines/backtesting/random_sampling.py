@@ -1,15 +1,14 @@
 """Deterministic candidate sampling contracts without candidate evaluation."""
 
 from dataclasses import dataclass
-from math import prod
 from random import Random
 from typing import Protocol
 
 from src.engines.strategy.parameters import (
     CandidateParameterSet,
     ParameterSpace,
-    ParameterValue,
 )
+from src.engines.strategy.indexing import ParameterSpaceIndexer
 
 __all__ = [
     "DeterministicRandomCandidateSampler",
@@ -53,6 +52,13 @@ class RandomCandidateSampler(Protocol):
 class DeterministicRandomCandidateSampler:
     """Sample finite Cartesian-product positions without full enumeration."""
 
+    parameter_space_indexer: ParameterSpaceIndexer
+
+    def __post_init__(self) -> None:
+        """Require one explicit finite-space indexing collaborator."""
+        if self.parameter_space_indexer is None:
+            raise TypeError("parameter_space_indexer must not be None.")
+
     def sample(
         self,
         parameter_space: ParameterSpace,
@@ -66,29 +72,13 @@ class DeterministicRandomCandidateSampler:
                 "configuration must be a RandomOptimizationConfiguration."
             )
 
-        total_candidates = prod(
-            len(parameter.values) for parameter in parameter_space.parameters
-        )
+        total_candidates = self.parameter_space_indexer.cardinality(parameter_space)
         sample_count = min(configuration.maximum_samples, total_candidates)
         sampled_indices = Random(configuration.seed).sample(
             range(total_candidates),
             sample_count,
         )
         return tuple(
-            _candidate_at_index(parameter_space, index)
+            self.parameter_space_indexer.candidate_at(parameter_space, index)
             for index in sampled_indices
         )
-
-
-def _candidate_at_index(
-    parameter_space: ParameterSpace,
-    index: int,
-) -> CandidateParameterSet:
-    """Map one Cartesian-product index to its declared parameter assignments."""
-    assignments: list[tuple[str, ParameterValue]] = []
-    remaining = index
-    for parameter in reversed(parameter_space.parameters):
-        value_index = remaining % len(parameter.values)
-        remaining //= len(parameter.values)
-        assignments.append((parameter.name, parameter.values[value_index]))
-    return CandidateParameterSet(tuple(reversed(assignments)))

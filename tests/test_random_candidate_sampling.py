@@ -22,6 +22,7 @@ from src.engines.backtesting import (
 from src.engines.execution import ExecutionRequest, ExecutionResult, ExecutionStatus
 from src.engines.research import ORBBehaviorAtlas
 from src.engines.strategy import (
+    CartesianParameterSpaceIndexer,
     CandidateParameterSet,
     DiscreteParameter,
     ORBRuleStrategy,
@@ -33,7 +34,7 @@ class RandomCandidateSamplingTests(TestCase):
     """Verify sampling is distinct from ordered candidate evaluation."""
 
     def test_sampler_protocol_and_public_exports_are_intentional(self) -> None:
-        sampler: RandomCandidateSampler = DeterministicRandomCandidateSampler()
+        sampler: RandomCandidateSampler = _sampler()
         from src.engines.backtesting import (
             DeterministicRandomCandidateSampler as PackageSampler,
         )
@@ -43,8 +44,12 @@ class RandomCandidateSamplingTests(TestCase):
         self.assertIs(PackageSampler, DeterministicRandomCandidateSampler)
         self.assertIs(PackageProtocol, RandomCandidateSampler)
 
+    def test_sampler_requires_one_explicit_indexer(self) -> None:
+        with self.assertRaisesRegex(TypeError, "parameter_space_indexer"):
+            DeterministicRandomCandidateSampler(None)  # type: ignore[arg-type]
+
     def test_sampler_preserves_the_m20_1_seeded_sequence(self) -> None:
-        sampled = DeterministicRandomCandidateSampler().sample(
+        sampled = _sampler().sample(
             _parameter_space(),
             RandomOptimizationConfiguration(17, 4),
         )
@@ -70,7 +75,7 @@ class RandomCandidateSamplingTests(TestCase):
     def test_sampler_is_deterministic_unique_and_does_not_mutate_global_state(
         self,
     ) -> None:
-        sampler = DeterministicRandomCandidateSampler()
+        sampler = _sampler()
         configuration = RandomOptimizationConfiguration(5, 20)
         state = random.getstate()
         first = sampler.sample(_parameter_space(), configuration)
@@ -82,7 +87,7 @@ class RandomCandidateSamplingTests(TestCase):
         self.assertEqual(random.getstate(), state)
 
     def test_sampler_handles_empty_and_zero_sample_spaces(self) -> None:
-        sampler = DeterministicRandomCandidateSampler()
+        sampler = _sampler()
 
         self.assertEqual(
             sampler.sample(ParameterSpace(()), RandomOptimizationConfiguration(5, 1)),
@@ -93,10 +98,56 @@ class RandomCandidateSamplingTests(TestCase):
             (),
         )
 
+    def test_sampler_uses_an_injected_indexer_once_and_retains_its_candidates(
+        self,
+    ) -> None:
+        candidates = (
+            CandidateParameterSet((("orb_minutes", 5),)),
+            CandidateParameterSet((("orb_minutes", 15),)),
+            CandidateParameterSet((("orb_minutes", 30),)),
+        )
+        indexer = _RecordingIndexer(candidates)
+        sampler = DeterministicRandomCandidateSampler(indexer)
+
+        sampled = sampler.sample(
+            _parameter_space(),
+            RandomOptimizationConfiguration(7, 3),
+        )
+
+        self.assertEqual(indexer.cardinality_calls, 1)
+        self.assertEqual(len(indexer.indices), 3)
+        self.assertEqual(len(set(indexer.indices)), 3)
+        self.assertTrue(
+            all(
+                actual is candidates[index]
+                for actual, index in zip(sampled, indexer.indices)
+            )
+        )
+
+    def test_sampler_does_not_resolve_candidates_for_zero_cardinality(self) -> None:
+        indexer = _ZeroCardinalityIndexer()
+
+        sampled = DeterministicRandomCandidateSampler(indexer).sample(
+            _parameter_space(),
+            RandomOptimizationConfiguration(7, 3),
+        )
+
+        self.assertEqual(sampled, ())
+        self.assertEqual(indexer.cardinality_calls, 1)
+
+    def test_sampler_propagates_indexer_failure_without_partial_candidates(
+        self,
+    ) -> None:
+        with self.assertRaisesRegex(RuntimeError, "indexer failure"):
+            DeterministicRandomCandidateSampler(_FailingIndexer()).sample(
+                _parameter_space(),
+                RandomOptimizationConfiguration(7, 3),
+            )
+
     def test_empty_sample_skips_evaluation_and_retains_strategy_metadata(self) -> None:
         evaluator = _RecordingEvaluator()
         strategy = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             evaluator,
             RandomOptimizationConfiguration(5, 0),
         )
@@ -198,6 +249,71 @@ class _FailingSampler:
         raise RuntimeError("sampler failure")
 
 
+class _RecordingIndexer:
+    """Test-only indexer retaining random sampled positions and candidate identity."""
+
+    def __init__(self, candidates: tuple[CandidateParameterSet, ...]) -> None:
+        self.candidates = candidates
+        self.cardinality_calls = 0
+        self.indices: list[int] = []
+
+    def cardinality(self, parameter_space: ParameterSpace) -> int:
+        """Return the finite count without inspecting parameter definitions."""
+        del parameter_space
+        self.cardinality_calls += 1
+        return len(self.candidates)
+
+    def candidate_at(
+        self,
+        parameter_space: ParameterSpace,
+        index: int,
+    ) -> CandidateParameterSet:
+        """Record one sampled index and return its exact candidate object."""
+        del parameter_space
+        self.indices.append(index)
+        return self.candidates[index]
+
+
+class _ZeroCardinalityIndexer:
+    """Test-only indexer ensuring zero-cardinality sampling has no resolution."""
+
+    def __init__(self) -> None:
+        self.cardinality_calls = 0
+
+    def cardinality(self, parameter_space: ParameterSpace) -> int:
+        """Return zero without inspecting parameter definitions."""
+        del parameter_space
+        self.cardinality_calls += 1
+        return 0
+
+    def candidate_at(
+        self,
+        parameter_space: ParameterSpace,
+        index: int,
+    ) -> CandidateParameterSet:
+        """Fail if sampling incorrectly resolves a zero-cardinality position."""
+        del parameter_space, index
+        raise AssertionError("candidate_at must not be called for zero cardinality.")
+
+
+class _FailingIndexer:
+    """Test-only indexer proving candidate-resolution failure propagation."""
+
+    def cardinality(self, parameter_space: ParameterSpace) -> int:
+        """Return a positive finite size without inspecting parameter definitions."""
+        del parameter_space
+        return 3
+
+    def candidate_at(
+        self,
+        parameter_space: ParameterSpace,
+        index: int,
+    ) -> CandidateParameterSet:
+        """Fail directly without returning a candidate or fallback result."""
+        del parameter_space, index
+        raise RuntimeError("indexer failure")
+
+
 class _RecordingEvaluator:
     """Test-only evaluator retaining exact candidates and evaluations."""
 
@@ -268,3 +384,8 @@ def _outcome() -> BacktestRun:
         execution_engine=_SkippedExecutionEngine(),
     )
     return BacktestRun(context, BacktestStatus.COMPLETED)
+
+
+def _sampler() -> DeterministicRandomCandidateSampler:
+    """Create the explicit finite indexer-backed sampler used by this suite."""
+    return DeterministicRandomCandidateSampler(CartesianParameterSpaceIndexer())

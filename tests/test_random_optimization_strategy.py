@@ -22,6 +22,7 @@ from src.engines.backtesting import (
 from src.engines.execution import ExecutionRequest, ExecutionResult, ExecutionStatus
 from src.engines.research import ORBBehaviorAtlas
 from src.engines.strategy import (
+    CartesianParameterSpaceIndexer,
     CandidateParameterSet,
     DiscreteParameter,
     ORBRuleStrategy,
@@ -35,12 +36,12 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_identical_seed_produces_identical_sampled_candidates(self) -> None:
         specification = _specification()
         first = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(17, 4),
         ).execute(specification)
         second = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(17, 4),
         ).execute(specification)
@@ -53,12 +54,12 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_different_seed_samples_unique_candidates_within_the_limit(self) -> None:
         specification = _specification()
         first = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(1, 4),
         ).execute(specification)
         second = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(2, 4),
         ).execute(specification)
@@ -71,12 +72,12 @@ class RandomOptimizationStrategyTests(TestCase):
 
     def test_exhaustion_empty_space_and_metadata_are_deterministic(self) -> None:
         exhausted = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(5, 20),
         ).execute(_specification())
         empty_space = RandomOptimizationStrategy(
-            DeterministicRandomCandidateSampler(),
+            _sampler(),
             _RecordingEvaluator(),
             RandomOptimizationConfiguration(5, 1),
         ).execute(_specification(ParameterSpace(())))
@@ -89,7 +90,7 @@ class RandomOptimizationStrategyTests(TestCase):
     def test_random_strategy_plugs_into_the_unchanged_optimization_runner(self) -> None:
         result = StandardOptimizationRunner(
             RandomOptimizationStrategy(
-                DeterministicRandomCandidateSampler(),
+                _sampler(),
                 _RecordingEvaluator(),
                 RandomOptimizationConfiguration(7, 2),
             ),
@@ -109,7 +110,7 @@ class RandomOptimizationStrategyTests(TestCase):
             RandomOptimizationConfiguration(1, -1)
         with self.assertRaisesRegex(TypeError, "candidate_evaluator"):
             RandomOptimizationStrategy(
-                DeterministicRandomCandidateSampler(),
+                _sampler(),
                 None,
                 RandomOptimizationConfiguration(1, 1),
             )  # type: ignore[arg-type]
@@ -192,3 +193,8 @@ def _outcome() -> BacktestRun:
         execution_engine=_SkippedExecutionEngine(),
     )
     return BacktestRun(context, BacktestStatus.COMPLETED)
+
+
+def _sampler() -> DeterministicRandomCandidateSampler:
+    """Create the explicit finite indexer-backed sampler used by this suite."""
+    return DeterministicRandomCandidateSampler(CartesianParameterSpaceIndexer())
