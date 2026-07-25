@@ -60,6 +60,21 @@ remainder as cash. On close, it removes the active position and restores
 `quantity * exit_price` exactly once. The engine neither recomputes transaction
 costs nor performs valuation, analytics, reporting, retries, or I/O.
 
+## 1.4 Portfolio Equity Curve
+
+M16.4 builds portfolio equity from immutable snapshots through an explicit
+injected valuation policy. Each `PortfolioEquityPoint` contains a snapshot's
+timestamp, cash, active-position value, and exact total equity (`cash +
+position_value`). `PortfolioEquityCurve` retains the resulting points in the
+caller-supplied snapshot order.
+
+`CostBasisPortfolioValuation` is the deterministic baseline and values active
+positions only from their explicit entry capital. It does not claim market
+valuation or unrealized PnL. Other policies own any explicit valuation facts.
+Closed positions contribute only through snapshot cash, so entry capital is
+not double counted. The boundary accesses no market data, recalculates no
+transaction costs, and produces no performance, drawdown, or reporting data.
+
 ---
 
 # 2. Responsibilities
