@@ -298,6 +298,19 @@ Drawdown stays curve-derived and does not acquire duplicate mode metadata.
 `Gross` or `Net` report identity once near the top. Reporting preserves existing
 analytics; it never recalculates or independently selects a basis.
 
+## 9.8 Canonical Gross/Net Analytics Pipeline
+
+M15.8 adds `StandardBacktestAnalyticsPipeline`, an injected Performance
+Analytics composition boundary. It delegates PnL, metrics, equity, drawdown,
+risk, and report construction in fixed order, requiring each mode-aware result
+to match its canonical `PerformanceMetricMode` before report construction.
+
+Gross remains the default. The injected PnL engine retains its existing
+zero-cost default; a fixed-rate model can retain costs in trade PnL while gross
+analytics remain unaffected. Net analytics use existing net facts once. The
+pipeline does not add initial equity, because current equity construction starts
+at zero, and it performs no I/O, rendering, or report export.
+
 The framework supports configurable costs, including:
 
 - Brokerage

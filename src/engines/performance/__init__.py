@@ -14,6 +14,7 @@ from src.engines.performance.builders import (
     build_trade_pnl,
 )
 from src.engines.performance.analyzer import BasicPerformanceEngine
+from src.engines.performance.analytics import StandardBacktestAnalyticsPipeline
 from src.engines.performance.interfaces import (
     DrawdownAnalyzer,
     EquityCurveBuilder,
@@ -31,6 +32,7 @@ from src.engines.performance.interfaces import (
     ReportBundleBuilder,
     BinaryReportWriter,
     BinaryReportExportService,
+    BacktestAnalyticsPipeline,
 )
 from src.engines.performance.models import (
     BacktestReport,
@@ -73,6 +75,7 @@ from src.engines.performance.binary_export_service import (
 __all__ = [
     "BasicPerformanceAnalyzer",
     "BasicPerformanceEngine",
+    "BacktestAnalyticsPipeline",
     "BasicDrawdownAnalyzer",
     "BasicRiskMetricsAnalyzer",
     "BacktestReport",
@@ -116,6 +119,7 @@ __all__ = [
     "StandardReportBundleBuilder",
     "AtomicBinaryReportWriter",
     "StandardBinaryReportExportService",
+    "StandardBacktestAnalyticsPipeline",
     "TradePnL",
     "TextReportWriter",
     "TradeOutcome",

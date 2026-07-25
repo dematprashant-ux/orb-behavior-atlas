@@ -33,6 +33,7 @@ __all__ = [
     "ReportBundleBuilder",
     "BinaryReportWriter",
     "BinaryReportExportService",
+    "BacktestAnalyticsPipeline",
 ]
 
 
@@ -41,6 +42,13 @@ class PerformanceEngine(Protocol):
 
     def analyze(self, context: PerformanceContext) -> PerformanceReport:
         """Return a structural report without implying metric calculation."""
+
+
+class BacktestAnalyticsPipeline(Protocol):
+    """Defines deterministic analytics composition over completed trades."""
+
+    def run(self, trades: tuple[CompletedTrade, ...]) -> BacktestReport:
+        """Return one complete immutable gross or net report without I/O."""
 
 
 class PnLEngine(Protocol):

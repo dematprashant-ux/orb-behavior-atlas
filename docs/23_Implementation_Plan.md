@@ -2049,3 +2049,18 @@ unchanged. Reporting does not infer, calculate, or select gross/net values.
 **Out of scope:** Transaction costs, TradePnL, analytics, equity, drawdown,
 metrics, risk formulas, execution, report export orchestration, charts,
 timestamps, networking, and rounding.
+## M15.8 — End-to-End Gross/Net Backtest Mode
+
+**Objective:** Coordinate existing mode-aware analytics through one deterministic
+gross or net completed-trade to backtest-report pipeline.
+
+**Scope:** Injected `BacktestAnalyticsPipeline`; canonical
+`PerformanceMetricMode` propagation and result consistency checks; contract
+tests and directly affected documentation.
+
+**Compatibility:** Pipeline mode defaults to gross. An injected
+`RealizedPnLEngine` keeps its existing zero-cost default. Net mode uses existing
+net facts once, without recalculating transaction costs or analytics formulas.
+
+**Out of scope:** Initial equity, formulas, rendering/export, execution, I/O,
+networking, and rounding.
