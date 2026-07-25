@@ -51,6 +51,7 @@ from src.engines.backtesting.progress import OptimizationProgress
 from src.engines.backtesting.reporting import (
     OptimizationRunSummaryRenderedReport,
     OptimizationRunSummaryReportRenderer,
+    PlainTextOptimizationRunSummaryReportRenderer,
 )
 from src.engines.backtesting.ranking import (
     ObjectiveRanker,
@@ -170,6 +171,7 @@ __all__ = [
     "OptimizationRunSummaryReport",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
+    "PlainTextOptimizationRunSummaryReportRenderer",
     "OptimizationRunSummaryRates",
     "OptimizationProgress",
     "OptimizationRunner",

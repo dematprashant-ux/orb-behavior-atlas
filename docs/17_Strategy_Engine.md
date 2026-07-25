@@ -380,6 +380,13 @@ not choose or normalize an output representation, so it assumes no text, bytes,
 HTML, Markdown, or JSON format. The renderer protocol returns this wrapper, but
 no concrete renderer or rendering behavior is implemented.
 
+M24.4 adds `PlainTextOptimizationRunSummaryReportRenderer`, the first concrete
+renderer. It accepts one report and returns an
+`OptimizationRunSummaryRenderedReport[str]` with a fixed heading and ordered
+aggregate and raw-rate fields. It uses retained integer and float values without
+rounding, percentage conversion, recalculation, summary traversal, printing,
+file writing, persistence, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
