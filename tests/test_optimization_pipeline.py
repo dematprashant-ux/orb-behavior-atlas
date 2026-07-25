@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     ObjectiveRanking,
     ObjectiveScore,
     ObjectiveSelection,
+    OptimizationConfiguration,
     OptimizationRun,
     OptimizationRunner,
     StandardObjectiveRanker,
@@ -41,7 +42,7 @@ class OptimizationPipelineTests(TestCase):
             _GridSearchRunner(grid_search_run, events),
             _Objective(events),
             _Ranker(events),
-            _SelectionPolicy(events),
+            _configuration(events),
         )
 
         result = runner.run(parameter_space)
@@ -75,7 +76,7 @@ class OptimizationPipelineTests(TestCase):
             _GridSearchRunner(grid_search_run, []),
             _Objective([]),
             _Ranker([]),
-            _SelectionPolicy([]),
+            _configuration([]),
         )
 
         first = runner.run(parameter_space)
@@ -100,7 +101,7 @@ class OptimizationPipelineTests(TestCase):
             _GridSearchRunner(_grid_search_run(parameter_space), events),
             _FailingObjective(events),
             _Ranker(events),
-            _SelectionPolicy(events),
+            _configuration(events),
         )
 
         with self.assertRaisesRegex(RuntimeError, "objective failure"):
@@ -108,20 +109,20 @@ class OptimizationPipelineTests(TestCase):
 
         self.assertEqual(events, ["grid", "objective"])
 
-    def test_runner_rejects_mixed_score_directions_before_selection(self) -> None:
+    def test_runner_rejects_mixed_score_directions_before_ranking(self) -> None:
         events: list[str] = []
         parameter_space = _space()
         runner = StandardOptimizationRunner(
             _GridSearchRunner(_grid_search_run(parameter_space), events),
             _MixedDirectionObjective(events),
             _Ranker(events),
-            _SelectionPolicy(events),
+            _configuration(events),
         )
 
         with self.assertRaisesRegex(ValueError, "match"):
             runner.run(parameter_space)
 
-        self.assertEqual(events, ["grid", "objective", "objective", "rank"])
+        self.assertEqual(events, ["grid", "objective", "objective"])
 
     def test_run_rejects_intrinsic_and_cross_stage_misuse(self) -> None:
         parameter_space = _space()
@@ -133,21 +134,21 @@ class OptimizationPipelineTests(TestCase):
                 _GridSearchRunner(grid_search_run, []),
                 _Objective([]),
                 _Ranker([]),
-                _SelectionPolicy([]),
+                _configuration([]),
             ).run(None)  # type: ignore[arg-type]
         with self.assertRaisesRegex(TypeError, "grid_search_runner"):
             StandardOptimizationRunner(
                 None,
                 _Objective([]),
                 _Ranker([]),
-                _SelectionPolicy([]),
+                _configuration([]),
             )
         with self.assertRaisesRegex(ValueError, "parameter_space"):
             StandardOptimizationRunner(
                 _ForeignGridSearchRunner(GridSearchRun(_space(), (evaluation,))),
                 _Objective([]),
                 _Ranker([]),
-                _SelectionPolicy([]),
+                _configuration([]),
             ).run(parameter_space)
         with self.assertRaisesRegex(ValueError, "in order"):
             OptimizationRun(
@@ -277,6 +278,14 @@ class _SkippedExecutionEngine:
 def _space() -> ParameterSpace:
     """Create a source parameter space without candidate-generation behavior."""
     return ParameterSpace((DiscreteParameter("orb_minutes", (5, 15)),))
+
+
+def _configuration(events: list[str]) -> OptimizationConfiguration:
+    """Create one explicit policy configuration for standard test execution."""
+    return OptimizationConfiguration(
+        ObjectiveDirection.MAXIMIZE,
+        _SelectionPolicy(events),
+    )
 
 
 def _grid_search_run(parameter_space: ParameterSpace) -> GridSearchRun:

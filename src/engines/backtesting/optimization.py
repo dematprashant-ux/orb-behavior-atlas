@@ -3,11 +3,12 @@
 from dataclasses import dataclass
 from typing import Protocol
 
+from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.grid_search import GridSearchRun, GridSearchRunner
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
 from src.engines.backtesting.ranking import ObjectiveRanker, ObjectiveRanking
-from src.engines.backtesting.selection import ObjectiveSelection, SelectionPolicy
+from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.strategy.parameters import ParameterSpace
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
@@ -70,7 +71,7 @@ class StandardOptimizationRunner:
     grid_search_runner: GridSearchRunner
     candidate_objective: CandidateObjective
     objective_ranker: ObjectiveRanker
-    selection_policy: SelectionPolicy
+    configuration: OptimizationConfiguration
 
     def __post_init__(self) -> None:
         """Require explicit collaborators without inspecting or invoking them."""
@@ -78,7 +79,7 @@ class StandardOptimizationRunner:
             (self.grid_search_runner, "grid_search_runner"),
             (self.candidate_objective, "candidate_objective"),
             (self.objective_ranker, "objective_ranker"),
-            (self.selection_policy, "selection_policy"),
+            (self.configuration, "configuration"),
         ):
             if collaborator is None:
                 raise TypeError(f"{name} must not be None.")
@@ -100,7 +101,11 @@ class StandardOptimizationRunner:
         ranking = self.objective_ranker.rank(objective_scores)
         if not isinstance(ranking, ObjectiveRanking):
             raise TypeError("objective_ranker.rank must return an ObjectiveRanking.")
-        selection = self.selection_policy.select(ranking)
+        if ranking.direction is not self.configuration.direction:
+            raise ValueError(
+                "ranking direction must match the configuration direction."
+            )
+        selection = self.configuration.selection_policy.select(ranking)
         if not isinstance(selection, ObjectiveSelection):
             raise TypeError(
                 "selection_policy.select must return an ObjectiveSelection."
@@ -115,6 +120,8 @@ class StandardOptimizationRunner:
             raise TypeError("candidate_objective.score must return an ObjectiveScore.")
         if score.evaluation is not evaluation:
             raise ValueError("objective score must reference its source evaluation.")
+        if score.direction is not self.configuration.direction:
+            raise ValueError("objective score direction must match the configuration.")
         return score
 
 

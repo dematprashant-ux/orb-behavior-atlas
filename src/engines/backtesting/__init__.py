@@ -9,6 +9,7 @@ from src.engines.backtesting.costs import (
     TransactionCostBreakdown,
     ZeroTransactionCostModel,
 )
+from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.evaluation import CandidateEvaluation
 from src.engines.backtesting.grid_search import (
     GridSearchRun,
@@ -99,6 +100,7 @@ __all__ = [
     "ObjectiveRanking",
     "ObjectiveScore",
     "ObjectiveSelection",
+    "OptimizationConfiguration",
     "OptimizationRun",
     "OptimizationRunner",
     "RankedObjectiveScore",

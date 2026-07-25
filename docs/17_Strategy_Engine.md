@@ -150,6 +150,22 @@ selection policy, cache, retry, random behavior, walk-forward work, report,
 serialization, I/O, or concurrency. It only composes the existing deterministic
 boundaries for future optimization use.
 
+## 1.11 Explicit Optimization Configuration
+
+M19.1 adds immutable `OptimizationConfiguration`, which owns the explicit
+`ObjectiveDirection` and injected `SelectionPolicy` for one deterministic
+optimization pipeline. It retains the exact policy object and contains no
+runner, objective, ranker, evaluation, result, runtime state, or implicit
+default. Execution collaborators remain separately constructor-injected into
+`StandardOptimizationRunner`.
+
+The configuration is the sole pipeline source for direction and selection:
+every produced score must match its direction, the resulting ranking must use
+it, and the configured policy receives that exact ranking. This makes empty
+grid-search runs well-defined without fabricating a score: the configuration
+supplies their explicit ranking direction, while the objective is not invoked.
+The search, scoring, ranking, and selection sequence is otherwise unchanged.
+
 ---
 
 # 2. Responsibilities
