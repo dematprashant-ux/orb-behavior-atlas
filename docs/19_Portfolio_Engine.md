@@ -18,6 +18,19 @@ The Portfolio Engine manages portfolios.
 
 It does not create strategies.
 
+## 1.1 Portfolio Domain Foundation
+
+M16.1 establishes the immutable portfolio-domain boundary. A
+`PortfolioPosition` records an active holding's stable position identity,
+canonical instrument, side, quantity, explicit entry price, and aware entry
+timestamp. A `PortfolioSnapshot` records available cash plus an ordered tuple
+of unique active positions at one aware timestamp.
+
+Snapshots expose entry-based invested capital only; they do not imply a market
+valuation, unrealized PnL, an exit state, lifecycle transition, allocation, or
+portfolio analytics. Empty snapshots are valid. Construction retains supplied
+immutable position references and does not mutate caller collections.
+
 ---
 
 # 2. Responsibilities
