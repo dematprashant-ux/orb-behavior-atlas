@@ -92,6 +92,17 @@ backtest orchestration. Selection contents remain deliberately opaque to avoid
 prematurely imposing parameter-search mathematics or provider-specific data
 formats.
 
+## 1.8 Walk-Forward Runner
+
+M17.6 composes one supplied `WalkForwardPlan`, chronological canonical candle
+tuple, and injected split, training, and validation contracts. It executes plan
+windows sequentially in plan order and returns immutable
+`WalkForwardIterationResult` values in a `WalkForwardRun`. Each iteration
+retains the complete typed split, selection, and validation result. The runner
+does not generate schedules, construct datasets itself, optimize, search
+parameters, retry, return partial results, calculate analytics, report,
+serialize, or perform I/O.
+
 ---
 
 # 2. Responsibilities

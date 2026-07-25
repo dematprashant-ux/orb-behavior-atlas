@@ -26,6 +26,12 @@ from src.engines.backtesting.walk_forward.execution import (
     WalkForwardValidationExecutor,
     WalkForwardValidationResult,
 )
+from src.engines.backtesting.walk_forward.runner import (
+    StandardWalkForwardRunner,
+    WalkForwardIterationResult,
+    WalkForwardRun,
+    WalkForwardRunner,
+)
 
 __all__ = [
     "DatasetWindow",
@@ -34,11 +40,15 @@ __all__ = [
     "StandardDatasetWindowBuilder",
     "StandardTrainingValidationSplitEngine",
     "StandardRollingWindowGenerator",
+    "StandardWalkForwardRunner",
     "TrainingValidationSplitEngine",
     "RollingWindowGenerator",
     "WalkForwardConfiguration",
     "WalkForwardDatasetSplit",
+    "WalkForwardIterationResult",
     "WalkForwardPlan",
+    "WalkForwardRun",
+    "WalkForwardRunner",
     "WalkForwardSelection",
     "WalkForwardTrainer",
     "WalkForwardValidationExecutor",
