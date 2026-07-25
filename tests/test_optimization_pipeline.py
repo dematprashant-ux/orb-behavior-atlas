@@ -40,7 +40,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = _space()
         grid_search_run = _grid_search_run(parameter_space)
         runner: OptimizationRunner = StandardOptimizationRunner(
-            _GridSearchRunner(grid_search_run, events),
+            _OptimizationStrategy(grid_search_run, events),
             _Objective(events),
             _Ranker(events),
         )
@@ -73,7 +73,7 @@ class OptimizationPipelineTests(TestCase):
         parameter_space = ParameterSpace(())
         grid_search_run = GridSearchRun(parameter_space, ())
         runner = StandardOptimizationRunner(
-            _GridSearchRunner(grid_search_run, []),
+            _OptimizationStrategy(grid_search_run, []),
             _Objective([]),
             _Ranker([]),
         )
@@ -97,7 +97,7 @@ class OptimizationPipelineTests(TestCase):
         events: list[str] = []
         parameter_space = _space()
         runner = StandardOptimizationRunner(
-            _GridSearchRunner(_grid_search_run(parameter_space), events),
+            _OptimizationStrategy(_grid_search_run(parameter_space), events),
             _FailingObjective(events),
             _Ranker(events),
         )
@@ -111,7 +111,7 @@ class OptimizationPipelineTests(TestCase):
         events: list[str] = []
         parameter_space = _space()
         runner = StandardOptimizationRunner(
-            _GridSearchRunner(_grid_search_run(parameter_space), events),
+            _OptimizationStrategy(_grid_search_run(parameter_space), events),
             _MixedDirectionObjective(events),
             _Ranker(events),
         )
@@ -128,11 +128,11 @@ class OptimizationPipelineTests(TestCase):
 
         with self.assertRaisesRegex(TypeError, "specification"):
             StandardOptimizationRunner(
-                _GridSearchRunner(grid_search_run, []),
+                _OptimizationStrategy(grid_search_run, []),
                 _Objective([]),
                 _Ranker([]),
             ).run(None)  # type: ignore[arg-type]
-        with self.assertRaisesRegex(TypeError, "grid_search_runner"):
+        with self.assertRaisesRegex(TypeError, "optimization_strategy"):
             StandardOptimizationRunner(
                 None,
                 _Objective([]),
@@ -140,7 +140,7 @@ class OptimizationPipelineTests(TestCase):
             )
         with self.assertRaisesRegex(ValueError, "parameter_space"):
             StandardOptimizationRunner(
-                _ForeignGridSearchRunner(GridSearchRun(_space(), (evaluation,))),
+                _ForeignOptimizationStrategy(GridSearchRun(_space(), (evaluation,))),
                 _Objective([]),
                 _Ranker([]),
             ).run(_specification(parameter_space, []))
@@ -170,30 +170,30 @@ class OptimizationPipelineTests(TestCase):
         self.assertIs(PackageStandard, StandardOptimizationRunner)
 
 
-class _GridSearchRunner:
-    """Test-only grid-search boundary returning one configured immutable result."""
+class _OptimizationStrategy:
+    """Test-only strategy returning one configured immutable grid-search result."""
 
     def __init__(self, result: GridSearchRun, events: list[str]) -> None:
         self.result = result
         self.events = events
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
-        """Record one call and retain the supplied parameter-space identity."""
+    def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
+        """Record one call and retain the supplied specification identity."""
         self.events.append("grid")
-        if parameter_space is not self.result.parameter_space:
+        if specification.parameter_space is not self.result.parameter_space:
             raise AssertionError("unexpected parameter space")
         return self.result
 
 
-class _ForeignGridSearchRunner:
-    """Test-only boundary returning a result for a different parameter space."""
+class _ForeignOptimizationStrategy:
+    """Test-only strategy returning a result for a foreign parameter space."""
 
     def __init__(self, result: GridSearchRun) -> None:
         self.result = result
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
-        """Return the configured foreign result without invoking any search logic."""
-        del parameter_space
+    def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
+        """Return a foreign result without invoking any search or scoring logic."""
+        del specification
         return self.result
 
 

@@ -177,10 +177,10 @@ class _GridRunner:
         self.result = result
         self.events = events
 
-    def run(self, parameter_space: ParameterSpace) -> GridSearchRun:
+    def execute(self, specification: OptimizationSpecification) -> GridSearchRun:
         """Record one call and return the source-owned configured result."""
         self.events.append("grid")
-        if parameter_space is not self.result.parameter_space:
+        if specification.parameter_space is not self.result.parameter_space:
             raise AssertionError("unexpected parameter space")
         return self.result
 

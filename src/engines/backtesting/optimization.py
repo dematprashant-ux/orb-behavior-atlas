@@ -5,11 +5,12 @@ from typing import Protocol
 
 from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.evaluation import CandidateEvaluation
-from src.engines.backtesting.grid_search import GridSearchRun, GridSearchRunner
+from src.engines.backtesting.grid_search import GridSearchRun
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
 from src.engines.backtesting.ranking import ObjectiveRanker, ObjectiveRanking
 from src.engines.backtesting.selection import ObjectiveSelection
 from src.engines.backtesting.specification import OptimizationSpecification
+from src.engines.backtesting.strategies import OptimizationStrategy
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
 
@@ -68,14 +69,14 @@ class OptimizationRunner(Protocol):
 class StandardOptimizationRunner:
     """Coordinate injected optimization collaborators in one deterministic order."""
 
-    grid_search_runner: GridSearchRunner
+    optimization_strategy: OptimizationStrategy
     candidate_objective: CandidateObjective
     objective_ranker: ObjectiveRanker
 
     def __post_init__(self) -> None:
         """Require explicit collaborators without inspecting or invoking them."""
         for collaborator, name in (
-            (self.grid_search_runner, "grid_search_runner"),
+            (self.optimization_strategy, "optimization_strategy"),
             (self.candidate_objective, "candidate_objective"),
             (self.objective_ranker, "objective_ranker"),
         ):
@@ -86,12 +87,13 @@ class StandardOptimizationRunner:
         """Delegate once through search, score, rank, and selection stages."""
         if not isinstance(specification, OptimizationSpecification):
             raise TypeError("specification must be an OptimizationSpecification.")
-        parameter_space = specification.parameter_space
         configuration = specification.configuration
-        grid_search_run = self.grid_search_runner.run(parameter_space)
+        grid_search_run = self.optimization_strategy.execute(specification)
         if not isinstance(grid_search_run, GridSearchRun):
-            raise TypeError("grid_search_runner.run must return a GridSearchRun.")
-        if grid_search_run.parameter_space is not parameter_space:
+            raise TypeError(
+                "optimization_strategy.execute must return a GridSearchRun."
+            )
+        if grid_search_run.parameter_space is not specification.parameter_space:
             raise ValueError("grid_search_run must retain the source parameter_space.")
 
         objective_scores = tuple(

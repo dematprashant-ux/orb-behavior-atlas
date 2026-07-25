@@ -183,6 +183,22 @@ direction through the specification configuration; no score or default policy
 is fabricated. This preserves the existing orchestration sequence while giving
 future experiment descriptions one typed, immutable boundary.
 
+## 1.13 Optimization Strategy Contract
+
+M19.3 separates search execution from optimization orchestration through the
+protocol-only `OptimizationStrategy`. A strategy receives an
+`OptimizationSpecification` and returns an existing `GridSearchRun` without
+scoring, ranking, selection, or result aggregation. `GridOptimizationStrategy`
+is the first concrete adapter: it forwards the specification's exact
+`ParameterSpace` once to an injected `GridSearchRunner` and retains its exact
+result.
+
+`StandardOptimizationRunner` now depends on `OptimizationStrategy`, while its
+objective and ranker collaborators remain injected. This preserves the existing
+orchestration sequence and makes later search strategies pluggable without
+duplicating grid-search or optimization-pipeline behavior. No additional search
+algorithm is implemented by this contract.
+
 ---
 
 # 2. Responsibilities

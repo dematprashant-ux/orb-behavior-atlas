@@ -40,6 +40,10 @@ from src.engines.backtesting.ranking import (
     StandardObjectiveRanker,
 )
 from src.engines.backtesting.specification import OptimizationSpecification
+from src.engines.backtesting.strategies import (
+    GridOptimizationStrategy,
+    OptimizationStrategy,
+)
 from src.engines.backtesting.selection import (
     BestRankSelectionPolicy,
     ObjectiveSelection,
@@ -96,6 +100,7 @@ __all__ = [
     "FixedRateTransactionCostModel",
     "GridSearchRun",
     "GridSearchRunner",
+    "GridOptimizationStrategy",
     "ObjectiveDirection",
     "ObjectiveRanker",
     "ObjectiveRanking",
@@ -105,6 +110,7 @@ __all__ = [
     "OptimizationRun",
     "OptimizationRunner",
     "OptimizationSpecification",
+    "OptimizationStrategy",
     "RankedObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",
