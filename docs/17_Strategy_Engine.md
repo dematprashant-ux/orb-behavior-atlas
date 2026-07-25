@@ -296,6 +296,15 @@ consume this one result directly, eliminating separate eligibility and
 diagnostic requests while preserving encounter order, retained diagnostics,
 budget, progress, termination, scoring, ranking, and selection behavior.
 
+M22.1 adds `OptimizationRunSummary`, a pure read-only projection constructed
+from an existing successful `OptimizationRun`. It retains the exact strategy
+metadata and termination reason, and derives evaluated and total eligible counts
+and completion ratio from existing `OptimizationProgress`, plus a rejection
+count from recorded `ConstraintDiagnostics`. No singular selected evaluation is
+exposed because `ObjectiveSelection` deliberately permits multiple selected
+scores. Summary creation does not rerun constraints, evaluations, ranking, or
+selection; it introduces no reporting, persistence, or serialization behavior.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
