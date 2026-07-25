@@ -320,6 +320,16 @@ totals and duplicate summaries contribute independently. It performs no sorting,
 grouping, comparison, ranking, selection, rates, averages, optimization
 re-execution, reporting, persistence, or serialization.
 
+M22.4 adds `OptimizationRunSummaryRates`, a pure float-based projection of one
+`OptimizationRunSummaryAggregate`, following the existing deterministic
+zero-denominator ratio convention. It exposes candidate completion,
+recorded-rejection, search-space-exhausted, and evaluation-budget-reached
+rates. The recorded-rejection denominator is recorded rejections plus evaluated
+candidates only, so it does not infer unencountered candidates after a budget
+stop. Rates are numeric and unformatted; construction performs no run or
+summary traversal, optimization re-execution, reporting, persistence, or
+serialization.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

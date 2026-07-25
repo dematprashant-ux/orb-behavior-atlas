@@ -10,6 +10,7 @@ __all__ = [
     "OptimizationRunSummaries",
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
+    "OptimizationRunSummaryRates",
 ]
 
 
@@ -179,3 +180,68 @@ class OptimizationRunSummaryAggregate:
             search_space_exhausted_count,
             evaluation_budget_reached_count,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryRates:
+    """Retain scalar rates derived only from an existing summary aggregate."""
+
+    candidate_completion_rate: float
+    recorded_rejection_rate: float
+    search_space_exhausted_rate: float
+    evaluation_budget_reached_rate: float
+
+    def __post_init__(self) -> None:
+        """Require finite probability-like float values without formatting."""
+        for value, name in (
+            (self.candidate_completion_rate, "candidate_completion_rate"),
+            (self.recorded_rejection_rate, "recorded_rejection_rate"),
+            (self.search_space_exhausted_rate, "search_space_exhausted_rate"),
+            (
+                self.evaluation_budget_reached_rate,
+                "evaluation_budget_reached_rate",
+            ),
+        ):
+            if not isinstance(value, float):
+                raise TypeError(f"{name} must be a float.")
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be between 0.0 and 1.0.")
+
+    @classmethod
+    def from_aggregate(
+        cls,
+        aggregate: OptimizationRunSummaryAggregate,
+    ) -> "OptimizationRunSummaryRates":
+        """Derive deterministic float rates from aggregate scalar totals only."""
+        if not isinstance(aggregate, OptimizationRunSummaryAggregate):
+            raise TypeError("aggregate must be an OptimizationRunSummaryAggregate.")
+        return cls(
+            candidate_completion_rate=_rate(
+                aggregate.evaluated_candidate_count,
+                aggregate.total_eligible_candidate_count,
+            ),
+            recorded_rejection_rate=_rate(
+                aggregate.recorded_rejection_count,
+                (
+                    aggregate.evaluated_candidate_count
+                    + aggregate.recorded_rejection_count
+                ),
+            ),
+            search_space_exhausted_rate=_rate(
+                aggregate.search_space_exhausted_count,
+                aggregate.run_count,
+            ),
+            evaluation_budget_reached_rate=_rate(
+                aggregate.evaluation_budget_reached_count,
+                aggregate.run_count,
+            ),
+        )
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    """Return the established deterministic zero-denominator float ratio."""
+    if denominator == 0:
+        return 0.0
+    if numerator > denominator:
+        raise ValueError("rate numerator must not exceed its denominator.")
+    return numerator / denominator

@@ -67,6 +67,7 @@ from src.engines.backtesting.summary import (
     OptimizationRunSummaries,
     OptimizationRunSummary,
     OptimizationRunSummaryAggregate,
+    OptimizationRunSummaryRates,
 )
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.strategies import (
@@ -153,6 +154,7 @@ __all__ = [
     "OptimizationRunSummaries",
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
+    "OptimizationRunSummaryRates",
     "OptimizationProgress",
     "OptimizationRunner",
     "OptimizationSearchRun",
