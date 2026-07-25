@@ -39,6 +39,10 @@ from src.engines.backtesting.ranking import (
     RankedObjectiveScore,
     StandardObjectiveRanker,
 )
+from src.engines.backtesting.random_search import (
+    RandomOptimizationConfiguration,
+    RandomOptimizationStrategy,
+)
 from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.search import OptimizationSearchRun
 from src.engines.backtesting.strategies import (
@@ -116,6 +120,8 @@ __all__ = [
     "OptimizationStrategy",
     "OptimizationStrategyMetadata",
     "RankedObjectiveScore",
+    "RandomOptimizationConfiguration",
+    "RandomOptimizationStrategy",
     "TransactionCostBreakdown",
     "TransactionCostModel",
     "StandardDatasetWindowBuilder",

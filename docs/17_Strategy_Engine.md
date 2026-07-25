@@ -229,6 +229,20 @@ evaluation, scoring, ranking, selection, or optimization orchestration. Future
 strategies can provide their own metadata without claiming an implementation
 exists today.
 
+## 1.16 Deterministic Random Optimization Strategy
+
+M20.1 adds `RandomOptimizationStrategy` with immutable
+`RandomOptimizationConfiguration(seed, maximum_samples)`. It samples unique
+candidate combinations in deterministic seeded order, never exceeds the sample
+limit, and stops naturally when the finite parameter space is exhausted. It
+uses existing standard candidate evaluation and returns the same immutable
+`OptimizationSearchRun` shape as `GridOptimizationStrategy` with `random`
+strategy metadata.
+
+The random strategy adds no scoring, ranking, selection, adaptive sampling, or
+pipeline behavior. Reusing the supplied seed reproduces its sampled candidate
+sequence; it is an alternative search strategy, not a change to orchestration.
+
 ---
 
 # 2. Responsibilities
