@@ -270,6 +270,14 @@ child order and short-circuiting on the first AND failure or OR success. Empty
 ALL is eligible and empty ANY is ineligible. Composition remains filtering only;
 it does not alter scoring, ranking, selection, or execution ordering.
 
+M21.3 adds immutable `ConstraintDiagnostic` and a diagnostic operation on
+constraints. Eligible candidates return no diagnostic; rejected candidates have
+stable constraint and rejection identifiers. Composites preserve their existing
+short-circuit semantics: ALL returns its first failing child diagnostic, ANY
+reports deterministic all-child rejection, and NOT reports acceptance of its
+wrapped child. Diagnostics are contract-only and are not retained by search or
+optimization results.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

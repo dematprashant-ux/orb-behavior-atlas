@@ -14,6 +14,7 @@ from src.engines.backtesting.configuration import OptimizationConfiguration
 from src.engines.backtesting.constraints import (
     AllOfConstraint,
     AnyOfConstraint,
+    ConstraintDiagnostic,
     NotConstraint,
     OptimizationConstraint,
     OptimizationConstraints,
@@ -133,6 +134,7 @@ __all__ = [
     "OptimizationConstraints",
     "AllOfConstraint",
     "AnyOfConstraint",
+    "ConstraintDiagnostic",
     "NotConstraint",
     "OptimizationRun",
     "OptimizationProgress",
