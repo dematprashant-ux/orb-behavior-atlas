@@ -37,7 +37,10 @@ class TrainingValidationSplitTests(TestCase):
         with self.assertRaises(TypeError):
             StandardTrainingValidationSplitEngine(None)
         with self.assertRaises(TypeError):
-            StandardTrainingValidationSplitEngine(_RecordingBuilder([])).split([], _window())
+            StandardTrainingValidationSplitEngine(_RecordingBuilder([])).split(
+                [],
+                _window(),
+            )
 
 
 class _RecordingBuilder:
@@ -60,12 +63,26 @@ class _FailingBuilder:
 
 def _window() -> WalkForwardWindow:
     """Build a deterministic contiguous source window."""
-    return WalkForwardWindow(0, DateTimeRange(_time(0), _time(5)), DateTimeRange(_time(5), _time(10)))
+    return WalkForwardWindow(
+        0,
+        DateTimeRange(_time(0), _time(5)),
+        DateTimeRange(_time(5), _time(10)),
+    )
 
 
 def _candle(minutes: int) -> Candle:
     """Build a canonical candle fixture."""
-    return Candle(Instrument.BANKNIFTY, Timeframe.M5, _time(minutes), date(2026, 1, 1), 1.0, 1.0, 1.0, 1.0, 0)
+    return Candle(
+        Instrument.BANKNIFTY,
+        Timeframe.M5,
+        _time(minutes),
+        date(2026, 1, 1),
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0,
+    )
 
 
 def _time(minutes: int) -> datetime:

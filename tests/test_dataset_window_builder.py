@@ -21,16 +21,35 @@ class DatasetWindowBuilderTests(TestCase):
         window = builder.build(candles, DateTimeRange(_time(5), _time(10)))
         self.assertEqual(window.observations, (_candle(5),))
         self.assertIs(window.observations[0], candles[1])
-        self.assertEqual(builder.build((), DateTimeRange(_time(0), _time(5))).observations, ())
-        self.assertEqual(builder.build(candles, DateTimeRange(_time(20), _time(25))).observations, ())
+        self.assertEqual(
+            builder.build((), DateTimeRange(_time(0), _time(5))).observations,
+            (),
+        )
+        self.assertEqual(
+            builder.build(candles, DateTimeRange(_time(20), _time(25))).observations,
+            (),
+        )
 
-    def test_rejects_unordered_input_and_preserves_duplicate_timestamp_order(self) -> None:
-        """Do not silently normalize decreasing inputs; duplicate timestamps remain valid."""
+    def test_rejects_unordered_input_and_preserves_duplicate_timestamp_order(
+        self,
+    ) -> None:
+        """Reject decreasing data while preserving valid duplicate timestamps."""
         builder = StandardDatasetWindowBuilder()
         duplicates = (_candle(5), _candle(5), _candle(10))
-        self.assertEqual(len(builder.build(duplicates, DateTimeRange(_time(0), _time(10))).observations), 2)
+        self.assertEqual(
+            len(
+                builder.build(
+                    duplicates,
+                    DateTimeRange(_time(0), _time(10)),
+                ).observations
+            ),
+            2,
+        )
         with self.assertRaises(ValueError):
-            builder.build((_candle(5), _candle(0)), DateTimeRange(_time(0), _time(10)))
+            builder.build(
+                (_candle(5), _candle(0)),
+                DateTimeRange(_time(0), _time(10)),
+            )
 
     def test_rejects_boundary_misuse_without_mutating_inputs(self) -> None:
         """Require canonical tuple and range boundary types only."""
@@ -38,12 +57,25 @@ class DatasetWindowBuilderTests(TestCase):
         with self.assertRaises(TypeError):
             builder.build([], DateTimeRange(_time(0), _time(5)))
         with self.assertRaises(TypeError):
-            builder.build((), object())
+            builder.build(
+                (),
+                object(),
+            )
 
 
 def _candle(minutes: int) -> Candle:
     """Build one valid canonical candle fixture with an aware timestamp."""
-    return Candle(Instrument.BANKNIFTY, Timeframe.M5, _time(minutes), date(2026, 1, 1), 1.0, 1.0, 1.0, 1.0, 0)
+    return Candle(
+        Instrument.BANKNIFTY,
+        Timeframe.M5,
+        _time(minutes),
+        date(2026, 1, 1),
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0,
+    )
 
 
 def _time(minutes: int) -> datetime:

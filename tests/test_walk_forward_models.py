@@ -48,7 +48,13 @@ class WalkForwardModelTests(TestCase):
             WalkForwardPlan((second, first))
 
 
-def _window(index: int, train_start: int, train_end: int, valid_start: int, valid_end: int) -> WalkForwardWindow:
+def _window(
+    index: int,
+    train_start: int,
+    train_end: int,
+    valid_start: int,
+    valid_end: int,
+) -> WalkForwardWindow:
     """Build one deterministic walk-forward window fixture."""
     return WalkForwardWindow(
         index,

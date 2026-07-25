@@ -27,9 +27,13 @@ class WalkForwardDatasetSplit:
 
     def __post_init__(self) -> None:
         if not isinstance(self.source_window, WalkForwardWindow):
-            raise TypeError("source_window must be a WalkForwardWindow.")
+            raise TypeError(
+                "source_window must be a WalkForwardWindow."
+            )
         if not isinstance(self.training, DatasetWindow):
-            raise TypeError("training must be a DatasetWindow.")
+            raise TypeError(
+                "training must be a DatasetWindow."
+            )
         if not isinstance(self.validation, DatasetWindow):
             raise TypeError("validation must be a DatasetWindow.")
         if self.training.requested_range != self.source_window.training_range:
@@ -37,7 +41,9 @@ class WalkForwardDatasetSplit:
                 "training range must match source_window training_range."
             )
         if self.validation.requested_range != self.source_window.validation_range:
-            raise ValueError("validation range must match source_window validation_range.")
+            raise ValueError(
+                "validation range must match source_window validation_range."
+            )
 
 
 class TrainingValidationSplitEngine(Protocol):
