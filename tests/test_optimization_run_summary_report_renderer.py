@@ -6,6 +6,7 @@ from unittest import TestCase
 
 from src.engines.backtesting import (
     OptimizationRunSummaryAnalysis,
+    OptimizationRunSummaryRenderedReport,
     OptimizationRunSummaryReport,
     OptimizationRunSummaryReportRenderer,
     OptimizationRunSummaries,
@@ -35,7 +36,7 @@ class OptimizationRunSummaryReportRendererTests(TestCase):
 
         self.assertEqual(parameters, ("self", "report"))
         self.assertIs(hints["report"], OptimizationRunSummaryReport)
-        self.assertIn("_RenderedOptimizationRunSummaryReport", str(hints["return"]))
+        self.assertIn("OptimizationRunSummaryRenderedReport", str(hints["return"]))
 
     def test_protocol_has_no_rendering_implementation_or_stateful_constructor(
         self,

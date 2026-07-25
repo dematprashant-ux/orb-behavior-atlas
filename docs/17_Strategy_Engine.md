@@ -374,6 +374,12 @@ type deliberately unspecified. The report model remains renderer-independent;
 no concrete renderer, formatting rule, template, output type, persistence, or
 optimization behavior is implemented.
 
+M24.3 adds `OptimizationRunSummaryRenderedReport`, a frozen generic value
+object retaining one explicit non-`None` renderer payload by identity. It does
+not choose or normalize an output representation, so it assumes no text, bytes,
+HTML, Markdown, or JSON format. The renderer protocol returns this wrapper, but
+no concrete renderer or rendering behavior is implemented.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
