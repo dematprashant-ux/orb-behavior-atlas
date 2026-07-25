@@ -348,6 +348,12 @@ The delta retains no source analyses or nested values and traverses neither
 summaries nor runs; it makes no better/worse judgment and introduces no ranking,
 selection, reporting, persistence, serialization, or optimization re-execution.
 
+M23.2 adds `OptimizationRunSummaryComparison`, an immutable eager composition
+that retains exact baseline and comparison analyses with the exact delta created
+only by `OptimizationRunSummaryDelta.between()`. It copies no scalar values and
+performs no duplicated calculation, aggregate or rate reconstruction, summary or
+run traversal, recommendation, ranking, or optimization re-execution.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

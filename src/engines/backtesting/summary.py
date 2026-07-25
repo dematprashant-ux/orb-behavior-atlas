@@ -11,6 +11,7 @@ __all__ = [
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
     "OptimizationRunSummaryAnalysis",
+    "OptimizationRunSummaryComparison",
     "OptimizationRunSummaryDelta",
     "OptimizationRunSummaryRates",
 ]
@@ -375,6 +376,38 @@ class OptimizationRunSummaryDelta:
                 - baseline.rates.evaluation_budget_reached_rate
             ),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationRunSummaryComparison:
+    """Retain two summary analyses and their canonical directional delta."""
+
+    baseline: OptimizationRunSummaryAnalysis
+    comparison: OptimizationRunSummaryAnalysis
+    delta: OptimizationRunSummaryDelta
+
+    def __post_init__(self) -> None:
+        """Require existing immutable components without recalculation."""
+        if not isinstance(self.baseline, OptimizationRunSummaryAnalysis):
+            raise TypeError("baseline must be an OptimizationRunSummaryAnalysis.")
+        if not isinstance(self.comparison, OptimizationRunSummaryAnalysis):
+            raise TypeError("comparison must be an OptimizationRunSummaryAnalysis.")
+        if not isinstance(self.delta, OptimizationRunSummaryDelta):
+            raise TypeError("delta must be an OptimizationRunSummaryDelta.")
+
+    @classmethod
+    def between(
+        cls,
+        baseline: OptimizationRunSummaryAnalysis,
+        comparison: OptimizationRunSummaryAnalysis,
+    ) -> "OptimizationRunSummaryComparison":
+        """Compose two retained analyses with their canonical delta only."""
+        if not isinstance(baseline, OptimizationRunSummaryAnalysis):
+            raise TypeError("baseline must be an OptimizationRunSummaryAnalysis.")
+        if not isinstance(comparison, OptimizationRunSummaryAnalysis):
+            raise TypeError("comparison must be an OptimizationRunSummaryAnalysis.")
+        delta = OptimizationRunSummaryDelta.between(baseline, comparison)
+        return cls(baseline, comparison, delta)
 
 
 def _rate(numerator: int, denominator: int) -> float:
