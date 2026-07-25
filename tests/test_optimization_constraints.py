@@ -5,6 +5,8 @@ from unittest import TestCase
 from src.engines.backtesting import (
     AllOfConstraint,
     AnyOfConstraint,
+    ConstraintDiagnostic,
+    ConstraintEvaluationResult,
     NotConstraint,
     OptimizationConstraints,
 )
@@ -76,12 +78,17 @@ class _Constraint:
         self.name = name
         self.events = events
 
-    def is_eligible(self, candidate: CandidateParameterSet) -> bool:
-        """Record the exact evaluation order without mutating the candidate."""
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Record one result evaluation without mutating the candidate."""
         del candidate
         if self.events is not None:
             self.events.append(self.name)
-        return self.result
+        if self.result:
+            return ConstraintEvaluationResult(True, None)
+        return ConstraintEvaluationResult(
+            False,
+            ConstraintDiagnostic("test_constraint", "rejected"),
+        )
 
 
 def _candidate() -> CandidateParameterSet:

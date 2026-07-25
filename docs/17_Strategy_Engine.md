@@ -288,6 +288,14 @@ encounter order, and never evaluate or budget rejected candidates. Each
 informational only: they do not alter progress, termination, scoring, ranking,
 or selection; no post-budget traversal is introduced for diagnostic collection.
 
+M21.5 adds `ConstraintEvaluationResult`, the immutable authoritative output of
+one constraint traversal. It retains both eligibility and an optional
+`ConstraintDiagnostic`, with valid states limited to eligible-without-diagnostic
+or rejected-with-diagnostic. Constraint composites and optimization strategies
+consume this one result directly, eliminating separate eligibility and
+diagnostic requests while preserving encounter order, retained diagnostics,
+budget, progress, termination, scoring, ranking, and selection behavior.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

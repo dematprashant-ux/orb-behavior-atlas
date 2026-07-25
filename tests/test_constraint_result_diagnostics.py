@@ -9,6 +9,7 @@ from src.engines.backtesting import (
     BacktestStatus,
     CandidateEvaluation,
     ConstraintDiagnostic,
+    ConstraintEvaluationResult,
     ConstraintDiagnostics,
     ConstraintRejection,
     DeterministicRandomCandidateSampler,
@@ -126,20 +127,14 @@ class _RecordingConstraint:
         self.candidates: list[CandidateParameterSet] = []
         self.diagnostics: list[ConstraintDiagnostic] = []
 
-    def is_eligible(self, candidate: CandidateParameterSet) -> bool:
-        """Fail if a strategy uses the superseded separate eligibility traversal."""
-        raise AssertionError("strategy must use the diagnostic operation only")
-
-    def diagnostic(
-        self, candidate: CandidateParameterSet
-    ) -> ConstraintDiagnostic | None:
-        """Record one deterministic diagnostic lookup for the exact candidate."""
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Record one authoritative constraint result for the exact candidate."""
         self.candidates.append(candidate)
         if candidate not in self.rejected:
-            return None
+            return ConstraintEvaluationResult(True, None)
         diagnostic = ConstraintDiagnostic("test_constraint", "rejected")
         self.diagnostics.append(diagnostic)
-        return diagnostic
+        return ConstraintEvaluationResult(False, diagnostic)
 
 
 class _RecordingEvaluator:

@@ -6,6 +6,7 @@ from src.engines.backtesting import (
     AllOfConstraint,
     AnyOfConstraint,
     ConstraintDiagnostic,
+    ConstraintEvaluationResult,
     NotConstraint,
 )
 from src.engines.strategy import CandidateParameterSet
@@ -22,7 +23,9 @@ class ConstraintDiagnosticTests(TestCase):
             AllOfConstraint((failing,)).diagnostic(candidate),
             ConstraintDiagnostic("minimum_orb", "too_short"),
         )
-        self.assertIsNone(AnyOfConstraint((_Atomic(True), failing)).diagnostic(candidate))
+        self.assertIsNone(
+            AnyOfConstraint((_Atomic(True), failing)).diagnostic(candidate)
+        )
         self.assertEqual(
             AnyOfConstraint((failing,)).diagnostic(candidate),
             ConstraintDiagnostic("any_of_constraint", "all_children_rejected"),
@@ -36,19 +39,22 @@ class ConstraintDiagnosticTests(TestCase):
 class _Atomic:
     """Test-only atomic constraint providing an explicit stable diagnostic."""
 
-    def __init__(self, eligible: bool, identifier: str = "atomic", reason: str = "rejected") -> None:
+    def __init__(
+        self,
+        eligible: bool,
+        identifier: str = "atomic",
+        reason: str = "rejected",
+    ) -> None:
         self.eligible = eligible
         self.identifier = identifier
         self.reason = reason
 
-    def is_eligible(self, candidate: CandidateParameterSet) -> bool:
-        """Return the configured eligibility without mutating its candidate."""
-        del candidate
-        return self.eligible
-
-    def diagnostic(self, candidate: CandidateParameterSet) -> ConstraintDiagnostic | None:
-        """Return a diagnostic only for the configured rejected state."""
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return one configured result without mutating its candidate."""
         del candidate
         if self.eligible:
-            return None
-        return ConstraintDiagnostic(self.identifier, self.reason)
+            return ConstraintEvaluationResult(True, None)
+        return ConstraintEvaluationResult(
+            False,
+            ConstraintDiagnostic(self.identifier, self.reason),
+        )

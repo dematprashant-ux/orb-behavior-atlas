@@ -9,6 +9,7 @@ __all__ = [
     "AllOfConstraint",
     "AnyOfConstraint",
     "ConstraintDiagnostic",
+    "ConstraintEvaluationResult",
     "NotConstraint",
     "OptimizationConstraint",
     "OptimizationConstraints",
@@ -34,16 +35,28 @@ class ConstraintDiagnostic:
                 raise ValueError(f"{name} must not be blank.")
 
 
+@dataclass(frozen=True, slots=True)
+class ConstraintEvaluationResult:
+    """Retain one authoritative deterministic constraint evaluation outcome."""
+
+    eligible: bool
+    diagnostic: ConstraintDiagnostic | None
+
+    def __post_init__(self) -> None:
+        """Require exactly one internally consistent eligibility outcome."""
+        if not isinstance(self.eligible, bool):
+            raise TypeError("eligible must be a bool.")
+        if self.eligible and self.diagnostic is not None:
+            raise ValueError("eligible results must not have a diagnostic.")
+        if not self.eligible and not isinstance(self.diagnostic, ConstraintDiagnostic):
+            raise TypeError("rejected results must have a ConstraintDiagnostic.")
+
+
 class OptimizationConstraint(Protocol):
-    """Determine whether one candidate is eligible for evaluation."""
+    """Produce one deterministic eligibility and diagnostic result per candidate."""
 
-    def is_eligible(self, candidate: CandidateParameterSet) -> bool:
-        """Return deterministic candidate eligibility without evaluation or scoring."""
-
-    def diagnostic(
-        self, candidate: CandidateParameterSet
-    ) -> ConstraintDiagnostic | None:
-        """Return a deterministic rejection description or None when eligible."""
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return the authoritative immutable result without execution or scoring."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,19 +71,22 @@ class AllOfConstraint:
 
     def is_eligible(self, candidate: CandidateParameterSet) -> bool:
         """Evaluate children in order and short-circuit on first failure."""
-        _validate_candidate(candidate)
-        return all(constraint.is_eligible(candidate) for constraint in self.constraints)
+        return self.evaluate(candidate).eligible
 
     def diagnostic(
         self, candidate: CandidateParameterSet
     ) -> ConstraintDiagnostic | None:
         """Return the first failing child diagnostic in deterministic order."""
+        return self.evaluate(candidate).diagnostic
+
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return the first failing child result in deterministic order."""
         _validate_candidate(candidate)
         for constraint in self.constraints:
-            diagnostic = constraint.diagnostic(candidate)
-            if diagnostic is not None:
-                return diagnostic
-        return None
+            result = constraint.evaluate(candidate)
+            if not result.eligible:
+                return result
+        return ConstraintEvaluationResult(True, None)
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,18 +101,25 @@ class AnyOfConstraint:
 
     def is_eligible(self, candidate: CandidateParameterSet) -> bool:
         """Evaluate children in order and short-circuit on first success."""
-        _validate_candidate(candidate)
-        return any(constraint.is_eligible(candidate) for constraint in self.constraints)
+        return self.evaluate(candidate).eligible
 
     def diagnostic(
         self, candidate: CandidateParameterSet
     ) -> ConstraintDiagnostic | None:
         """Describe all-child rejection only after deterministic child evaluation."""
+        return self.evaluate(candidate).diagnostic
+
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return success early or the deterministic all-child rejection result."""
         _validate_candidate(candidate)
         for constraint in self.constraints:
-            if constraint.diagnostic(candidate) is None:
-                return None
-        return ConstraintDiagnostic("any_of_constraint", "all_children_rejected")
+            result = constraint.evaluate(candidate)
+            if result.eligible:
+                return result
+        return ConstraintEvaluationResult(
+            False,
+            ConstraintDiagnostic("any_of_constraint", "all_children_rejected"),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,17 +135,24 @@ class NotConstraint:
 
     def is_eligible(self, candidate: CandidateParameterSet) -> bool:
         """Return the logical negation of the wrapped constraint result."""
-        _validate_candidate(candidate)
-        return not self.constraint.is_eligible(candidate)
+        return self.evaluate(candidate).eligible
 
     def diagnostic(
         self, candidate: CandidateParameterSet
     ) -> ConstraintDiagnostic | None:
         """Describe rejection when the wrapped constraint accepts the candidate."""
+        return self.evaluate(candidate).diagnostic
+
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return the logically negated child outcome using one child evaluation."""
         _validate_candidate(candidate)
-        if self.constraint.diagnostic(candidate) is not None:
-            return None
-        return ConstraintDiagnostic("not_constraint", "wrapped_constraint_accepted")
+        result = self.constraint.evaluate(candidate)
+        if not result.eligible:
+            return ConstraintEvaluationResult(True, None)
+        return ConstraintEvaluationResult(
+            False,
+            ConstraintDiagnostic("not_constraint", "wrapped_constraint_accepted"),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,14 +167,17 @@ class OptimizationConstraints:
 
     def is_eligible(self, candidate: CandidateParameterSet) -> bool:
         """Return whether every injected constraint accepts the exact candidate."""
-        _validate_candidate(candidate)
-        return all(constraint.is_eligible(candidate) for constraint in self.constraints)
+        return self.evaluate(candidate).eligible
 
     def diagnostic(
         self, candidate: CandidateParameterSet
     ) -> ConstraintDiagnostic | None:
         """Return the first top-level failing diagnostic in declared order."""
-        return AllOfConstraint(self.constraints).diagnostic(candidate)
+        return self.evaluate(candidate).diagnostic
+
+    def evaluate(self, candidate: CandidateParameterSet) -> ConstraintEvaluationResult:
+        """Return the ordered logical-AND result without a duplicate traversal."""
+        return AllOfConstraint(self.constraints).evaluate(candidate)
 
 
 def _validate_constraints(constraints: tuple[OptimizationConstraint, ...]) -> None:

@@ -115,9 +115,11 @@ class StandardGridSearchRunner:
         eligible_candidates: list[CandidateParameterSet] = []
         rejections: list[ConstraintRejection] = []
         for candidate in candidates:
-            diagnostic = constraints.diagnostic(candidate)
-            if diagnostic is not None:
-                rejections.append(ConstraintRejection(candidate, diagnostic))
+            constraint_result = constraints.evaluate(candidate)
+            if not constraint_result.eligible:
+                rejections.append(
+                    ConstraintRejection(candidate, constraint_result.diagnostic)
+                )
                 continue
             eligible_candidates.append(candidate)
 
