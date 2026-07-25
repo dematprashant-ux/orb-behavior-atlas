@@ -27,6 +27,15 @@ _RISK_METRICS = (
     ("recovery_factor", "Recovery Factor"),
     ("return_over_drawdown", "Return Over Drawdown"),
 )
+_PORTFOLIO_METRICS = (
+    ("initial_equity", "Initial Equity"),
+    ("final_equity", "Final Equity"),
+    ("absolute_return", "Absolute Return"),
+    ("total_return", "Total Return"),
+    ("maximum_equity", "Maximum Equity"),
+    ("minimum_equity", "Minimum Equity"),
+    ("equity_point_count", "Equity Point Count"),
+)
 _CSS = """body {
   color: #1f2933;
   font-family: Arial, sans-serif;
@@ -87,6 +96,8 @@ class StandardHtmlReportRenderer:
             ValueError: If a required section or field is missing.
         """
         report = _require_mapping(serialized_report, "serialized_report")
+        if report.get("report_type") == "portfolio":
+            return _render_portfolio_report(report)
         report_mode = _require_report_mode(report)
         performance = _require_section(report, "performance_metrics")
         risk = _require_section(report, "risk_adjusted_metrics")
@@ -134,6 +145,124 @@ class StandardHtmlReportRenderer:
         lines.extend(_render_drawdown_section(drawdown_summary))
         lines.extend(["  </main>", "</body>", "</html>"])
         return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _render_portfolio_report(report: Mapping[str, object]) -> str:
+    """Render the portfolio plain-data structure through existing HTML styling."""
+    performance = _require_section(report, "performance_metrics")
+    equity_curve = _require_section(report, "equity_curve")
+    drawdown_summary = _require_section(report, "drawdown_summary")
+    lines = _document_prefix("Portfolio Report")
+    lines.append("    <h1>Portfolio Report</h1>")
+    lines.extend(
+        _render_metric_section(
+            "Performance Metrics",
+            performance,
+            _PORTFOLIO_METRICS,
+        )
+    )
+    lines.extend(_render_portfolio_equity_section(equity_curve))
+    lines.extend(_render_portfolio_drawdown_section(drawdown_summary))
+    lines.extend(["  </main>", "</body>", "</html>"])
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _document_prefix(title: str) -> list[str]:
+    """Return the stable shared HTML document opening and existing CSS."""
+    lines = [
+        "<!DOCTYPE html>",
+        '<html lang="en">',
+        "<head>",
+        '  <meta charset="utf-8">',
+        '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+        f"  <title>{escape(title, quote=True)}</title>",
+        "  <style>",
+    ]
+    lines.extend(_CSS.splitlines())
+    lines.extend(["  </style>", "</head>", "<body>", "  <main>"])
+    return lines
+
+
+def _render_portfolio_equity_section(values: Mapping[str, object]) -> list[str]:
+    """Render existing ordered portfolio equity rows without valuation logic."""
+    points = _require_list(_require_field(values, "points"), "equity_curve.points")
+    rows = []
+    for index, point in enumerate(points):
+        data = _require_mapping(point, f"equity_curve.points[{index}]")
+        rows.append(
+            (
+                _format_value(_require_field(data, "timestamp")),
+                _format_value(_require_field(data, "cash")),
+                _format_value(_require_field(data, "position_value")),
+                _format_value(_require_field(data, "total_equity")),
+            )
+        )
+    return _render_value_section(
+        "Equity Curve",
+        "Final Equity",
+        _require_field(values, "final_equity"),
+        ("Timestamp", "Cash", "Position Value", "Total Equity"),
+        rows,
+    )
+
+
+def _render_portfolio_drawdown_section(values: Mapping[str, object]) -> list[str]:
+    """Render existing ordered portfolio drawdown rows without calculations."""
+    points = _require_list(
+        _require_field(values, "points"),
+        "drawdown_summary.points",
+    )
+    rows = []
+    for index, point in enumerate(points):
+        data = _require_mapping(point, f"drawdown_summary.points[{index}]")
+        rows.append(
+            (
+                _format_value(_require_field(data, "timestamp")),
+                _format_value(_require_field(data, "running_peak")),
+                _format_value(_require_field(data, "drawdown")),
+            )
+        )
+    return _render_value_section(
+        "Drawdown Summary",
+        "Maximum Drawdown",
+        _require_field(values, "maximum_drawdown"),
+        ("Timestamp", "Running Peak", "Drawdown"),
+        rows,
+    )
+
+
+def _render_value_section(
+    title: str,
+    summary_label: str,
+    summary_value: object,
+    headers: tuple[str, ...],
+    rows: list[tuple[str, ...]],
+) -> list[str]:
+    """Render a summary value and supplied plain rows using escaped HTML."""
+    section_id = title.lower().replace(" ", "-")
+    header_cells = "".join(
+        f"<th scope=\"col\">{escape(value)}</th>" for value in headers
+    )
+    lines = [
+        f'    <section aria-labelledby="{section_id}">',
+        f'      <h2 id="{section_id}">{title}</h2>',
+    ]
+    lines.extend(_single_value_table(summary_label, summary_value))
+    lines.extend(
+        [
+            '      <div class="table-wrap">',
+            "        <table>",
+            f"          <thead><tr>{header_cells}</tr></thead>",
+            "          <tbody>",
+        ]
+    )
+    for row in rows:
+        cells = "".join(f"<td>{escape(value)}</td>" for value in row)
+        lines.append(f"            <tr>{cells}</tr>")
+    lines.extend(
+        ["          </tbody>", "        </table>", "      </div>", "    </section>"]
+    )
+    return lines
 
 
 def _render_metric_section(

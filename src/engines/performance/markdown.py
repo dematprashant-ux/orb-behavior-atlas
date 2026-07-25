@@ -26,6 +26,15 @@ _RISK_METRICS = (
     ("recovery_factor", "Recovery Factor"),
     ("return_over_drawdown", "Return Over Drawdown"),
 )
+_PORTFOLIO_METRICS = (
+    ("initial_equity", "Initial Equity"),
+    ("final_equity", "Final Equity"),
+    ("absolute_return", "Absolute Return"),
+    ("total_return", "Total Return"),
+    ("maximum_equity", "Maximum Equity"),
+    ("minimum_equity", "Minimum Equity"),
+    ("equity_point_count", "Equity Point Count"),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +55,8 @@ class StandardMarkdownReportRenderer:
             ValueError: If a required section or field is missing.
         """
         report = _require_mapping(serialized_report, "serialized_report")
+        if report.get("report_type") == "portfolio":
+            return _render_portfolio_report(report)
         report_mode = _require_report_mode(report)
         performance = _require_section(report, "performance_metrics")
         risk = _require_section(report, "risk_adjusted_metrics")
@@ -70,6 +81,71 @@ class StandardMarkdownReportRenderer:
         lines.extend(["", "## Drawdown Summary", ""])
         lines.extend(_render_drawdown_summary(drawdown_summary))
         return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _render_portfolio_report(report: Mapping[str, object]) -> str:
+    """Render the portfolio plain-data shape without backtest report fields."""
+    performance = _require_section(report, "performance_metrics")
+    equity_curve = _require_section(report, "equity_curve")
+    drawdown_summary = _require_section(report, "drawdown_summary")
+    lines = ["# Portfolio Report", "", "## Performance Metrics", ""]
+    lines.extend(_render_metric_table(performance, _PORTFOLIO_METRICS))
+    lines.extend(["", "## Equity Curve", ""])
+    lines.extend(_render_portfolio_equity_curve(equity_curve))
+    lines.extend(["", "## Drawdown Summary", ""])
+    lines.extend(_render_portfolio_drawdown(drawdown_summary))
+    return "\n".join(lines).rstrip("\n") + "\n"
+
+
+def _render_portfolio_equity_curve(values: Mapping[str, object]) -> list[str]:
+    """Render existing ordered portfolio equity values without calculations."""
+    points = _require_list(_require_field(values, "points"), "equity_curve.points")
+    lines = [
+        "| Final Equity |",
+        "| --- |",
+        f"| {_format_value(_require_field(values, 'final_equity'))} |",
+        "",
+        "| Timestamp | Cash | Position Value | Total Equity |",
+        "| --- | --- | --- | --- |",
+    ]
+    for index, point in enumerate(points):
+        values_at_point = _require_mapping(point, f"equity_curve.points[{index}]")
+        lines.append(
+            "| "
+            f"{_format_value(_require_field(values_at_point, 'timestamp'))} | "
+            f"{_format_value(_require_field(values_at_point, 'cash'))} | "
+            f"{_format_value(_require_field(values_at_point, 'position_value'))} | "
+            f"{_format_value(_require_field(values_at_point, 'total_equity'))} |"
+        )
+    return lines
+
+
+def _render_portfolio_drawdown(values: Mapping[str, object]) -> list[str]:
+    """Render existing ordered portfolio drawdown facts without analysis."""
+    points = _require_list(
+        _require_field(values, "points"),
+        "drawdown_summary.points",
+    )
+    lines = [
+        "| Maximum Drawdown |",
+        "| --- |",
+        f"| {_format_value(_require_field(values, 'maximum_drawdown'))} |",
+        "",
+        "| Timestamp | Running Peak | Drawdown |",
+        "| --- | --- | --- |",
+    ]
+    for index, point in enumerate(points):
+        values_at_point = _require_mapping(
+            point,
+            f"drawdown_summary.points[{index}]",
+        )
+        lines.append(
+            "| "
+            f"{_format_value(_require_field(values_at_point, 'timestamp'))} | "
+            f"{_format_value(_require_field(values_at_point, 'running_peak'))} | "
+            f"{_format_value(_require_field(values_at_point, 'drawdown'))} |"
+        )
+    return lines
 
 
 def _render_metric_table(

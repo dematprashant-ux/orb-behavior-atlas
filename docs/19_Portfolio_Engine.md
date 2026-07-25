@@ -90,6 +90,23 @@ or recreate trade statistics. Portfolio drawdown has a separate result model
 but reuses the existing shared absolute-drawdown mathematics; it is calculated
 from the same portfolio equity curve and retains source equity-point references.
 
+## 1.6 Portfolio Reporting
+
+M16.6 composes existing `PortfolioPerformanceMetrics`,
+`PortfolioEquityCurve`, and `PortfolioDrawdownSummary` into an immutable
+`PortfolioReport`. The report calculates nothing and retains its child
+references. `DictionaryPortfolioReportSerializer` produces a deterministic
+plain-data structure with `report_type: portfolio`, performance metrics,
+ordered equity points, and ordered drawdown points; domain timestamps are
+represented by their supplied ISO-8601 values.
+
+The existing JSON exporter accepts this plain data directly. Existing
+Markdown, HTML, and PDF renderer boundaries recognize the portfolio report
+shape while retaining backtest-report behavior. Existing generic writers,
+export services, and bundles remain the only persistence and packaging
+boundaries. Portfolio reporting introduces no charts, I/O, timestamps beyond
+domain values, valuation, analytics recalculation, or mode inference.
+
 ---
 
 # 2. Responsibilities

@@ -41,6 +41,15 @@ _RISK_METRICS = (
     ("recovery_factor", "Recovery Factor"),
     ("return_over_drawdown", "Return Over Drawdown"),
 )
+_PORTFOLIO_METRICS = (
+    ("initial_equity", "Initial Equity"),
+    ("final_equity", "Final Equity"),
+    ("absolute_return", "Absolute Return"),
+    ("total_return", "Total Return"),
+    ("maximum_equity", "Maximum Equity"),
+    ("minimum_equity", "Minimum Equity"),
+    ("equity_point_count", "Equity Point Count"),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +70,8 @@ class StandardPdfReportRenderer:
             ValueError: If a required section or field is missing.
         """
         report = _require_mapping(serialized_report, "serialized_report")
+        if report.get("report_type") == "portfolio":
+            return _render_portfolio_pdf(report)
         report_mode = _require_report_mode(report)
         performance = _require_section(report, "performance_metrics")
         risk = _require_section(report, "risk_adjusted_metrics")
@@ -88,6 +99,135 @@ class StandardPdfReportRenderer:
         )
         document.build(story)
         return _rewrite_without_timestamps(source.getvalue())
+
+
+def _render_portfolio_pdf(report: Mapping[str, object]) -> bytes:
+    """Render portfolio plain data through the existing deterministic PDF stack."""
+    performance = _require_section(report, "performance_metrics")
+    equity_curve = _require_section(report, "equity_curve")
+    drawdown_summary = _require_section(report, "drawdown_summary")
+    _ensure_font_registered()
+    source = BytesIO()
+    document = SimpleDocTemplate(
+        source,
+        pagesize=A4,
+        leftMargin=16 * mm,
+        rightMargin=16 * mm,
+        topMargin=16 * mm,
+        bottomMargin=16 * mm,
+        invariant=1,
+        pageCompression=0,
+    )
+    styles = _styles()
+    story: list[object] = [Paragraph("Portfolio Report", styles["title"])]
+    story.extend(
+        _section_flowables(
+            "Performance Metrics",
+            performance,
+            _PORTFOLIO_METRICS,
+            styles,
+        )
+    )
+    story.extend(_portfolio_equity_flowables(equity_curve, styles))
+    story.extend(_portfolio_drawdown_flowables(drawdown_summary, styles))
+    document.build(story)
+    return _rewrite_without_timestamps(source.getvalue())
+
+
+def _portfolio_equity_flowables(
+    values: Mapping[str, object],
+    styles: Mapping[str, ParagraphStyle],
+) -> list[object]:
+    """Build existing portfolio equity point tables without valuation logic."""
+    points = _require_list(_require_field(values, "points"), "equity_curve.points")
+    rows = [
+        [
+            _paragraph("Timestamp", styles),
+            _paragraph("Cash", styles),
+            _paragraph("Position Value", styles),
+            _paragraph("Total Equity", styles),
+        ]
+    ]
+    for index, point in enumerate(points):
+        data = _require_mapping(point, f"equity_curve.points[{index}]")
+        rows.append(
+            [
+                _paragraph(_format_value(_require_field(data, "timestamp")), styles),
+                _paragraph(_format_value(_require_field(data, "cash")), styles),
+                _paragraph(
+                    _format_value(_require_field(data, "position_value")),
+                    styles,
+                ),
+                _paragraph(_format_value(_require_field(data, "total_equity")), styles),
+            ]
+        )
+    return _portfolio_value_flowables(
+        "Equity Curve",
+        "Final Equity",
+        _require_field(values, "final_equity"),
+        rows,
+        (60 * mm, 35 * mm, 40 * mm, 40 * mm),
+        styles,
+    )
+
+
+def _portfolio_drawdown_flowables(
+    values: Mapping[str, object],
+    styles: Mapping[str, ParagraphStyle],
+) -> list[object]:
+    """Build existing portfolio drawdown tables without recalculating drawdown."""
+    points = _require_list(
+        _require_field(values, "points"),
+        "drawdown_summary.points",
+    )
+    rows = [
+        [
+            _paragraph("Timestamp", styles),
+            _paragraph("Running Peak", styles),
+            _paragraph("Drawdown", styles),
+        ]
+    ]
+    for index, point in enumerate(points):
+        data = _require_mapping(point, f"drawdown_summary.points[{index}]")
+        rows.append(
+            [
+                _paragraph(_format_value(_require_field(data, "timestamp")), styles),
+                _paragraph(_format_value(_require_field(data, "running_peak")), styles),
+                _paragraph(_format_value(_require_field(data, "drawdown")), styles),
+            ]
+        )
+    return _portfolio_value_flowables(
+        "Drawdown Summary",
+        "Maximum Drawdown",
+        _require_field(values, "maximum_drawdown"),
+        rows,
+        (62 * mm, 56 * mm, 56 * mm),
+        styles,
+    )
+
+
+def _portfolio_value_flowables(
+    title: str,
+    summary_label: str,
+    summary_value: object,
+    rows: list[list[Paragraph]],
+    widths: tuple[float, ...],
+    styles: Mapping[str, ParagraphStyle],
+) -> list[object]:
+    """Build one summary and existing plain-data table in stable row order."""
+    return [
+        Spacer(1, 4 * mm),
+        Paragraph(title, styles["section"]),
+        _table(
+            [
+                [_paragraph(summary_label, styles)],
+                [_paragraph(_format_value(summary_value), styles)],
+            ],
+            (175 * mm,),
+        ),
+        Spacer(1, 2 * mm),
+        _table(rows, widths),
+    ]
 
 
 def _build_story(

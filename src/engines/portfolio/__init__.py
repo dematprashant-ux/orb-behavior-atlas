@@ -42,12 +42,19 @@ from src.engines.portfolio.analytics import (
     build_portfolio_drawdown_summary,
     build_portfolio_performance_metrics,
 )
+from src.engines.portfolio.reporting import (
+    DictionaryPortfolioReportSerializer,
+    PortfolioReport,
+    PortfolioReportBuilder,
+    build_portfolio_report,
+)
 
 __all__ = [
     "AllocationDecision",
     "AllocationRequest",
     "CapitalAllocationPolicy",
     "CostBasisPortfolioValuation",
+    "DictionaryPortfolioReportSerializer",
     "FixedCapitalAllocationPolicy",
     "PercentageCapitalAllocationPolicy",
     "PortfolioCloseEvent",
@@ -65,6 +72,8 @@ __all__ = [
     "PortfolioValuationPolicy",
     "PortfolioPerformanceAnalyzer",
     "PortfolioPerformanceMetrics",
+    "PortfolioReport",
+    "PortfolioReportBuilder",
     "StandardPortfolioDrawdownAnalyzer",
     "StandardPortfolioEquityCurveBuilder",
     "StandardPortfolioPerformanceAnalyzer",
@@ -75,4 +84,5 @@ __all__ = [
     "build_portfolio_equity_point",
     "build_portfolio_drawdown_summary",
     "build_portfolio_performance_metrics",
+    "build_portfolio_report",
 ]
