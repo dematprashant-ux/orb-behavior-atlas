@@ -39,6 +39,7 @@ from src.engines.backtesting.ranking import (
     RankedObjectiveScore,
     StandardObjectiveRanker,
 )
+from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.selection import (
     BestRankSelectionPolicy,
     ObjectiveSelection,
@@ -103,6 +104,7 @@ __all__ = [
     "OptimizationConfiguration",
     "OptimizationRun",
     "OptimizationRunner",
+    "OptimizationSpecification",
     "RankedObjectiveScore",
     "TransactionCostBreakdown",
     "TransactionCostModel",

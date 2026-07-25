@@ -166,6 +166,23 @@ grid-search runs well-defined without fabricating a score: the configuration
 supplies their explicit ranking direction, while the objective is not invoked.
 The search, scoring, ranking, and selection sequence is otherwise unchanged.
 
+## 1.12 Optimization Specification
+
+M19.2 adds immutable `OptimizationSpecification`, which defines one experiment
+by retaining the exact existing `ParameterSpace` and
+`OptimizationConfiguration`. The parameter space describes the finite candidate
+values, while the configuration remains the sole source of objective direction
+and selection policy. The specification holds no execution collaborator,
+runtime state, result, timestamp, statistic, or report metadata.
+
+`OptimizationRunner.run()` now receives the specification rather than a bare
+parameter space. `StandardOptimizationRunner` remains responsible only for how
+the supplied experiment executes: its grid-search, objective, and ranker
+collaborators remain constructor-injected. Empty runs retain their explicit
+direction through the specification configuration; no score or default policy
+is fabricated. This preserves the existing orchestration sequence while giving
+future experiment descriptions one typed, immutable boundary.
+
 ---
 
 # 2. Responsibilities

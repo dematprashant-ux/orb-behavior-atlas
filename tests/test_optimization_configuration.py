@@ -13,6 +13,7 @@ from src.engines.backtesting import (
     ObjectiveScore,
     ObjectiveSelection,
     OptimizationConfiguration,
+    OptimizationSpecification,
     StandardObjectiveRanker,
     StandardOptimizationRunner,
 )
@@ -67,15 +68,19 @@ class OptimizationConfigurationTests(TestCase):
             _GridRunner(GridSearchRun(parameter_space), events),
             _Objective(events, ObjectiveDirection.MINIMIZE),
             _Ranker(events, ObjectiveDirection.MINIMIZE),
-            OptimizationConfiguration(ObjectiveDirection.MINIMIZE, policy),
         )
 
-        result = runner.run(parameter_space)
+        specification = _specification(
+            parameter_space,
+            ObjectiveDirection.MINIMIZE,
+            policy,
+        )
+        result = runner.run(specification)
 
         self.assertEqual(events, ["grid", "rank", "select"])
         self.assertEqual(result.ranking.direction, ObjectiveDirection.MINIMIZE)
         self.assertIs(result.selection.ranking, result.ranking)
-        self.assertIs(runner.configuration.selection_policy, policy)
+        self.assertIs(specification.configuration.selection_policy, policy)
 
     def test_mismatched_score_stops_before_ranking_and_selection(self) -> None:
         events: list[str] = []
@@ -85,14 +90,16 @@ class OptimizationConfigurationTests(TestCase):
             _GridRunner(GridSearchRun(parameter_space, (evaluation,)), events),
             _Objective(events, ObjectiveDirection.MINIMIZE),
             _Ranker(events, ObjectiveDirection.MAXIMIZE),
-            OptimizationConfiguration(
-                ObjectiveDirection.MAXIMIZE,
-                _RecordingSelectionPolicy(events),
-            ),
         )
 
         with self.assertRaisesRegex(ValueError, "configuration"):
-            runner.run(parameter_space)
+            runner.run(
+                _specification(
+                    parameter_space,
+                    ObjectiveDirection.MAXIMIZE,
+                    _RecordingSelectionPolicy(events),
+                )
+            )
 
         self.assertEqual(events, ["grid", "objective"])
 
@@ -105,10 +112,11 @@ class OptimizationConfigurationTests(TestCase):
             _GridRunner(GridSearchRun(parameter_space, (evaluation,)), events),
             _Objective(events, ObjectiveDirection.MINIMIZE),
             _Ranker(events, ObjectiveDirection.MINIMIZE),
-            OptimizationConfiguration(ObjectiveDirection.MINIMIZE, policy),
         )
 
-        result = runner.run(parameter_space)
+        result = runner.run(
+            _specification(parameter_space, ObjectiveDirection.MINIMIZE, policy)
+        )
 
         self.assertEqual(events, ["grid", "objective", "rank", "select"])
         self.assertIs(result.selection.ranking, result.ranking)
@@ -122,14 +130,16 @@ class OptimizationConfigurationTests(TestCase):
             _GridRunner(GridSearchRun(parameter_space, (evaluation,)), events),
             _Objective(events, ObjectiveDirection.MAXIMIZE),
             _MismatchedRanker(events),
-            OptimizationConfiguration(
-                ObjectiveDirection.MAXIMIZE,
-                _RecordingSelectionPolicy(events),
-            ),
         )
 
         with self.assertRaisesRegex(ValueError, "ranking direction"):
-            runner.run(parameter_space)
+            runner.run(
+                _specification(
+                    parameter_space,
+                    ObjectiveDirection.MAXIMIZE,
+                    _RecordingSelectionPolicy(events),
+                )
+            )
 
         self.assertEqual(events, ["grid", "objective", "rank"])
 
@@ -212,6 +222,18 @@ class _MismatchedRanker:
         del scores
         self.events.append("rank")
         return ObjectiveRanking(ObjectiveDirection.MINIMIZE)
+
+
+def _specification(
+    parameter_space: ParameterSpace,
+    direction: ObjectiveDirection,
+    selection_policy: _RecordingSelectionPolicy,
+) -> OptimizationSpecification:
+    """Create one immutable specification for an existing test parameter space."""
+    return OptimizationSpecification(
+        parameter_space,
+        OptimizationConfiguration(direction, selection_policy),
+    )
 
 
 def _evaluation() -> CandidateEvaluation:

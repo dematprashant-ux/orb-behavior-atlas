@@ -9,7 +9,7 @@ from src.engines.backtesting.grid_search import GridSearchRun, GridSearchRunner
 from src.engines.backtesting.objectives import CandidateObjective, ObjectiveScore
 from src.engines.backtesting.ranking import ObjectiveRanker, ObjectiveRanking
 from src.engines.backtesting.selection import ObjectiveSelection
-from src.engines.strategy.parameters import ParameterSpace
+from src.engines.backtesting.specification import OptimizationSpecification
 
 __all__ = ["OptimizationRun", "OptimizationRunner", "StandardOptimizationRunner"]
 
@@ -60,7 +60,7 @@ class OptimizationRun:
 class OptimizationRunner(Protocol):
     """Define deterministic optimization orchestration without optimizer heuristics."""
 
-    def run(self, parameter_space: ParameterSpace) -> OptimizationRun:
+    def run(self, specification: OptimizationSpecification) -> OptimizationRun:
         """Return complete search, scoring, ranking, and selection artifacts."""
 
 
@@ -71,7 +71,6 @@ class StandardOptimizationRunner:
     grid_search_runner: GridSearchRunner
     candidate_objective: CandidateObjective
     objective_ranker: ObjectiveRanker
-    configuration: OptimizationConfiguration
 
     def __post_init__(self) -> None:
         """Require explicit collaborators without inspecting or invoking them."""
@@ -79,15 +78,16 @@ class StandardOptimizationRunner:
             (self.grid_search_runner, "grid_search_runner"),
             (self.candidate_objective, "candidate_objective"),
             (self.objective_ranker, "objective_ranker"),
-            (self.configuration, "configuration"),
         ):
             if collaborator is None:
                 raise TypeError(f"{name} must not be None.")
 
-    def run(self, parameter_space: ParameterSpace) -> OptimizationRun:
+    def run(self, specification: OptimizationSpecification) -> OptimizationRun:
         """Delegate once through search, score, rank, and selection stages."""
-        if not isinstance(parameter_space, ParameterSpace):
-            raise TypeError("parameter_space must be a ParameterSpace.")
+        if not isinstance(specification, OptimizationSpecification):
+            raise TypeError("specification must be an OptimizationSpecification.")
+        parameter_space = specification.parameter_space
+        configuration = specification.configuration
         grid_search_run = self.grid_search_runner.run(parameter_space)
         if not isinstance(grid_search_run, GridSearchRun):
             raise TypeError("grid_search_runner.run must return a GridSearchRun.")
@@ -95,17 +95,17 @@ class StandardOptimizationRunner:
             raise ValueError("grid_search_run must retain the source parameter_space.")
 
         objective_scores = tuple(
-            self._score_evaluation(evaluation)
+            self._score_evaluation(evaluation, configuration)
             for evaluation in grid_search_run.evaluations
         )
         ranking = self.objective_ranker.rank(objective_scores)
         if not isinstance(ranking, ObjectiveRanking):
             raise TypeError("objective_ranker.rank must return an ObjectiveRanking.")
-        if ranking.direction is not self.configuration.direction:
+        if ranking.direction is not configuration.direction:
             raise ValueError(
                 "ranking direction must match the configuration direction."
             )
-        selection = self.configuration.selection_policy.select(ranking)
+        selection = configuration.selection_policy.select(ranking)
         if not isinstance(selection, ObjectiveSelection):
             raise TypeError(
                 "selection_policy.select must return an ObjectiveSelection."
@@ -113,14 +113,18 @@ class StandardOptimizationRunner:
 
         return OptimizationRun(grid_search_run, objective_scores, ranking, selection)
 
-    def _score_evaluation(self, evaluation: CandidateEvaluation) -> ObjectiveScore:
+    def _score_evaluation(
+        self,
+        evaluation: CandidateEvaluation,
+        configuration: OptimizationConfiguration,
+    ) -> ObjectiveScore:
         """Score one search evaluation while enforcing its exact source reference."""
         score = self.candidate_objective.score(evaluation)
         if not isinstance(score, ObjectiveScore):
             raise TypeError("candidate_objective.score must return an ObjectiveScore.")
         if score.evaluation is not evaluation:
             raise ValueError("objective score must reference its source evaluation.")
-        if score.direction is not self.configuration.direction:
+        if score.direction is not configuration.direction:
             raise ValueError("objective score direction must match the configuration.")
         return score
 
