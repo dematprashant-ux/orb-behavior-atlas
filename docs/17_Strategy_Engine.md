@@ -105,6 +105,22 @@ walk-forward integration, reporting, serialization, I/O, or concurrency.
 Future selection policies can consume these typed scores without changing
 candidate generation or evaluation contracts.
 
+## 1.8 Deterministic Objective Ranking
+
+M18.6 adds `ObjectiveRanker`, `StandardObjectiveRanker`, immutable
+`ObjectiveRanking`, and `RankedObjectiveScore`. The standard ranker is created
+with an explicit `ObjectiveDirection`, which makes empty rankings well-defined
+without an implicit default. It orders matching `ObjectiveScore` values by their
+existing scalar score: descending for `maximize` and ascending for `minimize`.
+Equal scores preserve their supplied order; ranks are one-based positions in
+that final stable order.
+
+Ranking creates no score, winner, top-k subset, threshold subset, aggregate
+statistic, multi-objective rule, or search behavior. It does not alter grid
+search, integrate walk-forward execution, render, serialize, perform I/O, or
+use concurrency. Future selection policies may consume the complete immutable
+ranking explicitly.
+
 ---
 
 # 2. Responsibilities
