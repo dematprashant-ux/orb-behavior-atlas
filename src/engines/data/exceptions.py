@@ -1,6 +1,6 @@
 """Exception hierarchy for Data Engine implementations."""
 
-from src.core.exceptions import ORBError
+from src.core.exceptions import ORBError, PersistenceConflictError
 
 
 class DataEngineError(ORBError):
@@ -19,7 +19,7 @@ class DataStorageError(DataAccessError):
     """Raised when canonical data cannot be persisted or retrieved safely."""
 
 
-class DataStorageConflictError(DataStorageError):
+class DataStorageConflictError(DataStorageError, PersistenceConflictError):
     """Raised when a canonical storage identity already exists."""
 
 

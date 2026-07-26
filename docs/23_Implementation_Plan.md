@@ -383,6 +383,15 @@ inclusive session-date ranges and deterministic timestamp ordering; and
 malformed session aggregates and existing storage identities have defined,
 separate failure semantics.
 
+M28.2 places generic identity-based persistence failure semantics in the shared
+core layer. `PersistenceConflictError` represents a duplicate identity where
+overwrite is disallowed, while `PersistenceNotFoundError` represents a missing
+identity. Existing `DataStorageConflictError` remains import-compatible and is
+also catchable as `PersistenceConflictError`; Data Engine missing sessions
+continue to use their established result-object behavior. No repository
+protocol, persistence request/result, storage implementation, or serialization
+behavior is introduced here.
+
 ## M2.9 — Data Quality Assessment
 
 ### Objective
