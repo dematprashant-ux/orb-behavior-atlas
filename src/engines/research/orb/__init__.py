@@ -1,6 +1,7 @@
 """Immutable domain concepts and observed-fact operations for ORB sessions."""
 
 from src.engines.research.orb.classification import classify_orb_behavior
+from src.engines.research.orb.comparison import compare_behavior_atlases
 from src.engines.research.orb.descriptive import (
     compute_behavior_descriptive_statistics,
 )
@@ -19,6 +20,7 @@ from src.engines.research.orb.models import (
     ORBBehavior,
     ORBBehaviorAtlas,
     ORBBehaviorAtlasGroups,
+    ORBBehaviorComparison,
     ORBBehaviorDescriptiveStatistics,
     ORBBehaviorDistributions,
     ORBBehaviorKind,
@@ -28,6 +30,7 @@ from src.engines.research.orb.models import (
     ORBEscapeEvent,
     ORBFeatures,
     ORBFeatureSummary,
+    ORBFeatureSummaryDifference,
     ORBPostEscapeObservation,
     ORBSession,
     ORBWindow,
@@ -41,6 +44,7 @@ __all__ = [
     "ORBBehavior",
     "ORBBehaviorAtlas",
     "ORBBehaviorAtlasGroups",
+    "ORBBehaviorComparison",
     "ORBBehaviorDescriptiveStatistics",
     "ORBBehaviorDistributions",
     "ORBBehaviorKind",
@@ -50,12 +54,14 @@ __all__ = [
     "ORBEscapeEvent",
     "ORBFeatures",
     "ORBFeatureSummary",
+    "ORBFeatureSummaryDifference",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
     "build_behavior_record",
     "build_behavior_atlas",
     "classify_orb_behavior",
+    "compare_behavior_atlases",
     "compute_behavior_descriptive_statistics",
     "compute_behavior_distributions",
     "compute_behavior_statistics",

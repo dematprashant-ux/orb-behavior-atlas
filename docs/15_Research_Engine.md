@@ -199,6 +199,24 @@ median without rounding. Empty numeric samples have zero count and `None` for
 each numeric metric. This descriptive layer adds no performance analytics,
 strategy behavior, execution, backtesting, optimization, reporting, or I/O.
 
+## 1.16 Deterministic Behavior Comparison
+
+`compare_behavior_atlases(left, right)` compares two immutable
+`ORBBehaviorAtlas` subsets by reusing `compute_behavior_descriptive_statistics`
+for each side. `ORBBehaviorComparison` retains those left and right statistics,
+so supported categorical counts and proportions remain visible exactly as the
+descriptive layer defines them.
+
+It also records absolute differences for the count, minimum, maximum, mean,
+and median of existing range-size, MFE, and MAE summaries. A numeric difference
+is `None` when either side has no observed value for that metric; no zero or
+other replacement value is fabricated. Empty-atlas comparisons therefore retain
+the existing empty statistics and numeric absence semantics.
+
+Comparison preserves each input atlas unchanged and has no filtering, grouping,
+feature derivation, significance testing, ranking, prediction, strategy,
+trading, execution, backtesting, visualization, reporting, or I/O behavior.
+
 ---
 
 # 2. Responsibilities

@@ -17,6 +17,7 @@ __all__ = [
     "ORBBehaviorAtlasGroups",
     "ORBBehaviorDistributions",
     "ORBBehaviorDescriptiveStatistics",
+    "ORBBehaviorComparison",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
     "ORBBehaviorKind",
@@ -24,6 +25,7 @@ __all__ = [
     "ORBEscapeEvent",
     "ORBFeatures",
     "ORBFeatureSummary",
+    "ORBFeatureSummaryDifference",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
@@ -258,6 +260,39 @@ class ORBFeatureSummary:
 
 
 @dataclass(frozen=True, slots=True)
+class ORBFeatureSummaryDifference:
+    """Records absolute differences between two existing feature summaries."""
+
+    count_difference: int
+    minimum_difference: float | None
+    maximum_difference: float | None
+    mean_difference: float | None
+    median_difference: float | None
+
+    def __post_init__(self) -> None:
+        """Require finite, non-negative observed differences without coercion."""
+        if type(self.count_difference) is not int or self.count_difference < 0:
+            raise ValueError("count_difference must be a non-negative integer")
+        for value in (
+            self.minimum_difference,
+            self.maximum_difference,
+            self.mean_difference,
+            self.median_difference,
+        ):
+            if value is None:
+                continue
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not isfinite(value)
+                or value < 0
+            ):
+                raise ValueError(
+                    "feature summary differences must be finite non-negative values"
+                )
+
+
+@dataclass(frozen=True, slots=True)
 class ORBBehaviorDescriptiveStatistics:
     """Combines existing categorical facts with numeric summaries of stored features."""
 
@@ -312,6 +347,33 @@ class ORBBehaviorDescriptiveStatistics:
                 "return_to_range_proportions",
             ),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorComparison:
+    """Compares two immutable atlas subsets through existing descriptive facts."""
+
+    left_statistics: ORBBehaviorDescriptiveStatistics
+    right_statistics: ORBBehaviorDescriptiveStatistics
+    range_size_difference: ORBFeatureSummaryDifference
+    maximum_favorable_excursion_difference: ORBFeatureSummaryDifference
+    maximum_adverse_excursion_difference: ORBFeatureSummaryDifference
+
+    def __post_init__(self) -> None:
+        """Require typed immutable summaries without recalculating either side."""
+        if not isinstance(self.left_statistics, ORBBehaviorDescriptiveStatistics):
+            raise TypeError("left_statistics must be ORBBehaviorDescriptiveStatistics")
+        if not isinstance(self.right_statistics, ORBBehaviorDescriptiveStatistics):
+            raise TypeError("right_statistics must be ORBBehaviorDescriptiveStatistics")
+        for difference in (
+            self.range_size_difference,
+            self.maximum_favorable_excursion_difference,
+            self.maximum_adverse_excursion_difference,
+        ):
+            if not isinstance(difference, ORBFeatureSummaryDifference):
+                raise TypeError(
+                    "numeric differences must be ORBFeatureSummaryDifference values"
+                )
 
 
 @dataclass(frozen=True, slots=True)
