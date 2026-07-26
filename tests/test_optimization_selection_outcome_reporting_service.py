@@ -18,6 +18,7 @@ from src.engines.backtesting import (
     OptimizationProgress,
     OptimizationResultRenderedReport,
     OptimizationResultReport,
+    OptimizationReportingFacade,
     OptimizationRun,
     OptimizationSearchRun,
     OptimizationSelectionOutcomeReport,
@@ -181,6 +182,76 @@ class OptimizationSelectionOutcomeReportingServiceTests(TestCase):
         self.assertIs(ModuleService, OptimizationSelectionOutcomeReportingService)
 
 
+class OptimizationReportingFacadeTests(TestCase):
+    """Verify the façade preserves the existing service boundary exactly."""
+
+    def test_facade_delegates_the_exact_run_once_and_returns_exact_result(self) -> None:
+        run = _run((3.0, 1.0))
+        expected = OptimizationResultRenderedReport(("rendered",))
+        service = _RecordingReportingService(expected)
+        facade = OptimizationReportingFacade(service)
+
+        result = facade.render_run(run)
+
+        self.assertIs(facade.reporting_service, service)
+        self.assertEqual(service.call_count, 1)
+        self.assertIs(service.received_run, run)
+        self.assertIs(result, expected)
+
+    def test_facade_is_immutable_and_does_not_duplicate_orchestration(self) -> None:
+        run = _run((2.0,))
+        service = _RecordingReportingService(OptimizationResultRenderedReport("ok"))
+        facade = OptimizationReportingFacade(service)
+
+        with patch.object(
+            StandardOptimizationRunner,
+            "run",
+            side_effect=AssertionError("optimization must not execute"),
+        ), patch.object(
+            StandardObjectiveRanker,
+            "rank",
+            side_effect=AssertionError("ranking must not execute"),
+        ), patch.object(
+            BestRankSelectionPolicy,
+            "select",
+            side_effect=AssertionError("selection must not execute"),
+        ):
+            first = facade.render_run(run)
+            second = facade.render_run(run)
+
+        self.assertEqual(first, second)
+        self.assertEqual(service.call_count, 2)
+        self.assertEqual(
+            repr(facade),
+            repr(OptimizationReportingFacade(service)),
+        )
+        with self.assertRaises(FrozenInstanceError):
+            facade.reporting_service = service  # type: ignore[misc]
+
+    def test_facade_validates_inputs_propagates_failures_and_is_exported(self) -> None:
+        run = _run((1.0,))
+        service = _RecordingReportingService(OptimizationResultRenderedReport("ok"))
+        facade = OptimizationReportingFacade(service)
+
+        with self.assertRaisesRegex(TypeError, "reporting_service"):
+            OptimizationReportingFacade(None)  # type: ignore[arg-type]
+        with self.assertRaisesRegex(TypeError, "optimization_run"):
+            facade.render_run(run.ranking)  # type: ignore[arg-type]
+
+        failing_service = _FailingReportingService()
+        with self.assertRaisesRegex(RuntimeError, "service failure"):
+            OptimizationReportingFacade(failing_service).render_run(run)
+        self.assertEqual(failing_service.call_count, 1)
+
+        from src.engines.backtesting import OptimizationReportingFacade as PackageFacade
+        from src.engines.backtesting.reporting import (
+            OptimizationReportingFacade as ModuleFacade,
+        )
+
+        self.assertIs(PackageFacade, OptimizationReportingFacade)
+        self.assertIs(ModuleFacade, OptimizationReportingFacade)
+
+
 @dataclass
 class _RecordingSelector:
     """Test-only selector retaining the exact ranking it receives."""
@@ -237,6 +308,40 @@ class _RecordingWorkflow:
         self.received_selection = selection
         self.call_count += 1
         return self.result
+
+
+@dataclass
+class _RecordingReportingService:
+    """Test-only facade collaborator retaining one exact received run."""
+
+    result: OptimizationResultRenderedReport[object]
+    received_run: OptimizationRun | None = None
+    call_count: int = 0
+
+    def run(
+        self,
+        optimization_run: OptimizationRun,
+    ) -> OptimizationResultRenderedReport[object]:
+        """Return one predetermined result without performing orchestration."""
+        self.received_run = optimization_run
+        self.call_count += 1
+        return self.result
+
+
+@dataclass
+class _FailingReportingService:
+    """Test-only collaborator proving failures pass directly through the facade."""
+
+    call_count: int = 0
+
+    def run(
+        self,
+        optimization_run: OptimizationRun,
+    ) -> OptimizationResultRenderedReport[object]:
+        """Fail after recording the single delegated invocation."""
+        del optimization_run
+        self.call_count += 1
+        raise RuntimeError("service failure")
 
 
 @dataclass

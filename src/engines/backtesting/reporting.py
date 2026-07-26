@@ -23,6 +23,7 @@ __all__ = [
     "OptimizationSelectionOutcomeReportingPipeline",
     "OptimizationSelectionOutcomeReportingWorkflow",
     "OptimizationSelectionOutcomeReportingService",
+    "OptimizationReportingFacade",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
@@ -207,6 +208,33 @@ class OptimizationSelectionOutcomeReportingService(
                 "selection_policy.select must return an ObjectiveSelection."
             )
         return self.reporting_workflow.run(optimization_run, selection)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationReportingFacade(Generic[_RenderedOptimizationResultPayload]):
+    """Expose one application entry point over injected outcome reporting."""
+
+    reporting_service: OptimizationSelectionOutcomeReportingService[
+        _RenderedOptimizationResultPayload
+    ]
+
+    def __post_init__(self) -> None:
+        """Require one injected reporting service without invoking it."""
+        if self.reporting_service is None:
+            raise TypeError("reporting_service must not be None.")
+        if not callable(getattr(self.reporting_service, "run", None)):
+            raise TypeError("reporting_service must define a callable run method.")
+
+    def render_run(
+        self,
+        optimization_run: "OptimizationRun",
+    ) -> OptimizationResultRenderedReport[_RenderedOptimizationResultPayload]:
+        """Delegate one exact completed run to the reporting service once."""
+        from src.engines.backtesting.optimization import OptimizationRun
+
+        if not isinstance(optimization_run, OptimizationRun):
+            raise TypeError("optimization_run must be an OptimizationRun.")
+        return self.reporting_service.run(optimization_run)
 
 
 @dataclass(frozen=True, slots=True)

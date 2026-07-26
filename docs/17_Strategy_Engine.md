@@ -475,6 +475,13 @@ remain wholly owned by the policy and downstream reporting layers. The service
 does not rerank, inspect selections or output, score, evaluate, execute an
 optimizer, choose a winner, tie-break, print, write files, or persist data.
 
+M26.2 adds `OptimizationReportingFacade`, the application-facing entry point
+for one completed `OptimizationRun`. It retains one injected
+`OptimizationSelectionOutcomeReportingService`, delegates the exact run once,
+and returns the service's exact rendered result unchanged. The facade creates
+no collaborators and performs no selection, ranking, scoring, evaluation,
+report construction, rendering, payload inspection, I/O, or persistence.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
