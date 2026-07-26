@@ -5,8 +5,10 @@ from enum import Enum
 from html import escape
 from typing import Generic, Protocol, TypeVar
 
+from src.engines.backtesting.optimization import OptimizationRunner
 from src.engines.backtesting.ranking import RankedObjectiveScore
 from src.engines.backtesting.selection import ObjectiveSelection, SelectionPolicy
+from src.engines.backtesting.specification import OptimizationSpecification
 from src.engines.backtesting.summary import (
     OptimizationResultReport,
     OptimizationSelectionOutcomeReport,
@@ -28,6 +30,7 @@ __all__ = [
     "OptimizationReportFormat",
     "OptimizationReportingRouter",
     "OptimizationReportingCompositionRoot",
+    "OptimizationExecutionReportingWorkflow",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "PlainTextOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
@@ -340,6 +343,36 @@ class OptimizationReportingCompositionRoot:
                 (OptimizationReportFormat.MARKDOWN, markdown_facade),
             )
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationExecutionReportingWorkflow:
+    """Connect one injected optimization execution to one reporting router."""
+
+    optimization_runner: OptimizationRunner
+    reporting_router: OptimizationReportingRouter
+
+    def __post_init__(self) -> None:
+        """Require explicit execution and reporting collaborators only."""
+        if self.optimization_runner is None:
+            raise TypeError("optimization_runner must not be None.")
+        if not callable(getattr(self.optimization_runner, "run", None)):
+            raise TypeError("optimization_runner must define a callable run method.")
+        if self.reporting_router is None:
+            raise TypeError("reporting_router must not be None.")
+        if not callable(getattr(self.reporting_router, "render_run", None)):
+            raise TypeError(
+                "reporting_router must define a callable render_run method."
+            )
+
+    def run(
+        self,
+        specification: OptimizationSpecification,
+        report_format: OptimizationReportFormat,
+    ) -> OptimizationResultRenderedReport[str]:
+        """Execute once, then delegate the exact returned run to routing once."""
+        optimization_run = self.optimization_runner.run(specification)
+        return self.reporting_router.render_run(optimization_run, report_format)
 
 
 @dataclass(frozen=True, slots=True)

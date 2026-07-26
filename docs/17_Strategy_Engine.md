@@ -506,6 +506,15 @@ root performs construction only: it neither invokes its selector nor executes
 reporting, while all runtime selection and rendering behavior remains owned by
 the established reporting layers.
 
+M27.1 adds `OptimizationExecutionReportingWorkflow`, the runtime application
+handoff from one injected `OptimizationRunner` to one injected
+`OptimizationReportingRouter`. For one caller-supplied
+`OptimizationSpecification` and report format, it executes optimization once,
+passes the exact returned `OptimizationRun` and exact format once to routing,
+and returns the router's exact rendered result. Composition stays separate, and
+the workflow performs no scoring, ranking, selection, report construction,
+rendering, payload inspection, I/O, or fallback handling.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
