@@ -25,6 +25,7 @@ __all__ = [
     "OptimizationSelectionOutcomeReportingService",
     "OptimizationReportingFacade",
     "MarkdownOptimizationSelectionOutcomeRenderer",
+    "PlainTextOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
     "OptimizationRunSummaryReportRenderer",
     "OptimizationRunSummaryReportingPipeline",
@@ -269,6 +270,39 @@ class MarkdownOptimizationSelectionOutcomeRenderer:
                 )
             )
         )
+
+
+@dataclass(frozen=True, slots=True)
+class PlainTextOptimizationSelectionOutcomeRenderer:
+    """Render complete selected outcomes as deterministic plain-text labels."""
+
+    def render(
+        self,
+        report: OptimizationSelectionOutcomeReport,
+    ) -> OptimizationResultRenderedReport[str]:
+        """Return retained selected facts without Markdown or recalculation."""
+        if not isinstance(report, OptimizationSelectionOutcomeReport):
+            raise TypeError("report must be an OptimizationSelectionOutcomeReport.")
+        lines = [
+            "Optimization Selection Outcome",
+            f"Selection Count: {report.selection_count}",
+        ]
+        for index, selected_outcome in enumerate(report.selected_outcomes, start=1):
+            source_score = selected_outcome.source_score
+            parameters = "; ".join(
+                f"{name}={value}"
+                for name, value in source_score.evaluation.candidate.assignments
+            )
+            lines.extend(
+                (
+                    f"Selected Outcome {index}:",
+                    f"Rank: {selected_outcome.rank}",
+                    f"Parameters: {parameters}",
+                    f"Objective Score: {source_score.score}",
+                    f"Objective Direction: {source_score.direction.value}",
+                )
+            )
+        return OptimizationResultRenderedReport("\n".join(lines))
 
 
 def _render_selected_outcome_row(selected_outcome: RankedObjectiveScore) -> str:

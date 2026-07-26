@@ -482,6 +482,14 @@ and returns the service's exact rendered result unchanged. The facade creates
 no collaborators and performs no selection, ranking, scoring, evaluation,
 report construction, rendering, payload inspection, I/O, or persistence.
 
+M26.3 adds `PlainTextOptimizationSelectionOutcomeRenderer`, a stateless second
+implementation of `OptimizationSelectionOutcomeReportRenderer`. It renders one
+stable heading, the retained selection count, and every selected outcome in
+canonical order as plain labelled rank, parameter, score, and direction lines.
+Empty, unique, and tied selections remain distinct; no winner is chosen. It
+returns `OptimizationResultRenderedReport[str]` without Markdown syntax,
+reranking, reselection, calculation, mutation, I/O, or persistence.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
