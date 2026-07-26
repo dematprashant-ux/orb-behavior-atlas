@@ -178,6 +178,27 @@ produce an empty atlas; sessions without a complete 15-minute opening window
 are omitted. The pipeline does not add market calculations, mutate records,
 persist data, execute strategies, backtest, optimize, or report results.
 
+## 1.15 Deterministic Behavior Statistics
+
+`compute_behavior_descriptive_statistics(atlas)` composes the existing
+immutable behavior counts and observed-category distributions with proportions
+and descriptive summaries of the already stored `ORBFeatures` values. It never
+queries candles, derives new behavior facts, filters records, or changes the
+existing atlas statistics APIs.
+
+The resulting `ORBBehaviorDescriptiveStatistics` retains categorical counts,
+read-only observed-category distributions, and proportion mappings for behavior
+kind, escape direction, and return-to-range facts. Category order is the
+existing first-observed atlas grouping order. Empty category samples have empty
+proportion mappings.
+
+`range_size` summarizes every record. MFE and MAE summarize only records whose
+features already contain those values; absent observations are not replaced
+with zero. Each `ORBFeatureSummary` records count, minimum, maximum, mean, and
+median without rounding. Empty numeric samples have zero count and `None` for
+each numeric metric. This descriptive layer adds no performance analytics,
+strategy behavior, execution, backtesting, optimization, reporting, or I/O.
+
 ---
 
 # 2. Responsibilities

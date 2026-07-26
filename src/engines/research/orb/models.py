@@ -4,6 +4,7 @@ from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from math import isfinite
 from types import MappingProxyType
 from typing import TypeVar
 
@@ -15,12 +16,14 @@ __all__ = [
     "ORBBehaviorAtlas",
     "ORBBehaviorAtlasGroups",
     "ORBBehaviorDistributions",
+    "ORBBehaviorDescriptiveStatistics",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
     "ORBBehaviorKind",
     "ORBEscapeDirection",
     "ORBEscapeEvent",
     "ORBFeatures",
+    "ORBFeatureSummary",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
@@ -219,6 +222,96 @@ class ORBBehaviorStatistics:
     upward_escape_count: int
     downward_escape_count: int
     returned_to_range_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class ORBFeatureSummary:
+    """Records exact descriptive values for one existing numeric ORB feature."""
+
+    count: int
+    minimum: float | None
+    maximum: float | None
+    mean: float | None
+    median: float | None
+
+    def __post_init__(self) -> None:
+        """Keep empty and observed numeric summaries internally consistent."""
+        if type(self.count) is not int or self.count < 0:
+            raise ValueError("count must be a non-negative integer")
+        values = (self.minimum, self.maximum, self.mean, self.median)
+        if self.count == 0:
+            if any(value is not None for value in values):
+                raise ValueError("an empty summary must not contain numeric values")
+            return
+        if any(value is None for value in values):
+            raise ValueError("a non-empty summary requires every numeric value")
+        if any(
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not isfinite(value)
+            for value in values
+        ):
+            raise ValueError("summary values must be finite numeric values")
+        if self.minimum is not None and self.maximum is not None:
+            if self.minimum > self.maximum:
+                raise ValueError("minimum must not exceed maximum")
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorDescriptiveStatistics:
+    """Combines existing categorical facts with numeric summaries of stored features."""
+
+    categorical_counts: ORBBehaviorStatistics
+    categorical_distributions: "ORBBehaviorDistributions"
+    behavior_proportions: Mapping[ORBBehaviorKind, float]
+    escape_direction_proportions: Mapping[ORBEscapeDirection, float]
+    return_to_range_proportions: Mapping[bool, float]
+    range_size: ORBFeatureSummary
+    maximum_favorable_excursion: ORBFeatureSummary
+    maximum_adverse_excursion: ORBFeatureSummary
+
+    def __post_init__(self) -> None:
+        """Defensively retain immutable proportion mappings and typed child results."""
+        if not isinstance(self.categorical_counts, ORBBehaviorStatistics):
+            raise TypeError("categorical_counts must be an ORBBehaviorStatistics")
+        if not isinstance(self.categorical_distributions, ORBBehaviorDistributions):
+            raise TypeError(
+                "categorical_distributions must be an ORBBehaviorDistributions"
+            )
+        for summary in (
+            self.range_size,
+            self.maximum_favorable_excursion,
+            self.maximum_adverse_excursion,
+        ):
+            if not isinstance(summary, ORBFeatureSummary):
+                raise TypeError("numeric summaries must be ORBFeatureSummary values")
+        object.__setattr__(
+            self,
+            "behavior_proportions",
+            _freeze_proportions(
+                self.behavior_proportions,
+                ORBBehaviorKind,
+                "behavior_proportions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "escape_direction_proportions",
+            _freeze_proportions(
+                self.escape_direction_proportions,
+                ORBEscapeDirection,
+                "escape_direction_proportions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "return_to_range_proportions",
+            _freeze_proportions(
+                self.return_to_range_proportions,
+                bool,
+                "return_to_range_proportions",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -472,3 +565,29 @@ def _freeze_distribution(
         immutable_distribution[category] = count
 
     return MappingProxyType(immutable_distribution)
+
+
+def _freeze_proportions(
+    proportions: Mapping[_DistributionCategory, float],
+    category_type: type[_DistributionCategory],
+    field_name: str,
+) -> Mapping[_DistributionCategory, float]:
+    """Return an immutable supported-category proportion mapping in input order."""
+    if not isinstance(proportions, Mapping):
+        raise TypeError(f"{field_name} must be a mapping.")
+
+    immutable_proportions: dict[_DistributionCategory, float] = {}
+    for category, proportion in proportions.items():
+        if not isinstance(category, category_type):
+            raise TypeError(f"{field_name} contains an unsupported category.")
+        if (
+            isinstance(proportion, bool)
+            or not isinstance(proportion, (int, float))
+            or not isfinite(proportion)
+            or proportion < 0.0
+            or proportion > 1.0
+        ):
+            raise ValueError(f"{field_name} values must be finite proportions.")
+        immutable_proportions[category] = proportion
+
+    return MappingProxyType(immutable_proportions)
