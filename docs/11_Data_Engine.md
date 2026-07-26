@@ -333,6 +333,35 @@ market-day completeness or data coverage without an exchange calendar.
 
 ---
 
+## Per-Session Market Quality Outcomes
+
+`evaluate_market_session_quality()` is a separate deterministic evaluation
+path; it does not change `DataEngineOrchestrator` or provider behavior. It
+uses existing canonical candle validation for OHLC, volume, duplicate, and
+ordering findings, and existing spacing assessment for internal M5 gaps.
+
+Canonical candle timestamps represent bar-open times. Repository ORB extraction
+defines the 09:15-to-09:30 opening range as including the 09:15, 09:20, and
+09:25 M5 candles while excluding the 09:30 candle. Under the approved
+BANKNIFTY M5 policy, valid bar-open timestamps are therefore 09:15 through
+15:25 inclusive in `Asia/Kolkata`; 15:30 is the exclusive session boundary.
+
+Each supplied session produces one immutable `MarketSessionQualityResult`:
+
+- `VALID_COMPLETE_SESSION` has the full 09:15-to-15:25 M5 timestamp sequence.
+- `VALID_PARTIAL_SESSION` is semantically valid, ordered, unique, within the
+  regular session, and gap-free between its first and last observed bars, but
+  omits leading or trailing regular-session bars.
+- `REJECTED_SESSION` has a canonical validation finding, an out-of-session or
+  unaligned timestamp, or an internal unexpected M5 interval. Rejections keep
+  stable codes and concise deterministic details for audit.
+
+The Data Engine owns these candle and market-session checks. Research owns ORB
+eligibility, including opening-window completeness and all subsequent ORB
+facts; this quality evaluator does not import or invoke Research Engine code.
+
+---
+
 # 13. Storage Model
 
 The storage boundary persists canonical `Session` aggregates. A session is the

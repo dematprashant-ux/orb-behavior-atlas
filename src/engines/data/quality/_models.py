@@ -21,6 +21,24 @@ class QualityCode(str, Enum):
     UNEXPECTED_INTERVAL = "UNEXPECTED_INTERVAL"
 
 
+class MarketSessionQualityStatus(str, Enum):
+    """Classifies a session's deterministic suitability for market research."""
+
+    VALID_COMPLETE_SESSION = "VALID_COMPLETE_SESSION"
+    VALID_PARTIAL_SESSION = "VALID_PARTIAL_SESSION"
+    REJECTED_SESSION = "REJECTED_SESSION"
+
+
+class MarketSessionRejectionCode(str, Enum):
+    """Identifies stable reasons a session cannot pass market-quality checks."""
+
+    EMPTY_SESSION = "EMPTY_SESSION"
+    CANDLE_VALIDATION = "CANDLE_VALIDATION"
+    OUTSIDE_REGULAR_SESSION = "OUTSIDE_REGULAR_SESSION"
+    UNALIGNED_M5_TIMESTAMP = "UNALIGNED_M5_TIMESTAMP"
+    INTERNAL_M5_GAP = "INTERNAL_M5_GAP"
+
+
 @dataclass(frozen=True, slots=True)
 class QualityIssue:
     """Describes one immutable observation without embedding candle objects."""
@@ -73,3 +91,46 @@ class DataQualityReport:
     def unexpected_interval_count(self) -> int:
         """Return the total number of observed unexpected intervals."""
         return sum(result.metrics.unexpected_interval_count for result in self.sessions)
+
+
+@dataclass(frozen=True, slots=True)
+class MarketSessionRejection:
+    """Describes one stable market-quality rejection without mutating a session."""
+
+    code: MarketSessionRejectionCode
+    detail: str | None = None
+
+    def __post_init__(self) -> None:
+        """Keep rejection facts typed and concise for deterministic audit output."""
+        if not isinstance(self.code, MarketSessionRejectionCode):
+            raise TypeError("code must be a MarketSessionRejectionCode")
+        if self.detail is not None and not isinstance(self.detail, str):
+            raise TypeError("detail must be a string or None")
+
+
+@dataclass(frozen=True, slots=True)
+class MarketSessionQualityResult:
+    """Pairs one supplied session with its complete, partial, or rejected outcome."""
+
+    session: Session
+    status: MarketSessionQualityStatus
+    rejections: tuple[MarketSessionRejection, ...]
+
+    def __post_init__(self) -> None:
+        """Require outcomes to retain their session and match rejection semantics."""
+        if not isinstance(self.session, Session):
+            raise TypeError("session must be a Session")
+        if not isinstance(self.status, MarketSessionQualityStatus):
+            raise TypeError("status must be a MarketSessionQualityStatus")
+        if not isinstance(self.rejections, tuple):
+            raise TypeError("rejections must be a tuple")
+        if any(
+            not isinstance(item, MarketSessionRejection)
+            for item in self.rejections
+        ):
+            raise TypeError("rejections must contain MarketSessionRejection values")
+        if self.status is MarketSessionQualityStatus.REJECTED_SESSION:
+            if not self.rejections:
+                raise ValueError("a rejected session requires at least one rejection")
+        elif self.rejections:
+            raise ValueError("a valid session cannot contain rejections")
