@@ -88,6 +88,10 @@ The repository currently has no configured CI workflow steps in
 `.github/workflows/ci.yml`. These requirements are therefore a repository
 health policy, not a claim about a specific external CI implementation.
 
+Validation summaries SHOULD report the Python version, Python executable,
+Pytest version, full-suite test count, full-suite duration, slowest tests when
+practical, and unavailable validation tools.
+
 ## 9. Activation Charter
 
 Behavioral expansion of a frozen package requires an activation charter before

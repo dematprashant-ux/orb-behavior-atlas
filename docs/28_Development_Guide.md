@@ -82,7 +82,7 @@ Each directory has a single responsibility.
 
 Recommended setup:
 
-- Python 3.12+
+- Python 3.11+
 - Git
 - VS Code
 - Virtual Environment
@@ -92,6 +92,45 @@ Recommended setup:
 - MyPy
 
 Development environments should be reproducible.
+
+The repository pins the supported local minor version to Python 3.11 through
+`.python-version`. `pyproject.toml` requires Python 3.11 or newer, and the
+configured Black and Ruff targets are Python 3.11. Python 3.9 is unsupported:
+the repository uses Python 3.10+ language and runtime features and declares
+Python 3.11+ support, so Python 3.9 will fail before or during test collection.
+
+Create the canonical local environment with the explicitly selected
+interpreter. Do not assume that bare `python` or `python3` selects Python 3.11.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+python -m pytest
+```
+
+On Windows PowerShell, activate the environment with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Confirm the active environment before validation:
+
+```bash
+python --version
+python -m pytest --version
+python -c "import sys; print(sys.executable)"
+```
+
+For diagnostic observation and baseline measurement, run:
+
+```bash
+python -m pytest --durations=20
+```
+
+This command is not a hard performance gate.
 
 ---
 
