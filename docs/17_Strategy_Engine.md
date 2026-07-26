@@ -490,6 +490,14 @@ Empty, unique, and tied selections remain distinct; no winner is chosen. It
 returns `OptimizationResultRenderedReport[str]` without Markdown syntax,
 reranking, reselection, calculation, mutation, I/O, or persistence.
 
+M26.4 adds `OptimizationReportFormat` with exactly `PLAIN_TEXT` and `MARKDOWN`,
+plus the immutable `OptimizationReportingRouter`. Its injected tuple-backed
+registrations map each available selection-outcome format to one configured
+`OptimizationReportingFacade`. For one completed run, the router delegates only
+to the matching facade and returns its exact rendered report. It does not create
+collaborators, choose defaults, fall back, render, construct reports, inspect
+payloads, or perform selection, ranking, scoring, evaluation, I/O, or mutation.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

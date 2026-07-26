@@ -1,6 +1,7 @@
 """Protocol boundary for future optimization summary report renderers."""
 
 from dataclasses import dataclass
+from enum import Enum
 from html import escape
 from typing import Generic, Protocol, TypeVar
 
@@ -24,6 +25,8 @@ __all__ = [
     "OptimizationSelectionOutcomeReportingWorkflow",
     "OptimizationSelectionOutcomeReportingService",
     "OptimizationReportingFacade",
+    "OptimizationReportFormat",
+    "OptimizationReportingRouter",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "PlainTextOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
@@ -44,6 +47,13 @@ _RenderedOptimizationResultPayload = TypeVar(
     "_RenderedOptimizationResultPayload",
     covariant=True,
 )
+
+
+class OptimizationReportFormat(str, Enum):
+    """Identify completed optimization selection-outcome presentation formats."""
+
+    PLAIN_TEXT = "plain_text"
+    MARKDOWN = "markdown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -236,6 +246,56 @@ class OptimizationReportingFacade(Generic[_RenderedOptimizationResultPayload]):
         if not isinstance(optimization_run, OptimizationRun):
             raise TypeError("optimization_run must be an OptimizationRun.")
         return self.reporting_service.run(optimization_run)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationReportingRouter:
+    """Route one completed run to one injected format-specific reporting facade."""
+
+    registrations: tuple[
+        tuple[OptimizationReportFormat, OptimizationReportingFacade[str]],
+        ...,
+    ]
+
+    def __post_init__(self) -> None:
+        """Require immutable unique format registrations without invoking them."""
+        if not isinstance(self.registrations, tuple):
+            raise TypeError("registrations must be a tuple.")
+        formats: list[OptimizationReportFormat] = []
+        for registration in self.registrations:
+            if not isinstance(registration, tuple) or len(registration) != 2:
+                raise TypeError(
+                    "registrations must contain format and facade tuple pairs."
+                )
+            report_format, facade = registration
+            if not isinstance(report_format, OptimizationReportFormat):
+                raise TypeError(
+                    "registration format must be an OptimizationReportFormat."
+                )
+            if facade is None or not callable(getattr(facade, "render_run", None)):
+                raise TypeError(
+                    "registration facade must define a callable render_run method."
+                )
+            formats.append(report_format)
+        if len(set(formats)) != len(formats):
+            raise ValueError("registrations must not contain duplicate formats.")
+
+    def render_run(
+        self,
+        run: "OptimizationRun",
+        report_format: OptimizationReportFormat,
+    ) -> OptimizationResultRenderedReport[str]:
+        """Delegate one exact run through one registered facade without fallback."""
+        from src.engines.backtesting.optimization import OptimizationRun
+
+        if not isinstance(run, OptimizationRun):
+            raise TypeError("run must be an OptimizationRun.")
+        if not isinstance(report_format, OptimizationReportFormat):
+            raise TypeError("report_format must be an OptimizationReportFormat.")
+        for registered_format, facade in self.registrations:
+            if registered_format is report_format:
+                return facade.render_run(run)
+        raise ValueError("report_format is not registered.")
 
 
 @dataclass(frozen=True, slots=True)
