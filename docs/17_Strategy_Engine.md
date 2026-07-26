@@ -515,6 +515,14 @@ and returns the router's exact rendered result. Composition stays separate, and
 the workflow performs no scoring, ranking, selection, report construction,
 rendering, payload inspection, I/O, or fallback handling.
 
+M27.2 adds `OptimizationExecutionReportingCompositionRoot`, the end-to-end
+application composition boundary. It retains externally supplied
+`OptimizationRunner` and `SelectionPolicy` instances, delegates reporting graph
+construction to `OptimizationReportingCompositionRoot`, and injects the created
+router with the exact runner into `OptimizationExecutionReportingWorkflow`. It
+does not invoke execution, selection, routing, or rendering; runtime behavior
+remains wholly owned by the assembled workflow and existing reporting layers.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using

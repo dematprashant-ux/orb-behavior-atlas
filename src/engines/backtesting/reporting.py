@@ -31,6 +31,7 @@ __all__ = [
     "OptimizationReportingRouter",
     "OptimizationReportingCompositionRoot",
     "OptimizationExecutionReportingWorkflow",
+    "OptimizationExecutionReportingCompositionRoot",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "PlainTextOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
@@ -373,6 +374,35 @@ class OptimizationExecutionReportingWorkflow:
         """Execute once, then delegate the exact returned run to routing once."""
         optimization_run = self.optimization_runner.run(specification)
         return self.reporting_router.render_run(optimization_run, report_format)
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationExecutionReportingCompositionRoot:
+    """Assemble one execution-to-reporting workflow from injected contracts."""
+
+    optimization_runner: OptimizationRunner
+    selection_policy: SelectionPolicy
+
+    def __post_init__(self) -> None:
+        """Require external execution and selection collaborators only."""
+        if self.optimization_runner is None:
+            raise TypeError("optimization_runner must not be None.")
+        if not callable(getattr(self.optimization_runner, "run", None)):
+            raise TypeError("optimization_runner must define a callable run method.")
+        if self.selection_policy is None:
+            raise TypeError("selection_policy must not be None.")
+        if not callable(getattr(self.selection_policy, "select", None)):
+            raise TypeError("selection_policy must define a callable select method.")
+
+    def build_workflow(self) -> OptimizationExecutionReportingWorkflow:
+        """Assemble reporting once without invoking execution or selection."""
+        router = OptimizationReportingCompositionRoot(
+            self.selection_policy
+        ).build_router()
+        return OptimizationExecutionReportingWorkflow(
+            self.optimization_runner,
+            router,
+        )
 
 
 @dataclass(frozen=True, slots=True)
