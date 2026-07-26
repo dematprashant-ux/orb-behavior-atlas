@@ -27,6 +27,7 @@ __all__ = [
     "OptimizationReportingFacade",
     "OptimizationReportFormat",
     "OptimizationReportingRouter",
+    "OptimizationReportingCompositionRoot",
     "MarkdownOptimizationSelectionOutcomeRenderer",
     "PlainTextOptimizationSelectionOutcomeRenderer",
     "OptimizationRunSummaryRenderedReport",
@@ -296,6 +297,49 @@ class OptimizationReportingRouter:
             if registered_format is report_format:
                 return facade.render_run(run)
         raise ValueError("report_format is not registered.")
+
+
+@dataclass(frozen=True, slots=True)
+class OptimizationReportingCompositionRoot:
+    """Assemble the complete injected selection-outcome reporting graphs."""
+
+    selection_policy: SelectionPolicy
+
+    def __post_init__(self) -> None:
+        """Require one explicit selector without invoking it during composition."""
+        if self.selection_policy is None:
+            raise TypeError("selection_policy must not be None.")
+        if not callable(getattr(self.selection_policy, "select", None)):
+            raise TypeError("selection_policy must define a callable select method.")
+
+    def build_router(self) -> OptimizationReportingRouter:
+        """Build plain-text and Markdown paths without performing reporting."""
+        plain_text_facade = OptimizationReportingFacade(
+            OptimizationSelectionOutcomeReportingService(
+                self.selection_policy,
+                OptimizationSelectionOutcomeReportingWorkflow(
+                    OptimizationSelectionOutcomeReportingPipeline(
+                        PlainTextOptimizationSelectionOutcomeRenderer()
+                    )
+                ),
+            )
+        )
+        markdown_facade = OptimizationReportingFacade(
+            OptimizationSelectionOutcomeReportingService(
+                self.selection_policy,
+                OptimizationSelectionOutcomeReportingWorkflow(
+                    OptimizationSelectionOutcomeReportingPipeline(
+                        MarkdownOptimizationSelectionOutcomeRenderer()
+                    )
+                ),
+            )
+        )
+        return OptimizationReportingRouter(
+            (
+                (OptimizationReportFormat.PLAIN_TEXT, plain_text_facade),
+                (OptimizationReportFormat.MARKDOWN, markdown_facade),
+            )
+        )
 
 
 @dataclass(frozen=True, slots=True)

@@ -498,6 +498,14 @@ to the matching facade and returns its exact rendered report. It does not create
 collaborators, choose defaults, fall back, render, construct reports, inspect
 payloads, or perform selection, ranking, scoring, evaluation, I/O, or mutation.
 
+M26.5 adds `OptimizationReportingCompositionRoot`, the application composition
+boundary for both supported selection-outcome formats. It retains one externally
+injected `SelectionPolicy` and assembles independent plain-text and Markdown
+renderer-to-façade graphs before registering them in an immutable router. The
+root performs construction only: it neither invokes its selector nor executes
+reporting, while all runtime selection and rendering behavior remains owned by
+the established reporting layers.
+
 M20.3 adds `ParameterSpaceIndexer` and its stateless
 `CartesianParameterSpaceIndexer` implementation. It provides exact finite
 Cartesian cardinality and zero-based mixed-radix `candidate_at()` access using
