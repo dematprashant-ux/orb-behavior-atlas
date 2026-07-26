@@ -133,6 +133,34 @@ provider name, source timezone, and canonical instrument/timeframe mappings.
 It must not contain credentials, transport objects, runtime state, caches, or
 retry behavior.
 
+## Canonical Historical-Data Input Contract
+
+The sole internal pre-normalization contract is an ordered iterable of
+mapping-like records with exactly these canonical keys:
+`timestamp`, `open`, `high`, `low`, `close`, and `volume`. Values retain their
+source representation until Data Engine normalization converts them to a
+canonical `Candle`. This mapping contract is the hand-off from provider parsing
+to `normalize_candles()`; CSV, Parquet, JSON, DataFrame, tuple, and provider
+SDK payloads are not Data Engine internal formats.
+
+The responsibility boundary is deliberately narrow:
+
+| Component | Responsibility | Must not do |
+|---|---|---|
+| Raw source | Supplies provider-native bytes, rows, or payloads in source order | Create `Candle` objects or apply Data Engine validation |
+| `ProviderAdapter` | Translates each raw payload into the canonical-key mapping, maps requested instrument/timeframe values, and invokes normalization | Validate OHLC semantics, deduplicate, reorder, build sessions, or perform research |
+| `ProviderConfig` | Declares provider name, source timezone, and immutable canonical-to-provider request mappings | Own source data, credentials, transport state, file handles, caches, or retry policy |
+| `DataSource` | Exposes provider-neutral `fetch()` returning canonical `Candle` values | Expose raw payloads or provider parsing details |
+
+The first concrete implementation should be a local, headered UTF-8 CSV
+adapter for BANKNIFTY M5 history. CSV is deterministic, inspectable, portable,
+and sufficient for research fixtures without choosing database, network, or
+production-provider infrastructure. Its parser should map its documented CSV
+columns into the canonical-key mapping contract above; its local path and file
+reading behavior remain adapter concerns, not `ProviderConfig` or `DataSource`
+concerns. Validation, session construction, quality assessment, storage, and
+all ORB research remain downstream of the adapter.
+
 ## Canonical Normalization Boundary
 
 Normalization accepts provider-independent values with canonical candle keys:
