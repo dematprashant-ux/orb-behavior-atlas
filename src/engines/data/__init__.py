@@ -5,7 +5,12 @@ from src.engines.data.interfaces import (
     DataEngine,
     DataSource,
 )
-from src.engines.data.providers import BaseProviderAdapter, ProviderAdapter, ProviderConfig
+from src.engines.data.providers import (
+    BankNiftyM5CsvProvider,
+    BaseProviderAdapter,
+    ProviderAdapter,
+    ProviderConfig,
+)
 from src.engines.data.orchestration import (
     DataEngineExecutionRequest,
     DataEngineExecutionResult,
@@ -79,6 +84,7 @@ __all__ = [
     "CandleIdentity",
     "CandleValidationResult",
     "BaseProviderAdapter",
+    "BankNiftyM5CsvProvider",
     "Instrument",
     "ExecutionStage",
     "ExecutionStatus",

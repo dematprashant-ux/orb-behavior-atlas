@@ -161,6 +161,23 @@ reading behavior remain adapter concerns, not `ProviderConfig` or `DataSource`
 concerns. Validation, session construction, quality assessment, storage, and
 all ORB research remain downstream of the adapter.
 
+`BankNiftyM5CsvProvider` is the reference local implementation. It accepts a
+UTF-8 CSV file with this exact header and source-order records:
+
+```text
+timestamp,open,high,low,close,volume
+```
+
+`timestamp` must be ISO 8601 and is interpreted using the provider's declared
+source timezone when it is naive. The provider rejects unreadable or invalid
+UTF-8 sources, empty or header-only files, malformed CSV, non-canonical or
+duplicate headers, blank or incomplete rows, and timestamp values that cannot
+be parsed. Numeric values are deliberately passed unchanged to canonical
+normalization, which rejects malformed, non-finite, and non-integral volume
+values. OHLC semantics, duplicate timestamps, and timestamp ordering remain
+canonical validation responsibilities executed downstream by
+`DataEngineOrchestrator`.
+
 ## Canonical Normalization Boundary
 
 Normalization accepts provider-independent values with canonical candle keys:
