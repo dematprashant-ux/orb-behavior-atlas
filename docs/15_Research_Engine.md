@@ -163,6 +163,21 @@ atlas groups to produce read-only frequency maps for only observed behavior,
 escape-direction, and return-to-range categories. It does not calculate
 percentages, normalize values, inspect candles, or create new research facts.
 
+## 1.14 BANKNIFTY CSV ORB Research Pipeline
+
+`BankNiftyCsvOrbResearchPipeline` is the narrow application orchestration for
+one historical BANKNIFTY M5 CSV source. It constructs the existing CSV
+provider, delegates acquisition, normalization, validation, and session
+construction to an injected `DataEngineOrchestrator`, then delegates each
+complete session to the existing opening-range extraction, escape observation,
+classification, feature generation, record construction, and atlas builder.
+
+Its immutable `ORBResearchPipelineResult` retains the exact Data Engine result
+and completed `ORBBehaviorAtlas`. Rejected or failed Data Engine executions
+produce an empty atlas; sessions without a complete 15-minute opening window
+are omitted. The pipeline does not add market calculations, mutate records,
+persist data, execute strategies, backtest, optimize, or report results.
+
 ---
 
 # 2. Responsibilities

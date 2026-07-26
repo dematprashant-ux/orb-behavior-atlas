@@ -1,5 +1,9 @@
 """Research Engine domain models and future research capabilities."""
 
+from src.engines.research.pipeline import (
+    BankNiftyCsvOrbResearchPipeline,
+    ORBResearchPipelineResult,
+)
 from src.engines.research.orb import (
     OpeningRange,
     ORBBehavior,
@@ -30,6 +34,7 @@ from src.engines.research.orb import (
 )
 
 __all__ = [
+    "BankNiftyCsvOrbResearchPipeline",
     "OpeningRange",
     "ORBBehavior",
     "ORBBehaviorAtlas",
@@ -42,6 +47,7 @@ __all__ = [
     "ORBEscapeEvent",
     "ORBFeatures",
     "ORBPostEscapeObservation",
+    "ORBResearchPipelineResult",
     "ORBSession",
     "ORBWindow",
     "build_behavior_record",
