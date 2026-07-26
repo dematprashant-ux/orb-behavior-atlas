@@ -35,6 +35,10 @@ from src.engines.backtesting.interfaces import (
     CandidateEvaluator,
     TransactionCostModel,
 )
+from src.engines.backtesting.identity import (
+    IdentifiedOptimizationRun,
+    OptimizationRunIdentity,
+)
 from src.engines.backtesting.models import BacktestContext, BacktestRun, BacktestStatus
 from src.engines.backtesting.objectives import (
     CandidateObjective,
@@ -181,6 +185,8 @@ __all__ = [
     "ConstraintRejection",
     "NotConstraint",
     "OptimizationRun",
+    "OptimizationRunIdentity",
+    "IdentifiedOptimizationRun",
     "OptimizationRunSummaries",
     "OptimizationRunSummary",
     "OptimizationRunSummaryAggregate",
