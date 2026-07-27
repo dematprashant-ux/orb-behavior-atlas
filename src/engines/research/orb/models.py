@@ -23,8 +23,12 @@ __all__ = [
     "ORBResearchFinding",
     "ORBResearchFindingStatus",
     "ORBStatisticalEvidence",
+    "ORBStatisticalComparisonDesign",
+    "ORBStatisticalObservationDomain",
+    "ORBStatisticalTestDefinition",
     "ORBStatisticalTestFamily",
     "ORBStatisticalTestIdentifier",
+    "ORBStatisticalTestImplementationStatus",
     "ORBStatisticalValidation",
     "ORBStatisticalValidationLifecycleStatus",
     "ORBStatisticalValidationNotEvaluableReason",
@@ -379,6 +383,30 @@ class ORBStatisticalTestFamily(str, Enum):
     RESAMPLING = "RESAMPLING"
 
 
+class ORBStatisticalObservationDomain(str, Enum):
+    """Identifies the broad observation form consumed by a planned test."""
+
+    CONTINUOUS = "CONTINUOUS"
+    ORDINAL = "ORDINAL"
+    CATEGORICAL = "CATEGORICAL"
+    RESAMPLED = "RESAMPLED"
+
+
+class ORBStatisticalComparisonDesign(str, Enum):
+    """Identifies the supported structural comparison form of a planned test."""
+
+    TWO_INDEPENDENT_SAMPLES = "TWO_INDEPENDENT_SAMPLES"
+    CONTINGENCY_TABLE = "CONTINGENCY_TABLE"
+    GENERIC_RESAMPLING = "GENERIC_RESAMPLING"
+
+
+class ORBStatisticalTestImplementationStatus(str, Enum):
+    """Identifies whether a canonical statistical test is executable yet."""
+
+    PLANNED = "PLANNED"
+    AVAILABLE = "AVAILABLE"
+
+
 class ORBStatisticalTestIdentifier(str, Enum):
     """Identifies a planned statistical method without executing it."""
 
@@ -562,6 +590,40 @@ class ORBStatisticalEvidence:
                 raise ValueError(f"{field_name} must be a non-negative integer")
         if self.note is not None and not isinstance(self.note, str):
             raise TypeError("note must be a string or None")
+
+
+@dataclass(frozen=True, slots=True)
+class ORBStatisticalTestDefinition:
+    """Describe stable metadata for one planned statistical method."""
+
+    test_identifier: ORBStatisticalTestIdentifier
+    test_family: ORBStatisticalTestFamily
+    observation_domain: ORBStatisticalObservationDomain
+    comparison_design: ORBStatisticalComparisonDesign
+    implementation_status: ORBStatisticalTestImplementationStatus
+
+    def __post_init__(self) -> None:
+        """Require only canonical typed test-definition metadata."""
+        if not isinstance(self.test_identifier, ORBStatisticalTestIdentifier):
+            raise TypeError("test_identifier must be an ORBStatisticalTestIdentifier")
+        if not isinstance(self.test_family, ORBStatisticalTestFamily):
+            raise TypeError("test_family must be an ORBStatisticalTestFamily")
+        if not isinstance(self.observation_domain, ORBStatisticalObservationDomain):
+            raise TypeError(
+                "observation_domain must be an ORBStatisticalObservationDomain"
+            )
+        if not isinstance(self.comparison_design, ORBStatisticalComparisonDesign):
+            raise TypeError(
+                "comparison_design must be an ORBStatisticalComparisonDesign"
+            )
+        if not isinstance(
+            self.implementation_status,
+            ORBStatisticalTestImplementationStatus,
+        ):
+            raise TypeError(
+                "implementation_status must be an "
+                "ORBStatisticalTestImplementationStatus"
+            )
 
 
 @dataclass(frozen=True, slots=True)

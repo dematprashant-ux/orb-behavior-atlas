@@ -32,9 +32,13 @@ from src.engines.research.orb.models import (
     ORBBehaviorHypothesisEvaluation,
     ORBResearchFinding,
     ORBResearchFindingStatus,
+    ORBStatisticalComparisonDesign,
     ORBStatisticalEvidence,
+    ORBStatisticalObservationDomain,
     ORBStatisticalTestFamily,
+    ORBStatisticalTestDefinition,
     ORBStatisticalTestIdentifier,
+    ORBStatisticalTestImplementationStatus,
     ORBStatisticalValidation,
     ORBStatisticalValidationLifecycleStatus,
     ORBStatisticalValidationNotEvaluableReason,
@@ -62,6 +66,11 @@ from src.engines.research.orb.statistical_validation import (
     create_statistical_validation,
     mark_statistical_validation_not_evaluable,
 )
+from src.engines.research.orb.statistical_tests import (
+    get_statistical_test_definition,
+    list_statistical_test_definitions,
+    list_statistical_test_definitions_by_family,
+)
 from src.engines.research.orb.statistics import compute_behavior_statistics
 
 __all__ = [
@@ -76,9 +85,13 @@ __all__ = [
     "ORBBehaviorHypothesisEvaluation",
     "ORBResearchFinding",
     "ORBResearchFindingStatus",
+    "ORBStatisticalComparisonDesign",
     "ORBStatisticalEvidence",
+    "ORBStatisticalObservationDomain",
     "ORBStatisticalTestFamily",
+    "ORBStatisticalTestDefinition",
     "ORBStatisticalTestIdentifier",
+    "ORBStatisticalTestImplementationStatus",
     "ORBStatisticalValidation",
     "ORBStatisticalValidationLifecycleStatus",
     "ORBStatisticalValidationNotEvaluableReason",
@@ -112,10 +125,13 @@ __all__ = [
     "evaluate_behavior_hypothesis",
     "find_first_escape_event",
     "generate_orb_features",
+    "get_statistical_test_definition",
     "group_by_behavior",
     "group_by_escape_direction",
     "group_by_return_to_range",
     "observe_post_escape",
     "mark_statistical_validation_not_evaluable",
+    "list_statistical_test_definitions",
+    "list_statistical_test_definitions_by_family",
     "request_statistical_validation",
 ]

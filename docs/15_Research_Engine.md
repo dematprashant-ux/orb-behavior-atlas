@@ -294,6 +294,27 @@ unsupported metric, or an unimplemented test. This adds no p-values, test
 statistics, confidence intervals, effect sizes, power, adequacy algorithm,
 significance conclusion, or Strategy activation decision.
 
+## 1.20 Statistical Test Definition Registry
+
+`ORBStatisticalTestDefinition` is immutable metadata for one planned method:
+its canonical identifier, broad test family, observation domain, comparison
+design, and implementation status. The canonical registry contains exactly one
+definition for each R3.2 identifier in enum declaration order. All definitions
+remain `PLANNED`; the registry does not make any method executable.
+
+`list_statistical_test_definitions()` returns the complete immutable tuple,
+`get_statistical_test_definition(identifier)` returns its one canonical entry,
+and the typed family filter preserves the same order. The definitions map Welch
+t-test to parametric continuous independent samples; Mann-Whitney U to
+non-parametric ordinal independent samples; chi-square and Fisher exact to
+categorical contingency tables; and permutation test and bootstrap to generic
+resampling.
+
+The registry is descriptive only. It is the canonical metadata companion to
+R3.2 evidence, but it performs no test execution, automatic test selection,
+sample-adequacy assessment, assumption checking, significance interpretation,
+or Strategy activation.
+
 ---
 
 # 2. Responsibilities
