@@ -245,6 +245,27 @@ causal claim, prediction, strategy, trading, execution, backtesting,
 optimization, reporting, visualization, persistence, or automatic hypothesis
 discovery.
 
+## 1.18 Research Findings Framework
+
+`create_research_finding(evaluation, *, note=None)` composes one immutable
+`ORBResearchFinding` from a completed deterministic
+`ORBBehaviorHypothesisEvaluation`. The evaluation is the canonical evidence:
+the finding retains that exact object and does not copy its hypothesis,
+comparison, observed values, or differences.
+
+Finding status maps directly from the completed evaluation: `SUPPORTED` becomes
+`OBSERVED`, `NOT_SUPPORTED` becomes `NOT_OBSERVED`, and `NOT_EVALUABLE` remains
+`NOT_EVALUABLE`. These labels describe deterministic observation only; they do
+not assert significance, sample adequacy, economic meaning, robustness, or
+strategy readiness.
+
+Every new finding has statistical-validation status `NOT_REQUESTED`.
+`request_statistical_validation(finding)` returns a new immutable `PENDING`
+finding only when its status is `OBSERVED`; unsupported and unavailable findings
+are ineligible. Repeating a valid pending request is idempotent. Neither state
+requests nor notes perform statistical work: there are no p-values, confidence
+intervals, effect sizes, tests, or trading decisions in this framework.
+
 ---
 
 # 2. Responsibilities

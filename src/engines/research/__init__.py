@@ -14,6 +14,9 @@ from src.engines.research.orb import (
     ORBBehaviorDistributions,
     ORBBehaviorHypothesis,
     ORBBehaviorHypothesisEvaluation,
+    ORBResearchFinding,
+    ORBResearchFindingStatus,
+    ORBStatisticalValidationStatus,
     ORBBehaviorKind,
     ORBBehaviorRecord,
     ORBBehaviorStatistics,
@@ -37,6 +40,7 @@ from src.engines.research.orb import (
     compute_behavior_distributions,
     compute_behavior_statistics,
     extract_opening_range,
+    create_research_finding,
     evaluate_behavior_hypothesis,
     find_first_escape_event,
     generate_orb_features,
@@ -44,6 +48,7 @@ from src.engines.research.orb import (
     group_by_escape_direction,
     group_by_return_to_range,
     observe_post_escape,
+    request_statistical_validation,
 )
 
 __all__ = [
@@ -57,6 +62,9 @@ __all__ = [
     "ORBBehaviorDistributions",
     "ORBBehaviorHypothesis",
     "ORBBehaviorHypothesisEvaluation",
+    "ORBResearchFinding",
+    "ORBResearchFindingStatus",
+    "ORBStatisticalValidationStatus",
     "ORBBehaviorKind",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
@@ -81,6 +89,7 @@ __all__ = [
     "compute_behavior_distributions",
     "compute_behavior_statistics",
     "extract_opening_range",
+    "create_research_finding",
     "evaluate_behavior_hypothesis",
     "find_first_escape_event",
     "generate_orb_features",
@@ -88,4 +97,5 @@ __all__ = [
     "group_by_escape_direction",
     "group_by_return_to_range",
     "observe_post_escape",
+    "request_statistical_validation",
 ]

@@ -20,6 +20,9 @@ __all__ = [
     "ORBBehaviorComparison",
     "ORBBehaviorHypothesis",
     "ORBBehaviorHypothesisEvaluation",
+    "ORBResearchFinding",
+    "ORBResearchFindingStatus",
+    "ORBStatisticalValidationStatus",
     "ORBHypothesisMetric",
     "ORBHypothesisNotEvaluableReason",
     "ORBHypothesisOutcome",
@@ -338,6 +341,21 @@ class ORBHypothesisNotEvaluableReason(str, Enum):
     BOTH_VALUES_UNAVAILABLE = "BOTH_VALUES_UNAVAILABLE"
 
 
+class ORBResearchFindingStatus(str, Enum):
+    """Identifies the deterministic observation state of a research finding."""
+
+    OBSERVED = "OBSERVED"
+    NOT_OBSERVED = "NOT_OBSERVED"
+    NOT_EVALUABLE = "NOT_EVALUABLE"
+
+
+class ORBStatisticalValidationStatus(str, Enum):
+    """Identifies the request state for future statistical validation only."""
+
+    NOT_REQUESTED = "NOT_REQUESTED"
+    PENDING = "PENDING"
+
+
 @dataclass(frozen=True, slots=True)
 class ORBBehaviorHypothesis:
     """Declares one deterministic relation over existing descriptive facts."""
@@ -433,6 +451,47 @@ class ORBBehaviorHypothesisEvaluation:
             raise ValueError("signed_difference must match the observed values")
         if self.absolute_difference != abs(self.signed_difference):
             raise ValueError("absolute_difference must match signed_difference")
+
+
+@dataclass(frozen=True, slots=True)
+class ORBResearchFinding:
+    """Compose one deterministic hypothesis evaluation for later validation."""
+
+    evaluation: ORBBehaviorHypothesisEvaluation
+    status: ORBResearchFindingStatus
+    statistical_validation_status: ORBStatisticalValidationStatus
+    note: str | None = None
+
+    def __post_init__(self) -> None:
+        """Require typed immutable evidence and an outcome-consistent status."""
+        if not isinstance(self.evaluation, ORBBehaviorHypothesisEvaluation):
+            raise TypeError("evaluation must be an ORBBehaviorHypothesisEvaluation")
+        if not isinstance(self.status, ORBResearchFindingStatus):
+            raise TypeError("status must be an ORBResearchFindingStatus")
+        if not isinstance(
+            self.statistical_validation_status,
+            ORBStatisticalValidationStatus,
+        ):
+            raise TypeError(
+                "statistical_validation_status must be an "
+                "ORBStatisticalValidationStatus"
+            )
+        if self.note is not None and not isinstance(self.note, str):
+            raise TypeError("note must be a string or None")
+        expected_status = _finding_status_for_outcome(self.evaluation.outcome)
+        if self.status is not expected_status:
+            raise ValueError("status must match the evaluation outcome")
+        if (
+            self.statistical_validation_status
+            is ORBStatisticalValidationStatus.PENDING
+            and not self.is_eligible_for_statistical_validation
+        ):
+            raise ValueError("only observed findings can request statistical validation")
+
+    @property
+    def is_eligible_for_statistical_validation(self) -> bool:
+        """Return whether this observed deterministic result may be validated later."""
+        return self.status is ORBResearchFindingStatus.OBSERVED
 
 
 @dataclass(frozen=True, slots=True)
@@ -830,6 +889,19 @@ def _validate_hypothesis_category(
             raise TypeError("RETURN_TO_RANGE_PROPORTION requires a bool category")
         return
     raise ValueError("metric is unsupported")
+
+
+def _finding_status_for_outcome(
+    outcome: ORBHypothesisOutcome,
+) -> ORBResearchFindingStatus:
+    """Map one completed deterministic outcome to its finding status."""
+    if outcome is ORBHypothesisOutcome.SUPPORTED:
+        return ORBResearchFindingStatus.OBSERVED
+    if outcome is ORBHypothesisOutcome.NOT_SUPPORTED:
+        return ORBResearchFindingStatus.NOT_OBSERVED
+    if outcome is ORBHypothesisOutcome.NOT_EVALUABLE:
+        return ORBResearchFindingStatus.NOT_EVALUABLE
+    raise ValueError("outcome is unsupported")
 
 
 def _validate_optional_finite_value(value: float | None, field_name: str) -> None:
