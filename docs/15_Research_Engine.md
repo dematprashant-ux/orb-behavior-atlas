@@ -266,6 +266,34 @@ are ineligible. Repeating a valid pending request is idempotent. Neither state
 requests nor notes perform statistical work: there are no p-values, confidence
 intervals, effect sizes, tests, or trading decisions in this framework.
 
+## 1.19 Statistical Validation Framework
+
+`create_statistical_validation(finding)` creates an immutable
+`ORBStatisticalValidation` only from an eligible `ORBResearchFinding` whose
+R3.1 request status is already `PENDING`. The validation retains that exact
+finding and never copies its hypothesis, deterministic evaluation, comparison,
+or observed values.
+
+The framework lifecycle is deliberately separate from deterministic observation
+and future statistical conclusions: `PENDING` has neither evidence nor a
+reason; `NOT_EVALUABLE` has a stable reason and no evidence; `COMPLETE` has
+canonical `ORBStatisticalEvidence` and no not-evaluable reason. Pending
+validations may transition only to `NOT_EVALUABLE` or `COMPLETE`; both terminal
+states reject further transitions.
+
+Evidence currently records only a planned typed test identifier and family plus
+caller-supplied non-negative left and right sample sizes. Supported families
+are parametric, non-parametric, categorical, and resampling. Planned identifiers
+are Welch's t-test, Mann-Whitney U, chi-square, Fisher exact, permutation test,
+and bootstrap. These are architectural identifiers only; not every identifier
+is executable yet.
+
+Framework-level unavailable reasons are typed and deterministic. They may
+describe ineligible findings, insufficient or missing observations, an
+unsupported metric, or an unimplemented test. This adds no p-values, test
+statistics, confidence intervals, effect sizes, power, adequacy algorithm,
+significance conclusion, or Strategy activation decision.
+
 ---
 
 # 2. Responsibilities

@@ -32,6 +32,12 @@ from src.engines.research.orb.models import (
     ORBBehaviorHypothesisEvaluation,
     ORBResearchFinding,
     ORBResearchFindingStatus,
+    ORBStatisticalEvidence,
+    ORBStatisticalTestFamily,
+    ORBStatisticalTestIdentifier,
+    ORBStatisticalValidation,
+    ORBStatisticalValidationLifecycleStatus,
+    ORBStatisticalValidationNotEvaluableReason,
     ORBStatisticalValidationStatus,
     ORBBehaviorKind,
     ORBBehaviorRecord,
@@ -51,6 +57,11 @@ from src.engines.research.orb.models import (
 )
 from src.engines.research.orb.observation import observe_post_escape
 from src.engines.research.orb.record import build_behavior_record
+from src.engines.research.orb.statistical_validation import (
+    complete_statistical_validation,
+    create_statistical_validation,
+    mark_statistical_validation_not_evaluable,
+)
 from src.engines.research.orb.statistics import compute_behavior_statistics
 
 __all__ = [
@@ -65,6 +76,12 @@ __all__ = [
     "ORBBehaviorHypothesisEvaluation",
     "ORBResearchFinding",
     "ORBResearchFindingStatus",
+    "ORBStatisticalEvidence",
+    "ORBStatisticalTestFamily",
+    "ORBStatisticalTestIdentifier",
+    "ORBStatisticalValidation",
+    "ORBStatisticalValidationLifecycleStatus",
+    "ORBStatisticalValidationNotEvaluableReason",
     "ORBStatisticalValidationStatus",
     "ORBBehaviorKind",
     "ORBBehaviorRecord",
@@ -84,12 +101,14 @@ __all__ = [
     "build_behavior_record",
     "build_behavior_atlas",
     "classify_orb_behavior",
+    "complete_statistical_validation",
     "compare_behavior_atlases",
     "compute_behavior_descriptive_statistics",
     "compute_behavior_distributions",
     "compute_behavior_statistics",
     "extract_opening_range",
     "create_research_finding",
+    "create_statistical_validation",
     "evaluate_behavior_hypothesis",
     "find_first_escape_event",
     "generate_orb_features",
@@ -97,5 +116,6 @@ __all__ = [
     "group_by_escape_direction",
     "group_by_return_to_range",
     "observe_post_escape",
+    "mark_statistical_validation_not_evaluable",
     "request_statistical_validation",
 ]

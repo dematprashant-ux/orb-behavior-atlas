@@ -22,6 +22,12 @@ __all__ = [
     "ORBBehaviorHypothesisEvaluation",
     "ORBResearchFinding",
     "ORBResearchFindingStatus",
+    "ORBStatisticalEvidence",
+    "ORBStatisticalTestFamily",
+    "ORBStatisticalTestIdentifier",
+    "ORBStatisticalValidation",
+    "ORBStatisticalValidationLifecycleStatus",
+    "ORBStatisticalValidationNotEvaluableReason",
     "ORBStatisticalValidationStatus",
     "ORBHypothesisMetric",
     "ORBHypothesisNotEvaluableReason",
@@ -356,6 +362,44 @@ class ORBStatisticalValidationStatus(str, Enum):
     PENDING = "PENDING"
 
 
+class ORBStatisticalValidationLifecycleStatus(str, Enum):
+    """Identifies the lifecycle stage of one statistical validation record."""
+
+    PENDING = "PENDING"
+    NOT_EVALUABLE = "NOT_EVALUABLE"
+    COMPLETE = "COMPLETE"
+
+
+class ORBStatisticalTestFamily(str, Enum):
+    """Identifies the broad family of a planned statistical method."""
+
+    PARAMETRIC = "PARAMETRIC"
+    NON_PARAMETRIC = "NON_PARAMETRIC"
+    CATEGORICAL = "CATEGORICAL"
+    RESAMPLING = "RESAMPLING"
+
+
+class ORBStatisticalTestIdentifier(str, Enum):
+    """Identifies a planned statistical method without executing it."""
+
+    WELCH_T_TEST = "WELCH_T_TEST"
+    MANN_WHITNEY_U = "MANN_WHITNEY_U"
+    CHI_SQUARE = "CHI_SQUARE"
+    FISHER_EXACT = "FISHER_EXACT"
+    PERMUTATION_TEST = "PERMUTATION_TEST"
+    BOOTSTRAP = "BOOTSTRAP"
+
+
+class ORBStatisticalValidationNotEvaluableReason(str, Enum):
+    """Identifies a stable framework-level reason validation cannot proceed."""
+
+    FINDING_NOT_ELIGIBLE = "FINDING_NOT_ELIGIBLE"
+    INSUFFICIENT_OBSERVATIONS = "INSUFFICIENT_OBSERVATIONS"
+    MISSING_OBSERVATIONS = "MISSING_OBSERVATIONS"
+    UNSUPPORTED_METRIC = "UNSUPPORTED_METRIC"
+    TEST_NOT_IMPLEMENTED = "TEST_NOT_IMPLEMENTED"
+
+
 @dataclass(frozen=True, slots=True)
 class ORBBehaviorHypothesis:
     """Declares one deterministic relation over existing descriptive facts."""
@@ -492,6 +536,105 @@ class ORBResearchFinding:
     def is_eligible_for_statistical_validation(self) -> bool:
         """Return whether this observed deterministic result may be validated later."""
         return self.status is ORBResearchFindingStatus.OBSERVED
+
+
+@dataclass(frozen=True, slots=True)
+class ORBStatisticalEvidence:
+    """Retain common metadata for one future completed statistical procedure."""
+
+    test_identifier: ORBStatisticalTestIdentifier
+    test_family: ORBStatisticalTestFamily
+    left_sample_size: int
+    right_sample_size: int
+    note: str | None = None
+
+    def __post_init__(self) -> None:
+        """Require typed test metadata and explicit non-negative sample sizes."""
+        if not isinstance(self.test_identifier, ORBStatisticalTestIdentifier):
+            raise TypeError("test_identifier must be an ORBStatisticalTestIdentifier")
+        if not isinstance(self.test_family, ORBStatisticalTestFamily):
+            raise TypeError("test_family must be an ORBStatisticalTestFamily")
+        for sample_size, field_name in (
+            (self.left_sample_size, "left_sample_size"),
+            (self.right_sample_size, "right_sample_size"),
+        ):
+            if type(sample_size) is not int or sample_size < 0:
+                raise ValueError(f"{field_name} must be a non-negative integer")
+        if self.note is not None and not isinstance(self.note, str):
+            raise TypeError("note must be a string or None")
+
+
+@dataclass(frozen=True, slots=True)
+class ORBStatisticalValidation:
+    """Compose a requested research finding with its statistical lifecycle state."""
+
+    finding: ORBResearchFinding
+    lifecycle_status: ORBStatisticalValidationLifecycleStatus
+    evidence: ORBStatisticalEvidence | None = None
+    not_evaluable_reason: ORBStatisticalValidationNotEvaluableReason | None = None
+    note: str | None = None
+
+    def __post_init__(self) -> None:
+        """Require a requested eligible finding and a coherent lifecycle state."""
+        if not isinstance(self.finding, ORBResearchFinding):
+            raise TypeError("finding must be an ORBResearchFinding")
+        if not isinstance(
+            self.lifecycle_status,
+            ORBStatisticalValidationLifecycleStatus,
+        ):
+            raise TypeError(
+                "lifecycle_status must be an ORBStatisticalValidationLifecycleStatus"
+            )
+        if self.evidence is not None and not isinstance(
+            self.evidence,
+            ORBStatisticalEvidence,
+        ):
+            raise TypeError("evidence must be an ORBStatisticalEvidence or None")
+        if self.not_evaluable_reason is not None and not isinstance(
+            self.not_evaluable_reason,
+            ORBStatisticalValidationNotEvaluableReason,
+        ):
+            raise TypeError(
+                "not_evaluable_reason must be an "
+                "ORBStatisticalValidationNotEvaluableReason or None"
+            )
+        if self.note is not None and not isinstance(self.note, str):
+            raise TypeError("note must be a string or None")
+        if not self.finding.is_eligible_for_statistical_validation:
+            raise ValueError("finding must be eligible for statistical validation")
+        if (
+            self.finding.statistical_validation_status
+            is not ORBStatisticalValidationStatus.PENDING
+        ):
+            raise ValueError("finding must have a pending statistical validation request")
+        _validate_statistical_validation_state(
+            self.lifecycle_status,
+            self.evidence,
+            self.not_evaluable_reason,
+        )
+
+    @property
+    def is_pending(self) -> bool:
+        """Return whether no statistical evidence has yet been attached."""
+        return self.lifecycle_status is ORBStatisticalValidationLifecycleStatus.PENDING
+
+    @property
+    def is_complete(self) -> bool:
+        """Return whether canonical statistical evidence has been attached."""
+        return self.lifecycle_status is ORBStatisticalValidationLifecycleStatus.COMPLETE
+
+    @property
+    def is_not_evaluable(self) -> bool:
+        """Return whether validation cannot proceed with this framework state."""
+        return (
+            self.lifecycle_status
+            is ORBStatisticalValidationLifecycleStatus.NOT_EVALUABLE
+        )
+
+    @property
+    def has_evidence(self) -> bool:
+        """Return whether this lifecycle state retains completed evidence metadata."""
+        return self.evidence is not None
 
 
 @dataclass(frozen=True, slots=True)
@@ -902,6 +1045,31 @@ def _finding_status_for_outcome(
     if outcome is ORBHypothesisOutcome.NOT_EVALUABLE:
         return ORBResearchFindingStatus.NOT_EVALUABLE
     raise ValueError("outcome is unsupported")
+
+
+def _validate_statistical_validation_state(
+    lifecycle_status: ORBStatisticalValidationLifecycleStatus,
+    evidence: ORBStatisticalEvidence | None,
+    not_evaluable_reason: ORBStatisticalValidationNotEvaluableReason | None,
+) -> None:
+    """Require only the evidence and reason combination for one lifecycle state."""
+    if lifecycle_status is ORBStatisticalValidationLifecycleStatus.PENDING:
+        if evidence is not None or not_evaluable_reason is not None:
+            raise ValueError("PENDING validation must not contain evidence or a reason")
+        return
+    if lifecycle_status is ORBStatisticalValidationLifecycleStatus.NOT_EVALUABLE:
+        if evidence is not None or not_evaluable_reason is None:
+            raise ValueError(
+                "NOT_EVALUABLE validation requires a reason and no evidence"
+            )
+        return
+    if lifecycle_status is ORBStatisticalValidationLifecycleStatus.COMPLETE:
+        if evidence is None or not_evaluable_reason is not None:
+            raise ValueError(
+                "COMPLETE validation requires evidence and no not-evaluable reason"
+            )
+        return
+    raise ValueError("lifecycle_status is unsupported")
 
 
 def _validate_optional_finite_value(value: float | None, field_name: str) -> None:
