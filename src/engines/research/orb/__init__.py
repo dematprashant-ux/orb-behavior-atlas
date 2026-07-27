@@ -10,6 +10,7 @@ from src.engines.research.orb.atlas import build_behavior_atlas
 from src.engines.research.orb.escape import find_first_escape_event
 from src.engines.research.orb.extraction import extract_opening_range
 from src.engines.research.orb.features import generate_orb_features
+from src.engines.research.orb.hypothesis import evaluate_behavior_hypothesis
 from src.engines.research.orb.grouping import (
     group_by_behavior,
     group_by_escape_direction,
@@ -23,6 +24,8 @@ from src.engines.research.orb.models import (
     ORBBehaviorComparison,
     ORBBehaviorDescriptiveStatistics,
     ORBBehaviorDistributions,
+    ORBBehaviorHypothesis,
+    ORBBehaviorHypothesisEvaluation,
     ORBBehaviorKind,
     ORBBehaviorRecord,
     ORBBehaviorStatistics,
@@ -31,6 +34,10 @@ from src.engines.research.orb.models import (
     ORBFeatures,
     ORBFeatureSummary,
     ORBFeatureSummaryDifference,
+    ORBHypothesisMetric,
+    ORBHypothesisNotEvaluableReason,
+    ORBHypothesisOutcome,
+    ORBHypothesisRelation,
     ORBPostEscapeObservation,
     ORBSession,
     ORBWindow,
@@ -47,6 +54,8 @@ __all__ = [
     "ORBBehaviorComparison",
     "ORBBehaviorDescriptiveStatistics",
     "ORBBehaviorDistributions",
+    "ORBBehaviorHypothesis",
+    "ORBBehaviorHypothesisEvaluation",
     "ORBBehaviorKind",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
@@ -55,6 +64,10 @@ __all__ = [
     "ORBFeatures",
     "ORBFeatureSummary",
     "ORBFeatureSummaryDifference",
+    "ORBHypothesisMetric",
+    "ORBHypothesisNotEvaluableReason",
+    "ORBHypothesisOutcome",
+    "ORBHypothesisRelation",
     "ORBPostEscapeObservation",
     "ORBSession",
     "ORBWindow",
@@ -66,6 +79,7 @@ __all__ = [
     "compute_behavior_distributions",
     "compute_behavior_statistics",
     "extract_opening_range",
+    "evaluate_behavior_hypothesis",
     "find_first_escape_event",
     "generate_orb_features",
     "group_by_behavior",

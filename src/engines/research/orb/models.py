@@ -18,6 +18,12 @@ __all__ = [
     "ORBBehaviorDistributions",
     "ORBBehaviorDescriptiveStatistics",
     "ORBBehaviorComparison",
+    "ORBBehaviorHypothesis",
+    "ORBBehaviorHypothesisEvaluation",
+    "ORBHypothesisMetric",
+    "ORBHypothesisNotEvaluableReason",
+    "ORBHypothesisOutcome",
+    "ORBHypothesisRelation",
     "ORBBehaviorRecord",
     "ORBBehaviorStatistics",
     "ORBBehaviorKind",
@@ -290,6 +296,143 @@ class ORBFeatureSummaryDifference:
                 raise ValueError(
                     "feature summary differences must be finite non-negative values"
                 )
+
+
+class ORBHypothesisMetric(str, Enum):
+    """Identifies the existing descriptive fact evaluated by a hypothesis."""
+
+    RANGE_SIZE_MEAN = "RANGE_SIZE_MEAN"
+    RANGE_SIZE_MEDIAN = "RANGE_SIZE_MEDIAN"
+    MAXIMUM_FAVORABLE_EXCURSION_MEAN = "MAXIMUM_FAVORABLE_EXCURSION_MEAN"
+    MAXIMUM_FAVORABLE_EXCURSION_MEDIAN = "MAXIMUM_FAVORABLE_EXCURSION_MEDIAN"
+    MAXIMUM_ADVERSE_EXCURSION_MEAN = "MAXIMUM_ADVERSE_EXCURSION_MEAN"
+    MAXIMUM_ADVERSE_EXCURSION_MEDIAN = "MAXIMUM_ADVERSE_EXCURSION_MEDIAN"
+    BEHAVIOR_PROPORTION = "BEHAVIOR_PROPORTION"
+    ESCAPE_DIRECTION_PROPORTION = "ESCAPE_DIRECTION_PROPORTION"
+    RETURN_TO_RANGE_PROPORTION = "RETURN_TO_RANGE_PROPORTION"
+
+
+class ORBHypothesisRelation(str, Enum):
+    """Identifies the supported deterministic relation between two values."""
+
+    GREATER_THAN = "GREATER_THAN"
+    GREATER_THAN_OR_EQUAL = "GREATER_THAN_OR_EQUAL"
+    LESS_THAN = "LESS_THAN"
+    LESS_THAN_OR_EQUAL = "LESS_THAN_OR_EQUAL"
+    EQUAL = "EQUAL"
+
+
+class ORBHypothesisOutcome(str, Enum):
+    """Identifies whether canonical observations satisfy a hypothesis."""
+
+    SUPPORTED = "SUPPORTED"
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+    NOT_EVALUABLE = "NOT_EVALUABLE"
+
+
+class ORBHypothesisNotEvaluableReason(str, Enum):
+    """Identifies which canonical observation is unavailable for evaluation."""
+
+    LEFT_VALUE_UNAVAILABLE = "LEFT_VALUE_UNAVAILABLE"
+    RIGHT_VALUE_UNAVAILABLE = "RIGHT_VALUE_UNAVAILABLE"
+    BOTH_VALUES_UNAVAILABLE = "BOTH_VALUES_UNAVAILABLE"
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorHypothesis:
+    """Declares one deterministic relation over existing descriptive facts."""
+
+    metric: ORBHypothesisMetric
+    relation: ORBHypothesisRelation
+    category: ORBBehaviorKind | ORBEscapeDirection | bool | None = None
+    minimum_absolute_difference: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Require explicit supported metrics, relations, categories, and bounds."""
+        if not isinstance(self.metric, ORBHypothesisMetric):
+            raise TypeError("metric must be an ORBHypothesisMetric")
+        if not isinstance(self.relation, ORBHypothesisRelation):
+            raise TypeError("relation must be an ORBHypothesisRelation")
+        _validate_hypothesis_category(self.metric, self.category)
+        if (
+            isinstance(self.minimum_absolute_difference, bool)
+            or not isinstance(self.minimum_absolute_difference, (int, float))
+            or not isfinite(self.minimum_absolute_difference)
+            or self.minimum_absolute_difference < 0
+        ):
+            raise ValueError(
+                "minimum_absolute_difference must be a finite non-negative number"
+            )
+        if (
+            self.relation is ORBHypothesisRelation.EQUAL
+            and self.minimum_absolute_difference != 0
+        ):
+            raise ValueError(
+                "an EQUAL hypothesis requires zero minimum_absolute_difference"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class ORBBehaviorHypothesisEvaluation:
+    """Records the deterministic result of evaluating one atlas comparison."""
+
+    hypothesis: ORBBehaviorHypothesis
+    comparison: "ORBBehaviorComparison"
+    left_value: float | None
+    right_value: float | None
+    signed_difference: float | None
+    absolute_difference: float | None
+    outcome: ORBHypothesisOutcome
+    not_evaluable_reason: ORBHypothesisNotEvaluableReason | None
+
+    def __post_init__(self) -> None:
+        """Keep observed values, difference facts, and outcome semantics aligned."""
+        if not isinstance(self.hypothesis, ORBBehaviorHypothesis):
+            raise TypeError("hypothesis must be an ORBBehaviorHypothesis")
+        if not isinstance(self.comparison, ORBBehaviorComparison):
+            raise TypeError("comparison must be an ORBBehaviorComparison")
+        if not isinstance(self.outcome, ORBHypothesisOutcome):
+            raise TypeError("outcome must be an ORBHypothesisOutcome")
+        if self.not_evaluable_reason is not None and not isinstance(
+            self.not_evaluable_reason,
+            ORBHypothesisNotEvaluableReason,
+        ):
+            raise TypeError(
+                "not_evaluable_reason must be an ORBHypothesisNotEvaluableReason"
+            )
+        _validate_optional_finite_value(self.left_value, "left_value")
+        _validate_optional_finite_value(self.right_value, "right_value")
+        _validate_optional_finite_value(
+            self.signed_difference,
+            "signed_difference",
+        )
+        _validate_optional_finite_value(
+            self.absolute_difference,
+            "absolute_difference",
+        )
+        if self.absolute_difference is not None and self.absolute_difference < 0:
+            raise ValueError("absolute_difference must be non-negative")
+        if self.outcome is ORBHypothesisOutcome.NOT_EVALUABLE:
+            if self.not_evaluable_reason is None:
+                raise ValueError("NOT_EVALUABLE requires a stable reason")
+            if self.signed_difference is not None or self.absolute_difference is not None:
+                raise ValueError("NOT_EVALUABLE cannot contain difference values")
+            _validate_not_evaluable_values(
+                self.left_value,
+                self.right_value,
+                self.not_evaluable_reason,
+            )
+            return
+        if self.not_evaluable_reason is not None:
+            raise ValueError("an evaluable outcome cannot contain a reason")
+        if self.left_value is None or self.right_value is None:
+            raise ValueError("an evaluable outcome requires both observed values")
+        if self.signed_difference is None or self.absolute_difference is None:
+            raise ValueError("an evaluable outcome requires both difference values")
+        if self.signed_difference != self.left_value - self.right_value:
+            raise ValueError("signed_difference must match the observed values")
+        if self.absolute_difference != abs(self.signed_difference):
+            raise ValueError("absolute_difference must match signed_difference")
 
 
 @dataclass(frozen=True, slots=True)
@@ -653,3 +796,67 @@ def _freeze_proportions(
         immutable_proportions[category] = proportion
 
     return MappingProxyType(immutable_proportions)
+
+
+def _validate_hypothesis_category(
+    metric: ORBHypothesisMetric,
+    category: ORBBehaviorKind | ORBEscapeDirection | bool | None,
+) -> None:
+    """Require only the existing category type associated with a metric."""
+    numeric_metrics = (
+        ORBHypothesisMetric.RANGE_SIZE_MEAN,
+        ORBHypothesisMetric.RANGE_SIZE_MEDIAN,
+        ORBHypothesisMetric.MAXIMUM_FAVORABLE_EXCURSION_MEAN,
+        ORBHypothesisMetric.MAXIMUM_FAVORABLE_EXCURSION_MEDIAN,
+        ORBHypothesisMetric.MAXIMUM_ADVERSE_EXCURSION_MEAN,
+        ORBHypothesisMetric.MAXIMUM_ADVERSE_EXCURSION_MEDIAN,
+    )
+    if metric in numeric_metrics:
+        if category is not None:
+            raise ValueError("numeric hypothesis metrics must not specify a category")
+        return
+    if metric is ORBHypothesisMetric.BEHAVIOR_PROPORTION:
+        if not isinstance(category, ORBBehaviorKind):
+            raise TypeError("BEHAVIOR_PROPORTION requires an ORBBehaviorKind category")
+        return
+    if metric is ORBHypothesisMetric.ESCAPE_DIRECTION_PROPORTION:
+        if not isinstance(category, ORBEscapeDirection):
+            raise TypeError(
+                "ESCAPE_DIRECTION_PROPORTION requires an ORBEscapeDirection category"
+            )
+        return
+    if metric is ORBHypothesisMetric.RETURN_TO_RANGE_PROPORTION:
+        if type(category) is not bool:
+            raise TypeError("RETURN_TO_RANGE_PROPORTION requires a bool category")
+        return
+    raise ValueError("metric is unsupported")
+
+
+def _validate_optional_finite_value(value: float | None, field_name: str) -> None:
+    """Reject non-numeric, boolean, and non-finite observed evaluation values."""
+    if value is None:
+        return
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not isfinite(value)
+    ):
+        raise ValueError(f"{field_name} must be a finite numeric value or None")
+
+
+def _validate_not_evaluable_values(
+    left_value: float | None,
+    right_value: float | None,
+    reason: ORBHypothesisNotEvaluableReason,
+) -> None:
+    """Require the stable unavailable reason to match the retained observations."""
+    if left_value is None and right_value is None:
+        expected = ORBHypothesisNotEvaluableReason.BOTH_VALUES_UNAVAILABLE
+    elif left_value is None:
+        expected = ORBHypothesisNotEvaluableReason.LEFT_VALUE_UNAVAILABLE
+    elif right_value is None:
+        expected = ORBHypothesisNotEvaluableReason.RIGHT_VALUE_UNAVAILABLE
+    else:
+        raise ValueError("NOT_EVALUABLE requires at least one unavailable value")
+    if reason is not expected:
+        raise ValueError("not_evaluable_reason must match unavailable observations")

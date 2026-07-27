@@ -217,6 +217,34 @@ Comparison preserves each input atlas unchanged and has no filtering, grouping,
 feature derivation, significance testing, ranking, prediction, strategy,
 trading, execution, backtesting, visualization, reporting, or I/O behavior.
 
+## 1.17 Deterministic Hypothesis Evaluation
+
+`evaluate_behavior_hypothesis(hypothesis, left, right)` evaluates one explicit
+`ORBBehaviorHypothesis` against two already-selected immutable atlas subsets.
+It first reuses `compare_behavior_atlases(left, right)` and reads only the
+canonical descriptive statistics retained by that comparison. Callers remain
+responsible for selecting subsets with existing atlas filtering or grouping.
+
+Supported numeric metrics are the existing mean and median summaries for range
+size, MFE, and MAE. Supported categorical metrics are existing behavior,
+escape-direction, and return-to-range proportions; each requires its matching
+existing category identity in the hypothesis. Because descriptive proportion
+mappings retain only observed categories, an absent requested category is
+unavailable, not an assumed zero.
+
+Relations are exact greater-than, greater-than-or-equal, less-than,
+less-than-or-equal, and equality. A finite non-negative minimum absolute
+difference applies without rounding; equality requires a zero threshold. The
+immutable evaluation retains the hypothesis, exact canonical comparison,
+observed values, signed and absolute differences, outcome, and—when needed—a
+stable unavailable-value reason. `NOT_EVALUABLE` preserves unavailable values
+as `None`; it does not fabricate a zero.
+
+This is descriptive condition evaluation only. It adds no significance testing,
+causal claim, prediction, strategy, trading, execution, backtesting,
+optimization, reporting, visualization, persistence, or automatic hypothesis
+discovery.
+
 ---
 
 # 2. Responsibilities
